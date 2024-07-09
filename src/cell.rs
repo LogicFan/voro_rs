@@ -296,6 +296,10 @@ pub mod ffi {
             y: f64,
             z: f64,
         ) -> bool;
+        fn neighbors(
+            self: Pin<&mut voronoicell_neighbor>,
+            v: Pin<&mut CxxVector<i32>>
+        );
     }
 }
 
@@ -752,6 +756,12 @@ impl VoroCellNbr {
             xyz3[1], xyz3[2],
         );
         val
+    }
+
+    pub fn neighbors(&mut self) -> Vec<i32> {
+        let mut v = CxxVector::new();
+        self.inner.pin_mut().neighbors(v.pin_mut());
+        v.into_iter().copied().collect()
     }
 }
 
