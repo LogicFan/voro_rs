@@ -737,6 +737,154 @@ impl VoronoiCellNeighbor {
     }
 }
 
+impl VoronoiCell for VoronoiCellNeighbor {
+    fn translate(&mut self, xyz: Vec3) {
+        self.inner
+            .pin_mut()
+            .translate(xyz[0], xyz[1], xyz[2]);
+    }
+
+    fn volume(&mut self) -> f64 {
+        self.inner.pin_mut().volume()
+    }
+
+    fn max_radius_squared(&mut self) -> f64 {
+        self.inner.pin_mut().max_radius_squared()
+    }
+
+    fn total_edge_distance(&mut self) -> f64 {
+        self.inner.pin_mut().total_edge_distance()
+    }
+
+    fn surface_area(&mut self) -> f64 {
+        self.inner.pin_mut().surface_area()
+    }
+
+    fn centroid(&mut self) -> Vec3 {
+        let mut cx = 0.0;
+        let mut cy = 0.0;
+        let mut cz = 0.0;
+        self.inner
+            .pin_mut()
+            .centroid(&mut cx, &mut cy, &mut cz);
+        [cx, cy, cz]
+    }
+
+    fn number_of_faces(&mut self) -> i32 {
+        self.inner.pin_mut().number_of_faces()
+    }
+
+    fn number_of_edges(&mut self) -> i32 {
+        self.inner.pin_mut().number_of_edges()
+    }
+
+    fn vertex_orders(&mut self) -> Vec<i32> {
+        let mut v = CxxVector::new();
+        self.inner.pin_mut().vertex_orders(v.pin_mut());
+        v.into_iter().copied().collect()
+    }
+
+    fn vertices_local(&mut self) -> Vec<f64> {
+        let mut v = CxxVector::new();
+        self.inner.pin_mut().vertices_local(v.pin_mut());
+        v.into_iter().copied().collect()
+    }
+
+    fn vertices_global(&mut self, xyz: Vec3) -> Vec<f64> {
+        let mut v = CxxVector::new();
+        self.inner.pin_mut().vertices_global(
+            xyz[0],
+            xyz[1],
+            xyz[2],
+            v.pin_mut(),
+        );
+        v.into_iter().copied().collect()
+    }
+
+    fn face_areas(&mut self) -> Vec<f64> {
+        let mut v = CxxVector::new();
+        self.inner.pin_mut().face_areas(v.pin_mut());
+        v.into_iter().copied().collect()
+    }
+
+    fn face_orders(&mut self) -> Vec<i32> {
+        let mut v = CxxVector::new();
+        self.inner.pin_mut().face_orders(v.pin_mut());
+        v.into_iter().copied().collect()
+    }
+
+    fn face_freq_table(&mut self) -> Vec<i32> {
+        let mut v = CxxVector::new();
+        self.inner.pin_mut().face_freq_table(v.pin_mut());
+        v.into_iter().copied().collect()
+    }
+
+    fn face_vertices(&mut self) -> Vec<i32> {
+        let mut v = CxxVector::new();
+        self.inner.pin_mut().face_vertices(v.pin_mut());
+        v.into_iter().copied().collect()
+    }
+
+    fn face_perimeters(&mut self) -> Vec<f64> {
+        let mut v = CxxVector::new();
+        self.inner.pin_mut().face_perimeters(v.pin_mut());
+        v.into_iter().copied().collect()
+    }
+
+    fn normals(&mut self) -> Vec<f64> {
+        let mut v = CxxVector::new();
+        self.inner.pin_mut().normals(v.pin_mut());
+        v.into_iter().copied().collect()
+    }
+
+    fn plane_intersects(
+        &mut self,
+        xyz: Vec3,
+        rsq: f64,
+    ) -> bool {
+        self.inner
+            .pin_mut()
+            .plane_intersects(xyz[0], xyz[1], xyz[2], rsq)
+    }
+
+    fn plane_intersects_guess(
+        &mut self,
+        xyz: Vec3,
+        rsq: f64,
+    ) -> bool {
+        self.inner.pin_mut().plane_intersects_guess(
+            xyz[0], xyz[1], xyz[2], rsq,
+        )
+    }
+
+    fn n_plane_rsq(
+        &mut self,
+        xyz: Vec3,
+        rsq: f64,
+        p_id: i32,
+    ) -> bool {
+        self.inner
+            .pin_mut()
+            .n_plane_rsq(xyz[0], xyz[1], xyz[2], rsq, p_id)
+    }
+
+    fn n_plane(&mut self, xyz: Vec3, p_id: i32) -> bool {
+        self.inner
+            .pin_mut()
+            .n_plane(xyz[0], xyz[1], xyz[2], p_id)
+    }
+
+    fn plane_rsq(&mut self, xyz: Vec3, rsq: f64) -> bool {
+        self.inner
+            .pin_mut()
+            .plane_rsq(xyz[0], xyz[1], xyz[2], rsq)
+    }
+
+    fn plane(&mut self, xyz: Vec3) -> bool {
+        self.inner.pin_mut().plane(xyz[0], xyz[1], xyz[2])
+    }
+}
+
 #[cfg(test)]
 mod tests {
     // Note this useful idiom: importing names from outer (for mod tests) scope.
