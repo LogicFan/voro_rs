@@ -117,6 +117,36 @@ pub mod ffi {
             z: f64,
             rsq: f64,
         ) -> bool;
+        #[rust_name = "n_plane_rsq"]
+        fn n_plane(
+            self: Pin<&mut voronoicell>,
+            x: f64,
+            y: f64,
+            z: f64,
+            rsq: f64,
+            p_id: i32,
+        ) -> bool;
+        fn n_plane(
+            self: Pin<&mut voronoicell>,
+            x: f64,
+            y: f64,
+            z: f64,
+            p_id: i32,
+        ) -> bool;
+        #[rust_name = "plane_rsq"]
+        fn plane(
+            self: Pin<&mut voronoicell>,
+            x: f64,
+            y: f64,
+            z: f64,
+            rsq: f64,
+        ) -> bool;
+        fn plane(
+            self: Pin<&mut voronoicell>,
+            x: f64,
+            y: f64,
+            z: f64,
+        ) -> bool;
 
         type voronoicell_neighbor;
         #[rust_name = "new_voronoicell_neighbor"]
@@ -234,11 +264,40 @@ pub mod ffi {
             z: f64,
             rsq: f64,
         ) -> bool;
+        #[rust_name = "n_plane_rsq"]
+        fn n_plane(
+            self: Pin<&mut voronoicell_neighbor>,
+            x: f64,
+            y: f64,
+            z: f64,
+            rsq: f64,
+            p_id: i32,
+        ) -> bool;
+        fn n_plane(
+            self: Pin<&mut voronoicell_neighbor>,
+            x: f64,
+            y: f64,
+            z: f64,
+            p_id: i32,
+        ) -> bool;
+        #[rust_name = "plane_rsq"]
+        fn plane(
+            self: Pin<&mut voronoicell_neighbor>,
+            x: f64,
+            y: f64,
+            z: f64,
+            rsq: f64,
+        ) -> bool;
+        fn plane(
+            self: Pin<&mut voronoicell_neighbor>,
+            x: f64,
+            y: f64,
+            z: f64,
+        ) -> bool;
     }
 }
 
 use cxx::{CxxVector, UniquePtr};
-use itertools::*;
 
 type Vec3 = [f64; 3];
 
@@ -299,11 +358,11 @@ pub trait VoronoiCell {
     fn vertex_orders(&mut self) -> Vec<i32>;
 
     /// Returns a vector of the vertex vectors using the local coordinate system.
-    fn vertices_local(&mut self) -> Vec<Vec3>;
+    fn vertices_local(&mut self) -> Vec<f64>;
 
     /// Returns a vector of the vertex vectors in the global coordinate system.
     /// * `xyz`: the position vector of the particle in the global coordinate system.
-    fn vertices_global(&mut self, xyz: Vec3) -> Vec<Vec3>;
+    fn vertices_global(&mut self, xyz: Vec3) -> Vec<f64>;
 
     /// Calculates the areas of each face of the Voronoi cell and prints the
     /// results to an output vector.
@@ -316,15 +375,97 @@ pub trait VoronoiCell {
     /// table of the results.
     fn face_freq_table(&mut self) -> Vec<i32>;
 
-    fn face_vertices(&mut self) -> Vec<Vec3>;
+    /// For each face, this routine outputs a bracketed sequence of numbers
+    /// containing a list of all the vertices that make up that face.
+    fn face_vertices(&mut self) -> Vec<i32>;
 
+    /// This routine returns the perimeters of each face.
     fn face_perimeters(&mut self) -> Vec<f64>;
 
-    fn normals(&mut self) -> Vec<Vec3>;
+    /// For each face of the Voronoi cell, this routine prints the out the normal
+    /// vector of the face, and scales it to the distance from the cell center to
+    /// that plane.
+    fn normals(&mut self) -> Vec<f64>;
 
-    fn plane_intersects(&mut self) -> bool;
+    /// This routine tests to see whether the cell intersects a plane by starting
+    /// from the guess point up. If up intersects, then it immediately returns true.
+    /// Otherwise, it calls the plane_intersects_track() routine.
+    ///
+    /// * `xyz`: the normal vector to the plane.
+    /// * `rsq`: the distance along this vector of the plane.
+    ///
+    /// Return false if the plane does not intersect the plane, true if it does.
+    fn plane_intersects(
+        &mut self,
+        xyz: Vec3,
+        rsq: f64,
+    ) -> bool;
 
-    fn plane_intersects_guess(&mut self) -> bool;
+    /// This routine tests to see if a cell intersects a plane. It first tests a
+    /// random sample of approximately sqrt(p)/4 points. If any of those are
+    /// intersect, then it immediately returns true. Otherwise, it takes the closest
+    /// point and passes that to plane_intersect_track() routine.
+    ///
+    /// * `xyz`: the normal vector to the plane.
+    /// * `rsq`: the distance along this vector of the plane.
+    ///
+    /// Return false if the plane does not intersect the plane, true if it does. */
+    fn plane_intersects_guess(
+        &mut self,
+        xyz: Vec3,
+        rsq: f64,
+    ) -> bool;
+
+    /// Cuts the Voronoi cell by a particle whose center is at a
+    /// separation of (x,y,z) from the cell center. The value of rsq
+    /// should be initially set to $x^2+y^2+z^2$.
+    ///
+    /// * `xyz`: the normal vector to the plane.
+    /// * `rsq`: the distance along this vector of the plane.
+    /// * `p_id`: the plane ID (for neighbor tracking only).
+    ///
+    /// Return false if the plane cut deleted the cell entirely,
+    /// true otherwise.
+    fn n_plane_rsq(
+        &mut self,
+        xyz: Vec3,
+        rsq: f64,
+        p_id: i32,
+    ) -> bool;
+
+    /// This routine calculates the modulus squared of the vector
+    /// before passing it to the main nplane() routine with full
+    /// arguments.
+    ///
+    /// * `xyz`: the vector to cut the cell by.
+    /// * `p_id`: the plane ID (for neighbor tracking only).
+    ///
+    /// Return false if the plane cut deleted the cell entirely,
+    /// true otherwise.
+    fn n_plane(&mut self, xyz: Vec3, p_id: i32) -> bool;
+
+    /// This version of the plane routine just makes up the plane
+    /// ID to be zero. It will only be referenced if neighbor
+    /// tracking is enabled.
+    ///
+    /// * `xyz`: the vector to cut the cell by.
+    /// * `rsq`: the modulus squared of the vector.
+    ///
+    /// Return false if the plane cut deleted the cell entirely,
+    /// true otherwise.
+    fn plane_rsq(&mut self, xyz: Vec3, rsq: f64) -> bool;
+
+    /// Cuts a Voronoi cell using the influence of a particle at
+    /// (x,y,z), first calculating the modulus squared of this
+    /// vector before passing it to the main nplane() routine. Zero
+    /// is supplied as the plane ID, which will be ignored unless
+    /// neighbor tracking is enabled.
+    ///
+    /// * `xyz`: the vector to cut the cell by.
+    ///
+    /// Return false if the plane cut deleted the cell entirely,
+    /// true otherwise.
+    fn plane(&mut self, xyz: Vec3) -> bool;
 }
 
 /// `voronoicell` class in voro++.
@@ -438,17 +579,13 @@ impl VoronoiCell for VoronoiCellNoNeighbor {
         v.into_iter().copied().collect()
     }
 
-    fn vertices_local(&mut self) -> Vec<Vec3> {
+    fn vertices_local(&mut self) -> Vec<f64> {
         let mut v = CxxVector::new();
         self.inner.pin_mut().vertices_local(v.pin_mut());
-        v.into_iter()
-            .copied()
-            .tuples::<(_, _, _)>()
-            .map(|(x, y, z)| [x, y, z])
-            .collect()
+        v.into_iter().copied().collect()
     }
 
-    fn vertices_global(&mut self, xyz: Vec3) -> Vec<Vec3> {
+    fn vertices_global(&mut self, xyz: Vec3) -> Vec<f64> {
         let mut v = CxxVector::new();
         self.inner.pin_mut().vertices_global(
             xyz[0],
@@ -456,11 +593,7 @@ impl VoronoiCell for VoronoiCellNoNeighbor {
             xyz[2],
             v.pin_mut(),
         );
-        v.into_iter()
-            .copied()
-            .tuples::<(_, _, _)>()
-            .map(|(x, y, z)| [x, y, z])
-            .collect()
+        v.into_iter().copied().collect()
     }
 
     fn face_areas(&mut self) -> Vec<f64> {
@@ -481,24 +614,69 @@ impl VoronoiCell for VoronoiCellNoNeighbor {
         v.into_iter().copied().collect()
     }
 
-    fn face_vertices(&mut self) -> Vec<Vec3> {
-        todo!()
+    fn face_vertices(&mut self) -> Vec<i32> {
+        let mut v = CxxVector::new();
+        self.inner.pin_mut().face_vertices(v.pin_mut());
+        v.into_iter().copied().collect()
     }
 
     fn face_perimeters(&mut self) -> Vec<f64> {
-        todo!()
+        let mut v = CxxVector::new();
+        self.inner.pin_mut().face_perimeters(v.pin_mut());
+        v.into_iter().copied().collect()
     }
 
-    fn normals(&mut self) -> Vec<Vec3> {
-        todo!()
+    fn normals(&mut self) -> Vec<f64> {
+        let mut v = CxxVector::new();
+        self.inner.pin_mut().normals(v.pin_mut());
+        v.into_iter().copied().collect()
     }
 
-    fn plane_intersects(&mut self) -> bool {
-        todo!()
+    fn plane_intersects(
+        &mut self,
+        xyz: Vec3,
+        rsq: f64,
+    ) -> bool {
+        self.inner
+            .pin_mut()
+            .plane_intersects(xyz[0], xyz[1], xyz[2], rsq)
     }
 
-    fn plane_intersects_guess(&mut self) -> bool {
-        todo!()
+    fn plane_intersects_guess(
+        &mut self,
+        xyz: Vec3,
+        rsq: f64,
+    ) -> bool {
+        self.inner.pin_mut().plane_intersects_guess(
+            xyz[0], xyz[1], xyz[2], rsq,
+        )
+    }
+
+    fn n_plane_rsq(
+        &mut self,
+        xyz: Vec3,
+        rsq: f64,
+        p_id: i32,
+    ) -> bool {
+        self.inner
+            .pin_mut()
+            .n_plane_rsq(xyz[0], xyz[1], xyz[2], rsq, p_id)
+    }
+
+    fn n_plane(&mut self, xyz: Vec3, p_id: i32) -> bool {
+        self.inner
+            .pin_mut()
+            .n_plane(xyz[0], xyz[1], xyz[2], p_id)
+    }
+
+    fn plane_rsq(&mut self, xyz: Vec3, rsq: f64) -> bool {
+        self.inner
+            .pin_mut()
+            .plane_rsq(xyz[0], xyz[1], xyz[2], rsq)
+    }
+
+    fn plane(&mut self, xyz: Vec3) -> bool {
+        self.inner.pin_mut().plane(xyz[0], xyz[1], xyz[2])
     }
 }
 
@@ -567,6 +745,11 @@ mod tests {
     #[test]
     fn test_new() {
         VoronoiCellNoNeighbor::new(
+            [1.0, 1.0, 1.0],
+            [2.0, 2.0, 2.0],
+        );
+
+        VoronoiCellNeighbor::new(
             [1.0, 1.0, 1.0],
             [2.0, 2.0, 2.0],
         );

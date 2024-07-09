@@ -16,6 +16,8 @@
     ],
     "files.associations": {
         "*.m": "octave",
-        "memory": "cpp"
+        "memory": "cpp",
+        "vector": "cpp",
+        "cmath": "cpp"
     }
 }
