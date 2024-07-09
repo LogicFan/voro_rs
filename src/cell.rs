@@ -117,8 +117,8 @@ pub mod ffi {
             z: f64,
             rsq: f64,
         ) -> bool;
-        #[rust_name = "n_plane_rsq"]
-        fn n_plane(
+        #[rust_name = "nplane_rsq"]
+        fn nplane(
             self: Pin<&mut voronoicell>,
             x: f64,
             y: f64,
@@ -126,7 +126,7 @@ pub mod ffi {
             rsq: f64,
             p_id: i32,
         ) -> bool;
-        fn n_plane(
+        fn nplane(
             self: Pin<&mut voronoicell>,
             x: f64,
             y: f64,
@@ -264,8 +264,8 @@ pub mod ffi {
             z: f64,
             rsq: f64,
         ) -> bool;
-        #[rust_name = "n_plane_rsq"]
-        fn n_plane(
+        #[rust_name = "nplane_rsq"]
+        fn nplane(
             self: Pin<&mut voronoicell_neighbor>,
             x: f64,
             y: f64,
@@ -273,7 +273,7 @@ pub mod ffi {
             rsq: f64,
             p_id: i32,
         ) -> bool;
-        fn n_plane(
+        fn nplane(
             self: Pin<&mut voronoicell_neighbor>,
             x: f64,
             y: f64,
@@ -426,7 +426,7 @@ pub trait VoronoiCell {
     ///
     /// Return false if the plane cut deleted the cell entirely,
     /// true otherwise.
-    fn n_plane_rsq(
+    fn nplane_rsq(
         &mut self,
         xyz: DVec3,
         rsq: f64,
@@ -442,7 +442,7 @@ pub trait VoronoiCell {
     ///
     /// Return false if the plane cut deleted the cell entirely,
     /// true otherwise.
-    fn n_plane(&mut self, xyz: DVec3, p_id: i32) -> bool;
+    fn nplane(&mut self, xyz: DVec3, p_id: i32) -> bool;
 
     /// This version of the plane routine just makes up the plane
     /// ID to be zero. It will only be referenced if neighbor
@@ -652,7 +652,7 @@ impl VoronoiCell for VoronoiCellNoNeighbor {
         )
     }
 
-    fn n_plane_rsq(
+    fn nplane_rsq(
         &mut self,
         xyz: DVec3,
         rsq: f64,
@@ -660,13 +660,13 @@ impl VoronoiCell for VoronoiCellNoNeighbor {
     ) -> bool {
         self.inner
             .pin_mut()
-            .n_plane_rsq(xyz[0], xyz[1], xyz[2], rsq, p_id)
+            .nplane_rsq(xyz[0], xyz[1], xyz[2], rsq, p_id)
     }
 
-    fn n_plane(&mut self, xyz: DVec3, p_id: i32) -> bool {
+    fn nplane(&mut self, xyz: DVec3, p_id: i32) -> bool {
         self.inner
             .pin_mut()
-            .n_plane(xyz[0], xyz[1], xyz[2], p_id)
+            .nplane(xyz[0], xyz[1], xyz[2], p_id)
     }
 
     fn plane_rsq(&mut self, xyz: DVec3, rsq: f64) -> bool {
@@ -857,7 +857,7 @@ impl VoronoiCell for VoronoiCellNeighbor {
         )
     }
 
-    fn n_plane_rsq(
+    fn nplane_rsq(
         &mut self,
         xyz: DVec3,
         rsq: f64,
@@ -865,13 +865,13 @@ impl VoronoiCell for VoronoiCellNeighbor {
     ) -> bool {
         self.inner
             .pin_mut()
-            .n_plane_rsq(xyz[0], xyz[1], xyz[2], rsq, p_id)
+            .nplane_rsq(xyz[0], xyz[1], xyz[2], rsq, p_id)
     }
 
-    fn n_plane(&mut self, xyz: DVec3, p_id: i32) -> bool {
+    fn nplane(&mut self, xyz: DVec3, p_id: i32) -> bool {
         self.inner
             .pin_mut()
-            .n_plane(xyz[0], xyz[1], xyz[2], p_id)
+            .nplane(xyz[0], xyz[1], xyz[2], p_id)
     }
 
     fn plane_rsq(&mut self, xyz: DVec3, rsq: f64) -> bool {
