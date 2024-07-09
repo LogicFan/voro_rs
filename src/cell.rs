@@ -299,7 +299,7 @@ pub mod ffi {
 
 use cxx::{CxxVector, UniquePtr};
 
-type Vec3 = [f64; 3];
+type DVec3 = [f64; 3];
 
 /// `voronoicell_base` abstract class in voro++.
 ///
@@ -316,7 +316,7 @@ pub trait VoronoiCell {
     /// Translates the vertices of the Voronoi cell by a given vector.
     ///
     /// * `xyz`: the coordinates of the vector.
-    fn translate(&mut self, xyz: Vec3);
+    fn translate(&mut self, xyz: DVec3);
 
     /// Calculates the volume of the Voronoi cell, by decomposing the cell into
     /// tetrahedra extending outward from the zeroth vertex, whose volumes are
@@ -346,7 +346,7 @@ pub trait VoronoiCell {
     /// tetrahedra extending outward from the zeroth vertex.
     ///
     /// Return the centroid vector.
-    fn centroid(&mut self) -> Vec3;
+    fn centroid(&mut self) -> DVec3;
 
     /// Returns the number of faces of a computed Voronoi cell.
     fn number_of_faces(&mut self) -> i32;
@@ -362,7 +362,7 @@ pub trait VoronoiCell {
 
     /// Returns a vector of the vertex vectors in the global coordinate system.
     /// * `xyz`: the position vector of the particle in the global coordinate system.
-    fn vertices_global(&mut self, xyz: Vec3) -> Vec<f64>;
+    fn vertices_global(&mut self, xyz: DVec3) -> Vec<f64>;
 
     /// Calculates the areas of each face of the Voronoi cell and prints the
     /// results to an output vector.
@@ -397,7 +397,7 @@ pub trait VoronoiCell {
     /// Return false if the plane does not intersect the plane, true if it does.
     fn plane_intersects(
         &mut self,
-        xyz: Vec3,
+        xyz: DVec3,
         rsq: f64,
     ) -> bool;
 
@@ -412,7 +412,7 @@ pub trait VoronoiCell {
     /// Return false if the plane does not intersect the plane, true if it does. */
     fn plane_intersects_guess(
         &mut self,
-        xyz: Vec3,
+        xyz: DVec3,
         rsq: f64,
     ) -> bool;
 
@@ -428,7 +428,7 @@ pub trait VoronoiCell {
     /// true otherwise.
     fn n_plane_rsq(
         &mut self,
-        xyz: Vec3,
+        xyz: DVec3,
         rsq: f64,
         p_id: i32,
     ) -> bool;
@@ -442,7 +442,7 @@ pub trait VoronoiCell {
     ///
     /// Return false if the plane cut deleted the cell entirely,
     /// true otherwise.
-    fn n_plane(&mut self, xyz: Vec3, p_id: i32) -> bool;
+    fn n_plane(&mut self, xyz: DVec3, p_id: i32) -> bool;
 
     /// This version of the plane routine just makes up the plane
     /// ID to be zero. It will only be referenced if neighbor
@@ -453,7 +453,7 @@ pub trait VoronoiCell {
     ///
     /// Return false if the plane cut deleted the cell entirely,
     /// true otherwise.
-    fn plane_rsq(&mut self, xyz: Vec3, rsq: f64) -> bool;
+    fn plane_rsq(&mut self, xyz: DVec3, rsq: f64) -> bool;
 
     /// Cuts a Voronoi cell using the influence of a particle at
     /// (x,y,z), first calculating the modulus squared of this
@@ -465,7 +465,7 @@ pub trait VoronoiCell {
     ///
     /// Return false if the plane cut deleted the cell entirely,
     /// true otherwise.
-    fn plane(&mut self, xyz: Vec3) -> bool;
+    fn plane(&mut self, xyz: DVec3) -> bool;
 }
 
 /// `voronoicell` class in voro++.
@@ -485,7 +485,7 @@ impl VoronoiCellNoNeighbor {
     ///
     /// * `xyz_min`: the minimum xyz coordinates.
     /// * `xyz_max`: the maximum xyz coordinates.
-    pub fn new(xyz_min: Vec3, xyz_max: Vec3) -> Self {
+    pub fn new(xyz_min: DVec3, xyz_max: DVec3) -> Self {
         let mut val = Self {
             inner: ffi::new_voronoicell(),
         };
@@ -515,10 +515,10 @@ impl VoronoiCellNoNeighbor {
     /// * `xyz2`: the coordinates of the third vertex.
     /// * `xyz3`: the coordinates of the fourth vertex.
     pub fn new_tetrahedron(
-        xyz0: Vec3,
-        xyz1: Vec3,
-        xyz2: Vec3,
-        xyz3: Vec3,
+        xyz0: DVec3,
+        xyz1: DVec3,
+        xyz2: DVec3,
+        xyz3: DVec3,
     ) -> Self {
         let mut val = Self {
             inner: ffi::new_voronoicell(),
@@ -533,7 +533,7 @@ impl VoronoiCellNoNeighbor {
 }
 
 impl VoronoiCell for VoronoiCellNoNeighbor {
-    fn translate(&mut self, xyz: Vec3) {
+    fn translate(&mut self, xyz: DVec3) {
         self.inner
             .pin_mut()
             .translate(xyz[0], xyz[1], xyz[2]);
@@ -555,7 +555,7 @@ impl VoronoiCell for VoronoiCellNoNeighbor {
         self.inner.pin_mut().surface_area()
     }
 
-    fn centroid(&mut self) -> Vec3 {
+    fn centroid(&mut self) -> DVec3 {
         let mut cx = 0.0;
         let mut cy = 0.0;
         let mut cz = 0.0;
@@ -585,7 +585,7 @@ impl VoronoiCell for VoronoiCellNoNeighbor {
         v.into_iter().copied().collect()
     }
 
-    fn vertices_global(&mut self, xyz: Vec3) -> Vec<f64> {
+    fn vertices_global(&mut self, xyz: DVec3) -> Vec<f64> {
         let mut v = CxxVector::new();
         self.inner.pin_mut().vertices_global(
             xyz[0],
@@ -634,7 +634,7 @@ impl VoronoiCell for VoronoiCellNoNeighbor {
 
     fn plane_intersects(
         &mut self,
-        xyz: Vec3,
+        xyz: DVec3,
         rsq: f64,
     ) -> bool {
         self.inner
@@ -644,7 +644,7 @@ impl VoronoiCell for VoronoiCellNoNeighbor {
 
     fn plane_intersects_guess(
         &mut self,
-        xyz: Vec3,
+        xyz: DVec3,
         rsq: f64,
     ) -> bool {
         self.inner.pin_mut().plane_intersects_guess(
@@ -654,7 +654,7 @@ impl VoronoiCell for VoronoiCellNoNeighbor {
 
     fn n_plane_rsq(
         &mut self,
-        xyz: Vec3,
+        xyz: DVec3,
         rsq: f64,
         p_id: i32,
     ) -> bool {
@@ -663,19 +663,19 @@ impl VoronoiCell for VoronoiCellNoNeighbor {
             .n_plane_rsq(xyz[0], xyz[1], xyz[2], rsq, p_id)
     }
 
-    fn n_plane(&mut self, xyz: Vec3, p_id: i32) -> bool {
+    fn n_plane(&mut self, xyz: DVec3, p_id: i32) -> bool {
         self.inner
             .pin_mut()
             .n_plane(xyz[0], xyz[1], xyz[2], p_id)
     }
 
-    fn plane_rsq(&mut self, xyz: Vec3, rsq: f64) -> bool {
+    fn plane_rsq(&mut self, xyz: DVec3, rsq: f64) -> bool {
         self.inner
             .pin_mut()
             .plane_rsq(xyz[0], xyz[1], xyz[2], rsq)
     }
 
-    fn plane(&mut self, xyz: Vec3) -> bool {
+    fn plane(&mut self, xyz: DVec3) -> bool {
         self.inner.pin_mut().plane(xyz[0], xyz[1], xyz[2])
     }
 }
@@ -690,7 +690,7 @@ impl VoronoiCellNeighbor {
     ///
     /// * `xyz_min`: the minimum xyz coordinates.
     /// * `xyz_max`: the maximum xyz coordinates.
-    pub fn new(xyz_min: Vec3, xyz_max: Vec3) -> Self {
+    pub fn new(xyz_min: DVec3, xyz_max: DVec3) -> Self {
         let mut val = Self {
             inner: ffi::new_voronoicell_neighbor(),
         };
@@ -720,10 +720,10 @@ impl VoronoiCellNeighbor {
     /// * `xyz2`: the coordinates of the third vertex.
     /// * `xyz3`: the coordinates of the fourth vertex.
     pub fn new_tetrahedron(
-        xyz0: Vec3,
-        xyz1: Vec3,
-        xyz2: Vec3,
-        xyz3: Vec3,
+        xyz0: DVec3,
+        xyz1: DVec3,
+        xyz2: DVec3,
+        xyz3: DVec3,
     ) -> Self {
         let mut val = Self {
             inner: ffi::new_voronoicell_neighbor(),
@@ -738,7 +738,7 @@ impl VoronoiCellNeighbor {
 }
 
 impl VoronoiCell for VoronoiCellNeighbor {
-    fn translate(&mut self, xyz: Vec3) {
+    fn translate(&mut self, xyz: DVec3) {
         self.inner
             .pin_mut()
             .translate(xyz[0], xyz[1], xyz[2]);
@@ -760,7 +760,7 @@ impl VoronoiCell for VoronoiCellNeighbor {
         self.inner.pin_mut().surface_area()
     }
 
-    fn centroid(&mut self) -> Vec3 {
+    fn centroid(&mut self) -> DVec3 {
         let mut cx = 0.0;
         let mut cy = 0.0;
         let mut cz = 0.0;
@@ -790,7 +790,7 @@ impl VoronoiCell for VoronoiCellNeighbor {
         v.into_iter().copied().collect()
     }
 
-    fn vertices_global(&mut self, xyz: Vec3) -> Vec<f64> {
+    fn vertices_global(&mut self, xyz: DVec3) -> Vec<f64> {
         let mut v = CxxVector::new();
         self.inner.pin_mut().vertices_global(
             xyz[0],
@@ -839,7 +839,7 @@ impl VoronoiCell for VoronoiCellNeighbor {
 
     fn plane_intersects(
         &mut self,
-        xyz: Vec3,
+        xyz: DVec3,
         rsq: f64,
     ) -> bool {
         self.inner
@@ -849,7 +849,7 @@ impl VoronoiCell for VoronoiCellNeighbor {
 
     fn plane_intersects_guess(
         &mut self,
-        xyz: Vec3,
+        xyz: DVec3,
         rsq: f64,
     ) -> bool {
         self.inner.pin_mut().plane_intersects_guess(
@@ -859,7 +859,7 @@ impl VoronoiCell for VoronoiCellNeighbor {
 
     fn n_plane_rsq(
         &mut self,
-        xyz: Vec3,
+        xyz: DVec3,
         rsq: f64,
         p_id: i32,
     ) -> bool {
@@ -868,19 +868,19 @@ impl VoronoiCell for VoronoiCellNeighbor {
             .n_plane_rsq(xyz[0], xyz[1], xyz[2], rsq, p_id)
     }
 
-    fn n_plane(&mut self, xyz: Vec3, p_id: i32) -> bool {
+    fn n_plane(&mut self, xyz: DVec3, p_id: i32) -> bool {
         self.inner
             .pin_mut()
             .n_plane(xyz[0], xyz[1], xyz[2], p_id)
     }
 
-    fn plane_rsq(&mut self, xyz: Vec3, rsq: f64) -> bool {
+    fn plane_rsq(&mut self, xyz: DVec3, rsq: f64) -> bool {
         self.inner
             .pin_mut()
             .plane_rsq(xyz[0], xyz[1], xyz[2], rsq)
     }
 
-    fn plane(&mut self, xyz: Vec3) -> bool {
+    fn plane(&mut self, xyz: DVec3) -> bool {
         self.inner.pin_mut().plane(xyz[0], xyz[1], xyz[2])
     }
 }
