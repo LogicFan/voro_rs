@@ -215,3 +215,186 @@ impl Wall for WallSphere {
         )
     }
 }
+
+pub struct WallPlane {
+    inner: UniquePtr<ffi::wall_plane>,
+}
+
+impl WallPlane {
+    pub fn new(center: DVec3, radius: f64) -> Self {
+        Self {
+            inner: ffi::new_wall_plane(
+                center[0], center[1], center[2], radius,
+                -99,
+            ),
+        }
+    }
+
+    pub fn new_with_id(
+        center: DVec3,
+        radius: f64,
+        id: i32,
+    ) -> Self {
+        Self {
+            inner: ffi::new_wall_plane(
+                center[0], center[1], center[2], radius, id,
+            ),
+        }
+    }
+}
+
+impl Wall for WallPlane {
+    fn point_inside(&mut self, xyz: DVec3) -> bool {
+        self.inner
+            .pin_mut()
+            .point_inside(xyz[0], xyz[1], xyz[2])
+    }
+
+    fn cut_cell(
+        &mut self,
+        cell: &mut VoronoiCell,
+        xyz: DVec3,
+    ) -> bool {
+        self.inner.pin_mut().cut_cell(
+            cell.inner.pin_mut(),
+            xyz[0],
+            xyz[1],
+            xyz[2],
+        )
+    }
+
+    fn cut_cell_neighbor(
+        &mut self,
+        cell: &mut VoronoiCellNeighbor,
+        xyz: DVec3,
+    ) -> bool {
+        self.inner.pin_mut().cut_cell_neighbor(
+            cell.inner.pin_mut(),
+            xyz[0],
+            xyz[1],
+            xyz[2],
+        )
+    }
+}
+
+pub struct WallCylinder {
+    inner: UniquePtr<ffi::wall_cylinder>,
+}
+
+impl WallCylinder {
+    pub fn new(center: DVec3, radius: f64) -> Self {
+        Self {
+            inner: ffi::new_wall_cylinder(
+                center[0], center[1], center[2], radius,
+                -99,
+            ),
+        }
+    }
+
+    pub fn new_with_id(
+        center: DVec3,
+        radius: f64,
+        id: i32,
+    ) -> Self {
+        Self {
+            inner: ffi::new_wall_cylinder(
+                center[0], center[1], center[2], radius, id,
+            ),
+        }
+    }
+}
+
+impl Wall for WallCylinder {
+    fn point_inside(&mut self, xyz: DVec3) -> bool {
+        self.inner
+            .pin_mut()
+            .point_inside(xyz[0], xyz[1], xyz[2])
+    }
+
+    fn cut_cell(
+        &mut self,
+        cell: &mut VoronoiCell,
+        xyz: DVec3,
+    ) -> bool {
+        self.inner.pin_mut().cut_cell(
+            cell.inner.pin_mut(),
+            xyz[0],
+            xyz[1],
+            xyz[2],
+        )
+    }
+
+    fn cut_cell_neighbor(
+        &mut self,
+        cell: &mut VoronoiCellNeighbor,
+        xyz: DVec3,
+    ) -> bool {
+        self.inner.pin_mut().cut_cell_neighbor(
+            cell.inner.pin_mut(),
+            xyz[0],
+            xyz[1],
+            xyz[2],
+        )
+    }
+}
+
+pub struct WallCone {
+    inner: UniquePtr<ffi::wall_cone>,
+}
+
+impl WallCone {
+    pub fn new(center: DVec3, radius: f64) -> Self {
+        Self {
+            inner: ffi::new_wall_cone(
+                center[0], center[1], center[2], radius,
+                -99,
+            ),
+        }
+    }
+
+    pub fn new_with_id(
+        center: DVec3,
+        radius: f64,
+        id: i32,
+    ) -> Self {
+        Self {
+            inner: ffi::new_wall_cone(
+                center[0], center[1], center[2], radius, id,
+            ),
+        }
+    }
+}
+
+impl Wall for WallCone {
+    fn point_inside(&mut self, xyz: DVec3) -> bool {
+        self.inner
+            .pin_mut()
+            .point_inside(xyz[0], xyz[1], xyz[2])
+    }
+
+    fn cut_cell(
+        &mut self,
+        cell: &mut VoronoiCell,
+        xyz: DVec3,
+    ) -> bool {
+        self.inner.pin_mut().cut_cell(
+            cell.inner.pin_mut(),
+            xyz[0],
+            xyz[1],
+            xyz[2],
+        )
+    }
+
+    fn cut_cell_neighbor(
+        &mut self,
+        cell: &mut VoronoiCellNeighbor,
+        xyz: DVec3,
+    ) -> bool {
+        self.inner.pin_mut().cut_cell_neighbor(
+            cell.inner.pin_mut(),
+            xyz[0],
+            xyz[1],
+            xyz[2],
+        )
+    }
+}

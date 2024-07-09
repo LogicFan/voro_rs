@@ -899,10 +899,7 @@ mod tests {
 
     #[test]
     fn test_new() {
-        VoronoiCell::new(
-            [1.0, 1.0, 1.0],
-            [2.0, 2.0, 2.0],
-        );
+        VoronoiCell::new([1.0, 1.0, 1.0], [2.0, 2.0, 2.0]);
 
         VoronoiCellNeighbor::new(
             [1.0, 1.0, 1.0],
