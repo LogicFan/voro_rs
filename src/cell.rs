@@ -314,7 +314,7 @@ type DVec3 = [f64; 3];
 /// by a plane, which forms the key routine for the Voronoi cell computation.
 /// It contains numerous routine for computing statistics about the Voronoi cell,
 /// and it can output the cell in several formats.
-pub trait VoronoiCell {
+pub trait Cell {
     /// Translates the vertices of the Voronoi cell by a given vector.
     ///
     /// * `xyz`: the coordinates of the vector.
@@ -477,11 +477,11 @@ pub trait VoronoiCell {
 /// This class is an extension of the voronoicell_base class, in cases when
 /// is not necessary to track the IDs of neighboring particles associated
 /// with each face of the Voronoi cell.
-pub struct VoronoiCellNoNeighbor {
-    inner: UniquePtr<ffi::voronoicell>,
+pub struct VoronoiCell {
+    pub(crate) inner: UniquePtr<ffi::voronoicell>,
 }
 
-impl VoronoiCellNoNeighbor {
+impl VoronoiCell {
     /// Initializes the Voronoi cell to be rectangular box with the
     /// given dimensions.
     ///
@@ -534,7 +534,7 @@ impl VoronoiCellNoNeighbor {
     }
 }
 
-impl VoronoiCell for VoronoiCellNoNeighbor {
+impl Cell for VoronoiCell {
     fn translate(&mut self, xyz: DVec3) {
         self.inner
             .pin_mut()
@@ -688,7 +688,7 @@ impl VoronoiCell for VoronoiCellNoNeighbor {
 ///  It contains additional data structures for storing this
 ///  information.
 pub struct VoronoiCellNeighbor {
-    inner: UniquePtr<ffi::voronoicell_neighbor>,
+    pub(crate) inner: UniquePtr<ffi::voronoicell_neighbor>,
 }
 
 impl VoronoiCellNeighbor {
@@ -744,7 +744,7 @@ impl VoronoiCellNeighbor {
     }
 }
 
-impl VoronoiCell for VoronoiCellNeighbor {
+impl Cell for VoronoiCellNeighbor {
     fn translate(&mut self, xyz: DVec3) {
         self.inner
             .pin_mut()
@@ -899,7 +899,7 @@ mod tests {
 
     #[test]
     fn test_new() {
-        VoronoiCellNoNeighbor::new(
+        VoronoiCell::new(
             [1.0, 1.0, 1.0],
             [2.0, 2.0, 2.0],
         );
