@@ -1,31 +1,4 @@
 fn main() {
-    println!("cargo:rerun-if-changed=cpp/c_loops.cc");
-    println!("cargo:rerun-if-changed=cpp/c_loops.hh");
-    println!("cargo:rerun-if-changed=cpp/cell.cc");
-    println!("cargo:rerun-if-changed=cpp/cell.hh");
-    println!("cargo:rerun-if-changed=cpp/common.cc");
-    println!("cargo:rerun-if-changed=cpp/common.hh");
-    println!("cargo:rerun-if-changed=cpp/config.hh");
-    println!("cargo:rerun-if-changed=cpp/container.cc");
-    println!("cargo:rerun-if-changed=cpp/container.hh");
-    println!("cargo:rerun-if-changed=cpp/container_prd.cc");
-    println!("cargo:rerun-if-changed=cpp/container_prd.hh");
-    println!("cargo:rerun-if-changed=cpp/pre_container.cc");
-    println!("cargo:rerun-if-changed=cpp/pre_container.hh");
-    println!("cargo:rerun-if-changed=cpp/rad_option.hh");
-    println!("cargo:rerun-if-changed=cpp/unitcell.cc");
-    println!("cargo:rerun-if-changed=cpp/unitcell.hh");
-    println!("cargo:rerun-if-changed=cpp/v_base.cc");
-    println!("cargo:rerun-if-changed=cpp/v_base.hh");
-    println!("cargo:rerun-if-changed=cpp/v_base_wl.cc");
-    println!("cargo:rerun-if-changed=cpp/v_compute.cc");
-    println!("cargo:rerun-if-changed=cpp/v_compute.hh");
-    println!("cargo:rerun-if-changed=cpp/voro++.cc");
-    println!("cargo:rerun-if-changed=cpp/voro++.hh");
-    println!("cargo:rerun-if-changed=cpp/wall.cc");
-    println!("cargo:rerun-if-changed=cpp/wall.hh");
-    println!("cargo:rerun-if-changed=cpp/worklist.hh");
-
     cxx_build::bridges(["src/cell.rs"])
         .file("cpp/voro++.cc")
         .cpp(true)
