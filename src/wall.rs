@@ -146,7 +146,7 @@ pub mod ffi {
     }
 }
 
-use crate::cell::VoroCellEnum;
+use crate::cell::VoroCellMut;
 use cxx::UniquePtr;
 
 type DVec3 = [f64; 3];
@@ -155,10 +155,25 @@ type DVec3 = [f64; 3];
 /// can be specified by deriving a new struct from this and specifying the
 /// functions.
 pub trait Wall {
+    /// Tests to see whether a point is inside the sphere wall object.
+    ///
+    /// * `x,y,z`: the vector to test.
+    ///
+    /// Return true if the point is inside, false if the point is outside.
     fn point_inside(&mut self, xyz: DVec3) -> bool;
+
+    /// Cuts a cell by the sphere wall object. The spherical wall is approximated by
+    /// a single plane applied at the point on the sphere which is closest to the center
+    /// of the cell. This works well for particle arrangements that are packed against
+    /// the wall, but loses accuracy for sparse particle distributions.
+    ///
+    /// * `cell`: the Voronoi cell to be cut.
+    /// * `xyz`: the location of the Voronoi cell.
+    ///
+    /// Return true if the cell still exists, false if the cell is deleted.
     fn cut_cell<'a>(
         &mut self,
-        cell: impl Into<VoroCellEnum<'a>>,
+        cell: impl Into<VoroCellMut<'a>>,
         xyz: DVec3,
     ) -> bool;
 }
@@ -168,6 +183,9 @@ pub struct WallSphere {
 }
 
 impl WallSphere {
+    /// Constructs a spherical wall object.
+    /// * `c`: a position vector for the sphere's center.
+    /// * `r`: the radius of the sphere.
     pub fn new(c: DVec3, r: f64) -> Self {
         Self {
             inner: ffi::new_wall_sphere(
@@ -176,6 +194,10 @@ impl WallSphere {
         }
     }
 
+    /// Constructs a spherical wall object.
+    /// * `c`: a position vector for the sphere's center.
+    /// * `r`: the radius of the sphere.
+    /// * `id`: an ID number to associate with the wall for neighbor tracking.
     pub fn new_with_id(c: DVec3, r: f64, id: i32) -> Self {
         Self {
             inner: ffi::new_wall_sphere(
@@ -194,11 +216,11 @@ impl Wall for WallSphere {
 
     fn cut_cell<'a>(
         &mut self,
-        cell: impl Into<VoroCellEnum<'a>>,
+        cell: impl Into<VoroCellMut<'a>>,
         xyz: DVec3,
     ) -> bool {
         match cell.into() {
-            VoroCellEnum::Standalone(c) => {
+            VoroCellMut::Standalone(c) => {
                 self.inner.pin_mut().cut_cell_0(
                     c.inner.pin_mut(),
                     xyz[0],
@@ -206,7 +228,7 @@ impl Wall for WallSphere {
                     xyz[2],
                 )
             }
-            VoroCellEnum::WithNeighbor(c) => {
+            VoroCellMut::WithNeighbor(c) => {
                 self.inner.pin_mut().cut_cell_1(
                     c.inner.pin_mut(),
                     xyz[0],
@@ -249,11 +271,11 @@ impl Wall for WallPlane {
 
     fn cut_cell<'a>(
         &mut self,
-        cell: impl Into<VoroCellEnum<'a>>,
+        cell: impl Into<VoroCellMut<'a>>,
         xyz: DVec3,
     ) -> bool {
         match cell.into() {
-            VoroCellEnum::Standalone(c) => {
+            VoroCellMut::Standalone(c) => {
                 self.inner.pin_mut().cut_cell_0(
                     c.inner.pin_mut(),
                     xyz[0],
@@ -261,7 +283,7 @@ impl Wall for WallPlane {
                     xyz[2],
                 )
             }
-            VoroCellEnum::WithNeighbor(c) => {
+            VoroCellMut::WithNeighbor(c) => {
                 self.inner.pin_mut().cut_cell_1(
                     c.inner.pin_mut(),
                     xyz[0],
@@ -309,11 +331,11 @@ impl Wall for WallCylinder {
 
     fn cut_cell<'a>(
         &mut self,
-        cell: impl Into<VoroCellEnum<'a>>,
+        cell: impl Into<VoroCellMut<'a>>,
         xyz: DVec3,
     ) -> bool {
         match cell.into() {
-            VoroCellEnum::Standalone(c) => {
+            VoroCellMut::Standalone(c) => {
                 self.inner.pin_mut().cut_cell_0(
                     c.inner.pin_mut(),
                     xyz[0],
@@ -321,7 +343,7 @@ impl Wall for WallCylinder {
                     xyz[2],
                 )
             }
-            VoroCellEnum::WithNeighbor(c) => {
+            VoroCellMut::WithNeighbor(c) => {
                 self.inner.pin_mut().cut_cell_1(
                     c.inner.pin_mut(),
                     xyz[0],
@@ -370,11 +392,11 @@ impl Wall for WallCone {
 
     fn cut_cell<'a>(
         &mut self,
-        cell: impl Into<VoroCellEnum<'a>>,
+        cell: impl Into<VoroCellMut<'a>>,
         xyz: DVec3,
     ) -> bool {
         match cell.into() {
-            VoroCellEnum::Standalone(c) => {
+            VoroCellMut::Standalone(c) => {
                 self.inner.pin_mut().cut_cell_0(
                     c.inner.pin_mut(),
                     xyz[0],
@@ -382,7 +404,7 @@ impl Wall for WallCone {
                     xyz[2],
                 )
             }
-            VoroCellEnum::WithNeighbor(c) => {
+            VoroCellMut::WithNeighbor(c) => {
                 self.inner.pin_mut().cut_cell_1(
                     c.inner.pin_mut(),
                     xyz[0],

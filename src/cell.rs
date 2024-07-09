@@ -470,7 +470,7 @@ pub trait VoroCell {
     fn plane(&mut self, xyz: DVec3) -> bool;
 }
 
-pub enum VoroCellEnum<'a> {
+pub enum VoroCellMut<'a> {
     Standalone(&'a mut VoroCellAln),
     WithNeighbor(&'a mut VoroCellNbr),
 }
@@ -687,9 +687,9 @@ impl VoroCell for VoroCellAln {
     }
 }
 
-impl<'a> Into<VoroCellEnum<'a>> for &'a mut VoroCellAln {
-    fn into(self) -> VoroCellEnum<'a> {
-        VoroCellEnum::Standalone(self)
+impl<'a> Into<VoroCellMut<'a>> for &'a mut VoroCellAln {
+    fn into(self) -> VoroCellMut<'a> {
+        VoroCellMut::Standalone(self)
     }
 }
 
@@ -903,9 +903,9 @@ impl VoroCell for VoroCellNbr {
     }
 }
 
-impl<'a> Into<VoroCellEnum<'a>> for &'a mut VoroCellNbr {
-    fn into(self) -> VoroCellEnum<'a> {
-        VoroCellEnum::WithNeighbor(self)
+impl<'a> Into<VoroCellMut<'a>> for &'a mut VoroCellNbr {
+    fn into(self) -> VoroCellMut<'a> {
+        VoroCellMut::WithNeighbor(self)
     }
 }
 
