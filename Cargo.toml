@@ -2,9 +2,13 @@
 name = "voro_rs"
 build = "build.rs"
 edition = "2021"
-version = "0.4.6"
-authors = ["Chris H. Rycroft <chr@alum.mit.edu>"]
-license = "BSD-3-Clause-LBNL"
+version = "0.1.0"
+authors = [
+    "Chris H. Rycroft <chr@alum.mit.edu>",
+    "Yongda Fan <fanyongda2012@gmail.com",
+]
+license = "(MIT OR Apache-2.0) AND BSD-3-Clause-LBNL"
+description = "A Rust binding for voro++ library"
 
 [dependencies]
 cxx = "1.0"

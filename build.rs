@@ -26,7 +26,7 @@ fn main() {
     println!("cargo:rerun-if-changed=cpp/wall.hh");
     println!("cargo:rerun-if-changed=cpp/worklist.hh");
 
-    cxx_build::bridge("src/lib.rs")
+    cxx_build::bridges(["src/cell.rs"])
         .file("cpp/voro++.cc")
         .cpp(true)
         .warnings(false)

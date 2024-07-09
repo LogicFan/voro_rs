@@ -4,7 +4,15 @@
         "libc",
         "unitcell",
         "voro",
-        "worklist"
+        "Voronoi",
+        "voronoicell",
+        "worklist",
+        "xmax",
+        "xmin",
+        "ymax",
+        "ymin",
+        "zmax",
+        "zmin"
     ],
     "files.associations": {
         "*.m": "octave",
