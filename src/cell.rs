@@ -72,7 +72,21 @@ use cxx::{CxxVector, UniquePtr};
 
 type Vec3 = [f64; 3];
 
+/// `voronoicell_base` abstract class in voro++.
+/// 
+/// A trait representing a single Voronoi cell.
+///
+/// This trait represents a single Voronoi cell, as a collection of vertices
+/// that are connected by edges. The class contains routines for initializing
+/// the Voronoi cell to be simple shapes such as a box, tetrahedron, or octahedron.
+/// It the contains routines for recomputing the cell based on cutting it
+/// by a plane, which forms the key routine for the Voronoi cell computation.
+/// It contains numerous routine for computing statistics about the Voronoi cell,
+/// and it can output the cell in several formats.
 pub trait VoronoiCell {
+    /// Translates the vertices of the Voronoi cell by a given vector.
+    /// 
+    /// * `xyz`: the coordinates of the vector.
     fn translate(&mut self, xyz: Vec3);
     fn volume(&mut self) -> f64;
     fn max_radius_squared(&mut self) -> f64;
@@ -85,11 +99,23 @@ pub trait VoronoiCell {
     fn vertex_orders(&mut self) -> Vec<i32>;
 }
 
+/// `voronoicell` class in voro++.
+/// 
+/// A class represent a Voronoi cell without neighbor information.
+/// 
+/// This class is an extension of the voronoicell_base class, in cases when
+/// is not necessary to track the IDs of neighboring particles associated
+/// with each face of the Voronoi cell.
 pub struct VoronoiCellNoNeighbor {
     inner: UniquePtr<ffi::voronoicell>,
 }
 
 impl VoronoiCellNoNeighbor {
+    /// Initializes the Voronoi cell to be rectangular box with the
+	/// given dimensions.
+    /// 
+    /// * `xyz_min`: the minimum xyz coordinates.
+    /// * `xyz_max`: the maximum xyz coordinates.
     pub fn new(xyz_min: Vec3, xyz_max: Vec3) -> Self {
         let mut val = Self {
             inner: ffi::construct(),
@@ -101,6 +127,10 @@ impl VoronoiCellNoNeighbor {
         val
     }
 
+    /// Initializes the cell to be an octahedron with vertices at
+	/// (l,0,0), (-l,0,0), (0,l,0), (0,-l,0), (0,0,l), and (0,0,-l).
+    /// 
+    /// * `l`: a parameter setting the size of the octahedron.
     pub fn new_octahedron(l: f64) -> Self {
         let mut val = Self {
             inner: ffi::construct(),
@@ -109,6 +139,12 @@ impl VoronoiCellNoNeighbor {
         val
     }
 
+    /// Initializes the cell to be a tetrahedron.
+    /// 
+	/// * `xyz0`: the coordinates of the first vertex.
+	/// * `xyz1`: the coordinates of the second vertex.
+	/// * `xyz2`: the coordinates of the third vertex.
+	/// * `xyz3`: the coordinates of the fourth vertex.
     pub fn new_tetrahedron(
         xyz0: Vec3,
         xyz1: Vec3,
