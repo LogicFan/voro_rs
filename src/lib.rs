@@ -3,6 +3,6 @@ pub mod wall;
 
 pub mod prelude {
     pub use crate::cell::{
-        Cell, VoronoiCell, VoronoiCellNeighbor,
+        VoronoiCellTrait, VoronoiCell, VoronoiCellNeighbor,
     };
 }
