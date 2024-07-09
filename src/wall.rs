@@ -184,6 +184,7 @@ pub struct WallSphere {
 
 impl WallSphere {
     /// Constructs a spherical wall object.
+    ///
     /// * `c`: a position vector for the sphere's center.
     /// * `r`: the radius of the sphere.
     pub fn new(c: DVec3, r: f64) -> Self {
@@ -195,6 +196,7 @@ impl WallSphere {
     }
 
     /// Constructs a spherical wall object.
+    ///
     /// * `c`: a position vector for the sphere's center.
     /// * `r`: the radius of the sphere.
     /// * `id`: an ID number to associate with the wall for neighbor tracking.
@@ -245,18 +247,27 @@ pub struct WallPlane {
 }
 
 impl WallPlane {
-    pub fn new(c: DVec3, r: f64) -> Self {
+    /// Constructs a plane wall object.
+    ///
+    /// * `c`: a normal vector to the plane.
+    /// * `a`: a displacement along the normal vector.
+    pub fn new(c: DVec3, a: f64) -> Self {
         Self {
             inner: ffi::new_wall_plane(
-                c[0], c[1], c[2], r, -99,
+                c[0], c[1], c[2], a, -99,
             ),
         }
     }
 
-    pub fn new_with_id(c: DVec3, r: f64, id: i32) -> Self {
+    /// Constructs a plane wall object.
+    ///
+    /// * `c`: a normal vector to the plane.
+    /// * `a`: a displacement along the normal vector.
+    /// * `id`: an ID number to associate with the wall for neighbor tracking.
+    pub fn new_with_id(c: DVec3, a: f64, id: i32) -> Self {
         Self {
             inner: ffi::new_wall_plane(
-                c[0], c[1], c[2], r, id,
+                c[0], c[1], c[2], a, id,
             ),
         }
     }
@@ -419,12 +430,12 @@ impl Wall for WallCone {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::prelude::VoroCellAln;
+    use crate::prelude::VoroCellSgl;
 
     #[test]
     fn test_new() {
         let mut w = WallSphere::new([0.0, 0.0, 0.0], 1.0);
-        let mut c = VoroCellAln::new(
+        let mut c = VoroCellSgl::new(
             [1.0, 1.0, 1.0],
             [2.0, 2.0, 2.0],
         );

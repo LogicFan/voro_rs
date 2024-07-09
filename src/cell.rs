@@ -471,7 +471,7 @@ pub trait VoroCell {
 }
 
 pub enum VoroCellMut<'a> {
-    Standalone(&'a mut VoroCellAln),
+    Standalone(&'a mut VoroCellSgl),
     WithNeighbor(&'a mut VoroCellNbr),
 }
 
@@ -482,11 +482,11 @@ pub enum VoroCellMut<'a> {
 /// This class is an extension of the voronoicell_base class, in cases when
 /// is not necessary to track the IDs of neighboring particles associated
 /// with each face of the Voronoi cell.
-pub struct VoroCellAln {
+pub struct VoroCellSgl {
     pub(crate) inner: UniquePtr<ffi::voronoicell>,
 }
 
-impl VoroCellAln {
+impl VoroCellSgl {
     /// Initializes the Voronoi cell to be rectangular box with the
     /// given dimensions.
     ///
@@ -539,7 +539,7 @@ impl VoroCellAln {
     }
 }
 
-impl VoroCell for VoroCellAln {
+impl VoroCell for VoroCellSgl {
     fn translate(&mut self, xyz: DVec3) {
         self.inner
             .pin_mut()
@@ -687,7 +687,7 @@ impl VoroCell for VoroCellAln {
     }
 }
 
-impl<'a> Into<VoroCellMut<'a>> for &'a mut VoroCellAln {
+impl<'a> Into<VoroCellMut<'a>> for &'a mut VoroCellSgl {
     fn into(self) -> VoroCellMut<'a> {
         VoroCellMut::Standalone(self)
     }
@@ -915,7 +915,7 @@ mod tests {
 
     #[test]
     fn test_new() {
-        VoroCellAln::new([1.0, 1.0, 1.0], [2.0, 2.0, 2.0]);
+        VoroCellSgl::new([1.0, 1.0, 1.0], [2.0, 2.0, 2.0]);
 
         VoroCellNbr::new([1.0, 1.0, 1.0], [2.0, 2.0, 2.0]);
     }
