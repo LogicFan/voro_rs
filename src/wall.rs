@@ -178,6 +178,7 @@ pub trait Wall {
     ) -> bool;
 }
 
+/// A class representing a spherical wall object.
 pub struct WallSphere {
     inner: UniquePtr<ffi::wall_sphere>,
 }
@@ -242,6 +243,7 @@ impl Wall for WallSphere {
     }
 }
 
+/// A class representing a plane wall object.
 pub struct WallPlane {
     inner: UniquePtr<ffi::wall_plane>,
 }
@@ -306,11 +308,17 @@ impl Wall for WallPlane {
     }
 }
 
+/// A class representing a cylindrical wall object.
 pub struct WallCylinder {
     inner: UniquePtr<ffi::wall_cylinder>,
 }
 
 impl WallCylinder {
+    /// Constructs a cylinder wall object.
+    ///
+    /// * `c`: a point on the axis of the cylinder.
+    /// * `a`: a vector pointing along the direction of the cylinder.
+    /// * `r`: the radius of the cylinder.
     pub fn new(c: DVec3, a: DVec3, r: f64) -> Self {
         Self {
             inner: ffi::new_wall_cylinder(
@@ -319,6 +327,12 @@ impl WallCylinder {
         }
     }
 
+    /// Constructs a cylinder wall object.
+    ///
+    /// * `c`: a point on the axis of the cylinder.
+    /// * `a`: a vector pointing along the direction of the cylinder.
+    /// * `r`: the radius of the cylinder.
+    /// * `id`: an ID number to associate with the wall for neighbor tracking.
     pub fn new_with_id(
         c: DVec3,
         a: DVec3,
@@ -366,11 +380,17 @@ impl Wall for WallCylinder {
     }
 }
 
+/// A class representing a conical wall object.
 pub struct WallCone {
     inner: UniquePtr<ffi::wall_cone>,
 }
 
 impl WallCone {
+    /// Constructs a cone wall object.
+    ///
+    /// * `c`: the apex of the cone.
+    /// * `a`: a vector pointing along the axis of the cone.
+    /// * `ang`: the angle (in radians) of the cone, measured from the axis.
     pub fn new(c: DVec3, a: DVec3, ang: f64) -> Self {
         Self {
             inner: ffi::new_wall_cone(
@@ -380,6 +400,12 @@ impl WallCone {
         }
     }
 
+    /// Constructs a cone wall object.
+    ///
+    /// * `c`: the apex of the cone.
+    /// * `a`: a vector pointing along the axis of the cone.
+    /// * `ang`: the angle (in radians) of the cone, measured from the axis.
+    /// * `id`: an ID number to associate with the wall for neighbor tracking.
     pub fn new_with_id(
         c: DVec3,
         a: DVec3,
@@ -433,7 +459,7 @@ mod tests {
     use crate::prelude::VoroCellSgl;
 
     #[test]
-    fn test_new() {
+    fn basic_test() {
         let mut w = WallSphere::new([0.0, 0.0, 0.0], 1.0);
         let mut c = VoroCellSgl::new(
             [1.0, 1.0, 1.0],

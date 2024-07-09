@@ -914,7 +914,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_new() {
+    fn basic_test() {
         VoroCellSgl::new([1.0, 1.0, 1.0], [2.0, 2.0, 2.0]);
 
         VoroCellNbr::new([1.0, 1.0, 1.0], [2.0, 2.0, 2.0]);
