@@ -65,6 +65,57 @@ pub mod ffi {
             self: Pin<&mut voronoicell>,
             v: Pin<&mut CxxVector<i32>>,
         );
+        #[rust_name = "vertices_local"]
+        fn vertices(
+            self: Pin<&mut voronoicell>,
+            v: Pin<&mut CxxVector<f64>>,
+        );
+        #[rust_name = "vertices_global"]
+        fn vertices(
+            self: Pin<&mut voronoicell>,
+            x: f64,
+            y: f64,
+            z: f64,
+            v: Pin<&mut CxxVector<f64>>,
+        );
+        fn face_areas(
+            self: Pin<&mut voronoicell>,
+            v: Pin<&mut CxxVector<f64>>,
+        );
+        fn face_orders(
+            self: Pin<&mut voronoicell>,
+            v: Pin<&mut CxxVector<i32>>,
+        );
+        fn face_freq_table(
+            self: Pin<&mut voronoicell>,
+            v: Pin<&mut CxxVector<i32>>,
+        );
+        fn face_vertices(
+            self: Pin<&mut voronoicell>,
+            v: Pin<&mut CxxVector<i32>>,
+        );
+        fn face_perimeters(
+            self: Pin<&mut voronoicell>,
+            v: Pin<&mut CxxVector<f64>>,
+        );
+        fn normals(
+            self: Pin<&mut voronoicell>,
+            v: Pin<&mut CxxVector<f64>>,
+        );
+        fn plane_intersects(
+            self: Pin<&mut voronoicell>,
+            x: f64,
+            y: f64,
+            z: f64,
+            rsq: f64,
+        ) -> bool;
+        fn plane_intersects_guess(
+            self: Pin<&mut voronoicell>,
+            x: f64,
+            y: f64,
+            z: f64,
+            rsq: f64,
+        ) -> bool;
     }
 }
 
@@ -73,7 +124,7 @@ use cxx::{CxxVector, UniquePtr};
 type Vec3 = [f64; 3];
 
 /// `voronoicell_base` abstract class in voro++.
-/// 
+///
 /// A trait representing a single Voronoi cell.
 ///
 /// This trait represents a single Voronoi cell, as a collection of vertices
@@ -85,24 +136,54 @@ type Vec3 = [f64; 3];
 /// and it can output the cell in several formats.
 pub trait VoronoiCell {
     /// Translates the vertices of the Voronoi cell by a given vector.
-    /// 
+    ///
     /// * `xyz`: the coordinates of the vector.
     fn translate(&mut self, xyz: Vec3);
+
+    /// Calculates the volume of the Voronoi cell, by decomposing the cell into
+    /// tetrahedra extending outward from the zeroth vertex, whose volumes are
+    /// evaluated using a scalar triple product.
+    ///
+    /// Return a floating point number holding the calculated volume.
     fn volume(&mut self) -> f64;
+
+    /// Computes the maximum radius squared of a vertex from the center of the
+    /// cell. It can be used to determine when enough particles have been testing an
+    /// all planes that could cut the cell have been considered.
+    ///
+    /// Return the maximum radius squared of a vertex.
     fn max_radius_squared(&mut self) -> f64;
+
+    /// Calculates the total edge distance of the Voronoi cell.
+    ///
+    /// Return a floating point number holding the calculated distance.
     fn total_edge_distance(&mut self) -> f64;
+
+    /// Calculates the total surface area of the Voronoi cell.
+    ///
+    /// Return the computed area.
     fn surface_area(&mut self) -> f64;
 
+    /// Calculates the centroid of the Voronoi cell, by decomposing the cell into
+    /// tetrahedra extending outward from the zeroth vertex.
+    ///
+    /// Return the centroid vector.
     fn centroid(&mut self) -> Vec3;
+
+    /// Returns the number of faces of a computed Voronoi cell.
     fn number_of_faces(&mut self) -> i32;
+
+    /// Counts the number of edges of the Voronoi cell.
     fn number_of_edges(&mut self) -> i32;
+
+    /// Returns a vector of the vertex orders.
     fn vertex_orders(&mut self) -> Vec<i32>;
 }
 
 /// `voronoicell` class in voro++.
-/// 
+///
 /// A class represent a Voronoi cell without neighbor information.
-/// 
+///
 /// This class is an extension of the voronoicell_base class, in cases when
 /// is not necessary to track the IDs of neighboring particles associated
 /// with each face of the Voronoi cell.
@@ -112,8 +193,8 @@ pub struct VoronoiCellNoNeighbor {
 
 impl VoronoiCellNoNeighbor {
     /// Initializes the Voronoi cell to be rectangular box with the
-	/// given dimensions.
-    /// 
+    /// given dimensions.
+    ///
     /// * `xyz_min`: the minimum xyz coordinates.
     /// * `xyz_max`: the maximum xyz coordinates.
     pub fn new(xyz_min: Vec3, xyz_max: Vec3) -> Self {
@@ -128,8 +209,8 @@ impl VoronoiCellNoNeighbor {
     }
 
     /// Initializes the cell to be an octahedron with vertices at
-	/// (l,0,0), (-l,0,0), (0,l,0), (0,-l,0), (0,0,l), and (0,0,-l).
-    /// 
+    /// (l,0,0), (-l,0,0), (0,l,0), (0,-l,0), (0,0,l), and (0,0,-l).
+    ///
     /// * `l`: a parameter setting the size of the octahedron.
     pub fn new_octahedron(l: f64) -> Self {
         let mut val = Self {
@@ -140,11 +221,11 @@ impl VoronoiCellNoNeighbor {
     }
 
     /// Initializes the cell to be a tetrahedron.
-    /// 
-	/// * `xyz0`: the coordinates of the first vertex.
-	/// * `xyz1`: the coordinates of the second vertex.
-	/// * `xyz2`: the coordinates of the third vertex.
-	/// * `xyz3`: the coordinates of the fourth vertex.
+    ///
+    /// * `xyz0`: the coordinates of the first vertex.
+    /// * `xyz1`: the coordinates of the second vertex.
+    /// * `xyz2`: the coordinates of the third vertex.
+    /// * `xyz3`: the coordinates of the fourth vertex.
     pub fn new_tetrahedron(
         xyz0: Vec3,
         xyz1: Vec3,
