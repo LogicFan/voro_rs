@@ -314,7 +314,7 @@ type DVec3 = [f64; 3];
 /// by a plane, which forms the key routine for the Voronoi cell computation.
 /// It contains numerous routine for computing statistics about the Voronoi cell,
 /// and it can output the cell in several formats.
-pub trait VoronoiCellTrait {
+pub trait VoroCell {
     /// Translates the vertices of the Voronoi cell by a given vector.
     ///
     /// * `xyz`: the coordinates of the vector.
@@ -470,6 +470,11 @@ pub trait VoronoiCellTrait {
     fn plane(&mut self, xyz: DVec3) -> bool;
 }
 
+pub enum VoroCellEnum<'a> {
+    Standalone(&'a mut VoroCellAln),
+    WithNeighbor(&'a mut VoroCellNbr),
+}
+
 /// `voronoicell` class in voro++.
 ///
 /// A class represent a Voronoi cell without neighbor information.
@@ -477,11 +482,11 @@ pub trait VoronoiCellTrait {
 /// This class is an extension of the voronoicell_base class, in cases when
 /// is not necessary to track the IDs of neighboring particles associated
 /// with each face of the Voronoi cell.
-pub struct VoronoiCell {
+pub struct VoroCellAln {
     pub(crate) inner: UniquePtr<ffi::voronoicell>,
 }
 
-impl VoronoiCell {
+impl VoroCellAln {
     /// Initializes the Voronoi cell to be rectangular box with the
     /// given dimensions.
     ///
@@ -534,7 +539,7 @@ impl VoronoiCell {
     }
 }
 
-impl VoronoiCellTrait for VoronoiCell {
+impl VoroCell for VoroCellAln {
     fn translate(&mut self, xyz: DVec3) {
         self.inner
             .pin_mut()
@@ -679,6 +684,12 @@ impl VoronoiCellTrait for VoronoiCell {
 
     fn plane(&mut self, xyz: DVec3) -> bool {
         self.inner.pin_mut().plane(xyz[0], xyz[1], xyz[2])
+    }
+}
+
+impl<'a> Into<VoroCellEnum<'a>> for &'a mut VoroCellAln {
+    fn into(self) -> VoroCellEnum<'a> {
+        VoroCellEnum::Standalone(self)
     }
 }
 
@@ -687,11 +698,11 @@ impl VoronoiCellTrait for VoronoiCell {
 ///  IDs of neighboring particles associated with each face of the Voronoi cell.
 ///  It contains additional data structures for storing this
 ///  information.
-pub struct VoronoiCellNeighbor {
+pub struct VoroCellNbr {
     pub(crate) inner: UniquePtr<ffi::voronoicell_neighbor>,
 }
 
-impl VoronoiCellNeighbor {
+impl VoroCellNbr {
     /// Initializes the Voronoi cell to be rectangular box with the
     /// given dimensions.
     ///
@@ -744,7 +755,7 @@ impl VoronoiCellNeighbor {
     }
 }
 
-impl VoronoiCellTrait for VoronoiCellNeighbor {
+impl VoroCell for VoroCellNbr {
     fn translate(&mut self, xyz: DVec3) {
         self.inner
             .pin_mut()
@@ -892,18 +903,20 @@ impl VoronoiCellTrait for VoronoiCellNeighbor {
     }
 }
 
+impl<'a> Into<VoroCellEnum<'a>> for &'a mut VoroCellNbr {
+    fn into(self) -> VoroCellEnum<'a> {
+        VoroCellEnum::WithNeighbor(self)
+    }
+}
+
 #[cfg(test)]
 mod tests {
-    // Note this useful idiom: importing names from outer (for mod tests) scope.
     use super::*;
 
     #[test]
     fn test_new() {
-        VoronoiCell::new([1.0, 1.0, 1.0], [2.0, 2.0, 2.0]);
+        VoroCellAln::new([1.0, 1.0, 1.0], [2.0, 2.0, 2.0]);
 
-        VoronoiCellNeighbor::new(
-            [1.0, 1.0, 1.0],
-            [2.0, 2.0, 2.0],
-        );
+        VoroCellNbr::new([1.0, 1.0, 1.0], [2.0, 2.0, 2.0]);
     }
 }

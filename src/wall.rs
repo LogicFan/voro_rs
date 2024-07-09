@@ -25,6 +25,7 @@ pub mod ffi {
             y: f64,
             z: f64,
         ) -> bool;
+        #[rust_name = "cut_cell_0"]
         fn cut_cell(
             self: Pin<&mut wall_sphere>,
             c: Pin<&mut voronoicell>,
@@ -32,7 +33,7 @@ pub mod ffi {
             y: f64,
             z: f64,
         ) -> bool;
-        #[rust_name = "cut_cell_neighbor"]
+        #[rust_name = "cut_cell_1"]
         fn cut_cell(
             self: Pin<&mut wall_sphere>,
             c: Pin<&mut voronoicell_neighbor>,
@@ -56,6 +57,7 @@ pub mod ffi {
             y: f64,
             z: f64,
         ) -> bool;
+        #[rust_name = "cut_cell_0"]
         fn cut_cell(
             self: Pin<&mut wall_plane>,
             c: Pin<&mut voronoicell>,
@@ -63,7 +65,7 @@ pub mod ffi {
             y: f64,
             z: f64,
         ) -> bool;
-        #[rust_name = "cut_cell_neighbor"]
+        #[rust_name = "cut_cell_1"]
         fn cut_cell(
             self: Pin<&mut wall_plane>,
             c: Pin<&mut voronoicell_neighbor>,
@@ -78,6 +80,9 @@ pub mod ffi {
             xc_: f64,
             yc_: f64,
             zc_: f64,
+            xa_: f64,
+            ya_: f64,
+            za_: f64,
             rc_: f64,
             w_id_: i32,
         ) -> UniquePtr<wall_cylinder>;
@@ -87,6 +92,7 @@ pub mod ffi {
             y: f64,
             z: f64,
         ) -> bool;
+        #[rust_name = "cut_cell_0"]
         fn cut_cell(
             self: Pin<&mut wall_cylinder>,
             c: Pin<&mut voronoicell>,
@@ -94,7 +100,7 @@ pub mod ffi {
             y: f64,
             z: f64,
         ) -> bool;
-        #[rust_name = "cut_cell_neighbor"]
+        #[rust_name = "cut_cell_1"]
         fn cut_cell(
             self: Pin<&mut wall_cylinder>,
             c: Pin<&mut voronoicell_neighbor>,
@@ -109,7 +115,10 @@ pub mod ffi {
             xc_: f64,
             yc_: f64,
             zc_: f64,
-            rc_: f64,
+            xa_: f64,
+            ya_: f64,
+            za_: f64,
+            ang: f64,
             w_id_: i32,
         ) -> UniquePtr<wall_cone>;
         fn point_inside(
@@ -118,6 +127,7 @@ pub mod ffi {
             y: f64,
             z: f64,
         ) -> bool;
+        #[rust_name = "cut_cell_0"]
         fn cut_cell(
             self: Pin<&mut wall_cone>,
             c: Pin<&mut voronoicell>,
@@ -125,7 +135,7 @@ pub mod ffi {
             y: f64,
             z: f64,
         ) -> bool;
-        #[rust_name = "cut_cell_neighbor"]
+        #[rust_name = "cut_cell_1"]
         fn cut_cell(
             self: Pin<&mut wall_cone>,
             c: Pin<&mut voronoicell_neighbor>,
@@ -136,21 +146,19 @@ pub mod ffi {
     }
 }
 
-use crate::prelude::{VoronoiCell, VoronoiCellNeighbor};
+use crate::cell::VoroCellEnum;
 use cxx::UniquePtr;
 
 type DVec3 = [f64; 3];
 
+/// This is a trait for a generic wall object. A wall object
+/// can be specified by deriving a new struct from this and specifying the
+/// functions.
 pub trait Wall {
     fn point_inside(&mut self, xyz: DVec3) -> bool;
-    fn cut_cell(
+    fn cut_cell<'a>(
         &mut self,
-        cell: &mut VoronoiCell,
-        xyz: DVec3,
-    ) -> bool;
-    fn cut_cell_neighbor(
-        &mut self,
-        cell: &mut VoronoiCellNeighbor,
+        cell: impl Into<VoroCellEnum<'a>>,
         xyz: DVec3,
     ) -> bool;
 }
@@ -160,23 +168,18 @@ pub struct WallSphere {
 }
 
 impl WallSphere {
-    pub fn new(center: DVec3, radius: f64) -> Self {
+    pub fn new(c: DVec3, r: f64) -> Self {
         Self {
             inner: ffi::new_wall_sphere(
-                center[0], center[1], center[2], radius,
-                -99,
+                c[0], c[1], c[2], r, -99,
             ),
         }
     }
 
-    pub fn new_with_id(
-        center: DVec3,
-        radius: f64,
-        id: i32,
-    ) -> Self {
+    pub fn new_with_id(c: DVec3, r: f64, id: i32) -> Self {
         Self {
             inner: ffi::new_wall_sphere(
-                center[0], center[1], center[2], radius, id,
+                c[0], c[1], c[2], r, id,
             ),
         }
     }
@@ -189,30 +192,29 @@ impl Wall for WallSphere {
             .point_inside(xyz[0], xyz[1], xyz[2])
     }
 
-    fn cut_cell(
+    fn cut_cell<'a>(
         &mut self,
-        cell: &mut VoronoiCell,
+        cell: impl Into<VoroCellEnum<'a>>,
         xyz: DVec3,
     ) -> bool {
-        self.inner.pin_mut().cut_cell(
-            cell.inner.pin_mut(),
-            xyz[0],
-            xyz[1],
-            xyz[2],
-        )
-    }
-
-    fn cut_cell_neighbor(
-        &mut self,
-        cell: &mut VoronoiCellNeighbor,
-        xyz: DVec3,
-    ) -> bool {
-        self.inner.pin_mut().cut_cell_neighbor(
-            cell.inner.pin_mut(),
-            xyz[0],
-            xyz[1],
-            xyz[2],
-        )
+        match cell.into() {
+            VoroCellEnum::Standalone(c) => {
+                self.inner.pin_mut().cut_cell_0(
+                    c.inner.pin_mut(),
+                    xyz[0],
+                    xyz[1],
+                    xyz[2],
+                )
+            }
+            VoroCellEnum::WithNeighbor(c) => {
+                self.inner.pin_mut().cut_cell_1(
+                    c.inner.pin_mut(),
+                    xyz[0],
+                    xyz[1],
+                    xyz[2],
+                )
+            }
+        }
     }
 }
 
@@ -221,23 +223,18 @@ pub struct WallPlane {
 }
 
 impl WallPlane {
-    pub fn new(center: DVec3, radius: f64) -> Self {
+    pub fn new(c: DVec3, r: f64) -> Self {
         Self {
             inner: ffi::new_wall_plane(
-                center[0], center[1], center[2], radius,
-                -99,
+                c[0], c[1], c[2], r, -99,
             ),
         }
     }
 
-    pub fn new_with_id(
-        center: DVec3,
-        radius: f64,
-        id: i32,
-    ) -> Self {
+    pub fn new_with_id(c: DVec3, r: f64, id: i32) -> Self {
         Self {
             inner: ffi::new_wall_plane(
-                center[0], center[1], center[2], radius, id,
+                c[0], c[1], c[2], r, id,
             ),
         }
     }
@@ -250,30 +247,29 @@ impl Wall for WallPlane {
             .point_inside(xyz[0], xyz[1], xyz[2])
     }
 
-    fn cut_cell(
+    fn cut_cell<'a>(
         &mut self,
-        cell: &mut VoronoiCell,
+        cell: impl Into<VoroCellEnum<'a>>,
         xyz: DVec3,
     ) -> bool {
-        self.inner.pin_mut().cut_cell(
-            cell.inner.pin_mut(),
-            xyz[0],
-            xyz[1],
-            xyz[2],
-        )
-    }
-
-    fn cut_cell_neighbor(
-        &mut self,
-        cell: &mut VoronoiCellNeighbor,
-        xyz: DVec3,
-    ) -> bool {
-        self.inner.pin_mut().cut_cell_neighbor(
-            cell.inner.pin_mut(),
-            xyz[0],
-            xyz[1],
-            xyz[2],
-        )
+        match cell.into() {
+            VoroCellEnum::Standalone(c) => {
+                self.inner.pin_mut().cut_cell_0(
+                    c.inner.pin_mut(),
+                    xyz[0],
+                    xyz[1],
+                    xyz[2],
+                )
+            }
+            VoroCellEnum::WithNeighbor(c) => {
+                self.inner.pin_mut().cut_cell_1(
+                    c.inner.pin_mut(),
+                    xyz[0],
+                    xyz[1],
+                    xyz[2],
+                )
+            }
+        }
     }
 }
 
@@ -282,23 +278,23 @@ pub struct WallCylinder {
 }
 
 impl WallCylinder {
-    pub fn new(center: DVec3, radius: f64) -> Self {
+    pub fn new(c: DVec3, a: DVec3, r: f64) -> Self {
         Self {
             inner: ffi::new_wall_cylinder(
-                center[0], center[1], center[2], radius,
-                -99,
+                c[0], c[1], c[2], a[0], a[1], a[2], r, -99,
             ),
         }
     }
 
     pub fn new_with_id(
-        center: DVec3,
-        radius: f64,
+        c: DVec3,
+        a: DVec3,
+        r: f64,
         id: i32,
     ) -> Self {
         Self {
             inner: ffi::new_wall_cylinder(
-                center[0], center[1], center[2], radius, id,
+                c[0], c[1], c[2], a[0], a[1], a[2], r, id,
             ),
         }
     }
@@ -311,30 +307,29 @@ impl Wall for WallCylinder {
             .point_inside(xyz[0], xyz[1], xyz[2])
     }
 
-    fn cut_cell(
+    fn cut_cell<'a>(
         &mut self,
-        cell: &mut VoronoiCell,
+        cell: impl Into<VoroCellEnum<'a>>,
         xyz: DVec3,
     ) -> bool {
-        self.inner.pin_mut().cut_cell(
-            cell.inner.pin_mut(),
-            xyz[0],
-            xyz[1],
-            xyz[2],
-        )
-    }
-
-    fn cut_cell_neighbor(
-        &mut self,
-        cell: &mut VoronoiCellNeighbor,
-        xyz: DVec3,
-    ) -> bool {
-        self.inner.pin_mut().cut_cell_neighbor(
-            cell.inner.pin_mut(),
-            xyz[0],
-            xyz[1],
-            xyz[2],
-        )
+        match cell.into() {
+            VoroCellEnum::Standalone(c) => {
+                self.inner.pin_mut().cut_cell_0(
+                    c.inner.pin_mut(),
+                    xyz[0],
+                    xyz[1],
+                    xyz[2],
+                )
+            }
+            VoroCellEnum::WithNeighbor(c) => {
+                self.inner.pin_mut().cut_cell_1(
+                    c.inner.pin_mut(),
+                    xyz[0],
+                    xyz[1],
+                    xyz[2],
+                )
+            }
+        }
     }
 }
 
@@ -343,23 +338,24 @@ pub struct WallCone {
 }
 
 impl WallCone {
-    pub fn new(center: DVec3, radius: f64) -> Self {
+    pub fn new(c: DVec3, a: DVec3, ang: f64) -> Self {
         Self {
             inner: ffi::new_wall_cone(
-                center[0], center[1], center[2], radius,
+                c[0], c[1], c[2], a[0], a[1], a[2], ang,
                 -99,
             ),
         }
     }
 
     pub fn new_with_id(
-        center: DVec3,
-        radius: f64,
+        c: DVec3,
+        a: DVec3,
+        ang: f64,
         id: i32,
     ) -> Self {
         Self {
             inner: ffi::new_wall_cone(
-                center[0], center[1], center[2], radius, id,
+                c[0], c[1], c[2], a[0], a[1], a[2], ang, id,
             ),
         }
     }
@@ -372,29 +368,45 @@ impl Wall for WallCone {
             .point_inside(xyz[0], xyz[1], xyz[2])
     }
 
-    fn cut_cell(
+    fn cut_cell<'a>(
         &mut self,
-        cell: &mut VoronoiCell,
+        cell: impl Into<VoroCellEnum<'a>>,
         xyz: DVec3,
     ) -> bool {
-        self.inner.pin_mut().cut_cell(
-            cell.inner.pin_mut(),
-            xyz[0],
-            xyz[1],
-            xyz[2],
-        )
+        match cell.into() {
+            VoroCellEnum::Standalone(c) => {
+                self.inner.pin_mut().cut_cell_0(
+                    c.inner.pin_mut(),
+                    xyz[0],
+                    xyz[1],
+                    xyz[2],
+                )
+            }
+            VoroCellEnum::WithNeighbor(c) => {
+                self.inner.pin_mut().cut_cell_1(
+                    c.inner.pin_mut(),
+                    xyz[0],
+                    xyz[1],
+                    xyz[2],
+                )
+            }
+        }
     }
+}
 
-    fn cut_cell_neighbor(
-        &mut self,
-        cell: &mut VoronoiCellNeighbor,
-        xyz: DVec3,
-    ) -> bool {
-        self.inner.pin_mut().cut_cell_neighbor(
-            cell.inner.pin_mut(),
-            xyz[0],
-            xyz[1],
-            xyz[2],
-        )
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::prelude::VoroCellAln;
+
+    #[test]
+    fn test_new() {
+        let mut w = WallSphere::new([0.0, 0.0, 0.0], 1.0);
+        let mut c = VoroCellAln::new(
+            [1.0, 1.0, 1.0],
+            [2.0, 2.0, 2.0],
+        );
+
+        let _ = w.cut_cell(&mut c, [0.0, 0.0, 0.0]);
     }
 }
