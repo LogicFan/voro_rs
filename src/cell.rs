@@ -1,3 +1,5 @@
+//! Voronoicell and related classes.
+
 #[cxx::bridge(namespace = "voro")]
 pub mod ffi {
     unsafe extern "C++" {
@@ -680,6 +682,11 @@ impl VoronoiCell for VoronoiCellNoNeighbor {
     }
 }
 
+/// `voronoicell_neighbor` class in voro++.
+/// A class to represent a Voronoi cell with neighbor information, in cases when the
+///  IDs of neighboring particles associated with each face of the Voronoi cell.
+///  It contains additional data structures for storing this
+///  information.
 pub struct VoronoiCellNeighbor {
     inner: UniquePtr<ffi::voronoicell_neighbor>,
 }
