@@ -314,7 +314,7 @@ type DVec3 = [f64; 3];
 /// by a plane, which forms the key routine for the Voronoi cell computation.
 /// It contains numerous routine for computing statistics about the Voronoi cell,
 /// and it can output the cell in several formats.
-pub trait Cell {
+pub trait VoronoiCellTrait {
     /// Translates the vertices of the Voronoi cell by a given vector.
     ///
     /// * `xyz`: the coordinates of the vector.
@@ -534,7 +534,7 @@ impl VoronoiCell {
     }
 }
 
-impl Cell for VoronoiCell {
+impl VoronoiCellTrait for VoronoiCell {
     fn translate(&mut self, xyz: DVec3) {
         self.inner
             .pin_mut()
@@ -744,7 +744,7 @@ impl VoronoiCellNeighbor {
     }
 }
 
-impl Cell for VoronoiCellNeighbor {
+impl VoronoiCellTrait for VoronoiCellNeighbor {
     fn translate(&mut self, xyz: DVec3) {
         self.inner
             .pin_mut()
