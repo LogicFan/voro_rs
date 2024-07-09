@@ -4,7 +4,7 @@ on:
         branches:
             - main
 jobs:
-    push_to_github_io:
+    cargo_build:
         runs-on: ubuntu-latest
         steps:
             - name: Install Rust
