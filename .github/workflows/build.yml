@@ -1,10 +1,10 @@
-name: Build (Linux)
+name: Build
 on:
     push:
         branches:
             - main
 jobs:
-    build_linux:
+    Linux:
         runs-on: ubuntu-latest
         steps:
             - name: Install Rust
@@ -18,7 +18,7 @@ jobs:
               run: cargo build
             - name: Test
               run: cargo test
-    build_windows:
+    Windows:
         runs-on: windows-latest
         steps:
             - name: Install Rust
@@ -32,7 +32,7 @@ jobs:
               run: cargo build
             - name: Test
               run: cargo test
-    build_macos:
+    MacOS:
         runs-on: macos-latest
         steps:
             - name: Install Rust
