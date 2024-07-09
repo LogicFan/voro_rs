@@ -1,0 +1,13 @@
+{
+    "cSpell.words": [
+        "bindgen",
+        "libc",
+        "unitcell",
+        "voro",
+        "worklist"
+    ],
+    "files.associations": {
+        "*.m": "octave",
+        "memory": "cpp"
+    }
+}

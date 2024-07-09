@@ -1,0 +1,13 @@
+[package]
+name = "voro_rs"
+build = "build.rs"
+edition = "2021"
+version = "0.4.6"
+authors = ["Chris H. Rycroft <chr@alum.mit.edu>"]
+license = "BSD-3-Clause-LBNL"
+
+[dependencies]
+cxx = "1.0"
+
+[build-dependencies]
+cxx-build = "1.0"
