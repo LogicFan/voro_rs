@@ -4,42 +4,45 @@ on:
         branches:
             - main
 jobs:
-    Linux:
+    build_linux:
+        name: Build (Linux)
         runs-on: ubuntu-latest
         steps:
-            - name: Install Rust
+            - name: Install Rust Toolchain
               run: |
-                rustup update --no-self-update stable
-                rustup component add --toolchain stable rustfmt rust-src
-                rustup default stable
+                  rustup update --no-self-update stable
+                  rustup component add --toolchain stable rustfmt rust-src
+                  rustup default stable
             - name: Check out Source Code
               uses: actions/checkout@v4
             - name: Build
               run: cargo build
             - name: Test
               run: cargo test
-    Windows:
+    build_windows:
+        name: Build (Windows)
         runs-on: windows-latest
         steps:
-            - name: Install Rust
+            - name: Install Rust Toolchain
               run: |
-                rustup update --no-self-update stable
-                rustup component add --toolchain stable rustfmt rust-src
-                rustup default stable
+                  rustup update --no-self-update stable
+                  rustup component add --toolchain stable rustfmt rust-src
+                  rustup default stable
             - name: Check out Source Code
               uses: actions/checkout@v4
             - name: Build
               run: cargo build
             - name: Test
               run: cargo test
-    MacOS:
+    build_macos:
+        name: Build (MacOS)
         runs-on: macos-latest
         steps:
-            - name: Install Rust
+            - name: Install Rust Toolchain
               run: |
-                rustup update --no-self-update stable
-                rustup component add --toolchain stable rustfmt rust-src
-                rustup default stable
+                  rustup update --no-self-update stable
+                  rustup component add --toolchain stable rustfmt rust-src
+                  rustup default stable
             - name: Check out Source Code
               uses: actions/checkout@v4
             - name: Build

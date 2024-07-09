@@ -2,7 +2,7 @@
 name = "voro_rs"
 build = "build.rs"
 edition = "2021"
-version = "0.1.0"
+version = "0.0.1"
 authors = [
     "Chris H. Rycroft <chr@alum.mit.edu>",
     "Yongda Fan <fanyongda2012@gmail.com",
@@ -14,7 +14,6 @@ readme = "README.md"
 
 [dependencies]
 cxx = "1.0"
-itertools = "0.13"
 
 [build-dependencies]
 cxx-build = "1.0"

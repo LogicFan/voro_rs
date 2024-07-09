@@ -1,0 +1,21 @@
+name: Publish
+on:
+    push:
+        tags:
+            - "*"
+jobs:
+    publish_crates_io:
+        name: Publish (crates.io)
+        runs-on: ubuntu-latest
+        steps:
+            - name: Install Rust Toolchain
+              run: |
+                  rustup update --no-self-update stable
+                  rustup component add --toolchain stable rustfmt rust-src
+                  rustup default stable
+            - name: Check out Source Code
+              uses: actions/checkout@v4
+            - name: Publish to crates.io
+              run: |
+                  cargo login ${{ secrets.CRATES_IO_TOEKN }}
+                  cargo publish --dry-run
