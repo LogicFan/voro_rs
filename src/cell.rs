@@ -238,6 +238,7 @@ pub mod ffi {
 }
 
 use cxx::{CxxVector, UniquePtr};
+use itertools::*;
 
 type Vec3 = [f64; 3];
 
@@ -296,6 +297,34 @@ pub trait VoronoiCell {
 
     /// Returns a vector of the vertex orders.
     fn vertex_orders(&mut self) -> Vec<i32>;
+
+    /// Returns a vector of the vertex vectors using the local coordinate system.
+    fn vertices_local(&mut self) -> Vec<Vec3>;
+
+    /// Returns a vector of the vertex vectors in the global coordinate system.
+    /// * `xyz`: the position vector of the particle in the global coordinate system.
+    fn vertices_global(&mut self, xyz: Vec3) -> Vec<Vec3>;
+
+    /// Calculates the areas of each face of the Voronoi cell and prints the
+    /// results to an output vector.
+    fn face_areas(&mut self) -> Vec<f64>;
+
+    /// Outputs a list of the number of edges in each face.
+    fn face_orders(&mut self) -> Vec<i32>;
+
+    /// Computes the number of edges that each face has and outputs a frequency
+    /// table of the results.
+    fn face_freq_table(&mut self) -> Vec<i32>;
+
+    fn face_vertices(&mut self) -> Vec<Vec3>;
+
+    fn face_perimeters(&mut self) -> Vec<f64>;
+
+    fn normals(&mut self) -> Vec<Vec3>;
+
+    fn plane_intersects(&mut self) -> bool;
+
+    fn plane_intersects_guess(&mut self) -> bool;
 }
 
 /// `voronoicell` class in voro++.
@@ -407,6 +436,69 @@ impl VoronoiCell for VoronoiCellNoNeighbor {
         let mut v = CxxVector::new();
         self.inner.pin_mut().vertex_orders(v.pin_mut());
         v.into_iter().copied().collect()
+    }
+
+    fn vertices_local(&mut self) -> Vec<Vec3> {
+        let mut v = CxxVector::new();
+        self.inner.pin_mut().vertices_local(v.pin_mut());
+        v.into_iter()
+            .copied()
+            .tuples::<(_, _, _)>()
+            .map(|(x, y, z)| [x, y, z])
+            .collect()
+    }
+
+    fn vertices_global(&mut self, xyz: Vec3) -> Vec<Vec3> {
+        let mut v = CxxVector::new();
+        self.inner.pin_mut().vertices_global(
+            xyz[0],
+            xyz[1],
+            xyz[2],
+            v.pin_mut(),
+        );
+        v.into_iter()
+            .copied()
+            .tuples::<(_, _, _)>()
+            .map(|(x, y, z)| [x, y, z])
+            .collect()
+    }
+
+    fn face_areas(&mut self) -> Vec<f64> {
+        let mut v = CxxVector::new();
+        self.inner.pin_mut().face_areas(v.pin_mut());
+        v.into_iter().copied().collect()
+    }
+
+    fn face_orders(&mut self) -> Vec<i32> {
+        let mut v = CxxVector::new();
+        self.inner.pin_mut().face_orders(v.pin_mut());
+        v.into_iter().copied().collect()
+    }
+
+    fn face_freq_table(&mut self) -> Vec<i32> {
+        let mut v = CxxVector::new();
+        self.inner.pin_mut().face_freq_table(v.pin_mut());
+        v.into_iter().copied().collect()
+    }
+
+    fn face_vertices(&mut self) -> Vec<Vec3> {
+        todo!()
+    }
+
+    fn face_perimeters(&mut self) -> Vec<f64> {
+        todo!()
+    }
+
+    fn normals(&mut self) -> Vec<Vec3> {
+        todo!()
+    }
+
+    fn plane_intersects(&mut self) -> bool {
+        todo!()
+    }
+
+    fn plane_intersects_guess(&mut self) -> bool {
+        todo!()
     }
 }
 

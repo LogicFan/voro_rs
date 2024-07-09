@@ -12,6 +12,7 @@ description = "A Rust binding for voro++ library"
 
 [dependencies]
 cxx = "1.0"
+itertools = "0.13"
 
 [build-dependencies]
 cxx-build = "1.0"
