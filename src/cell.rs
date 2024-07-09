@@ -5,6 +5,7 @@ pub mod ffi {
         include!("voro_rs/cpp/boilerplate.hh");
 
         type voronoicell;
+        #[rust_name = "new_voronoicell"]
         fn construct() -> UniquePtr<voronoicell>;
         fn init_base(
             self: Pin<&mut voronoicell>,
@@ -116,6 +117,120 @@ pub mod ffi {
             z: f64,
             rsq: f64,
         ) -> bool;
+
+        type voronoicell_neighbor;
+        #[rust_name = "new_voronoicell_neighbor"]
+        fn construct() -> UniquePtr<voronoicell_neighbor>;
+        fn init_base(
+            self: Pin<&mut voronoicell_neighbor>,
+            xmin: f64,
+            xmax: f64,
+            ymin: f64,
+            ymax: f64,
+            zmin: f64,
+            zmax: f64,
+        );
+        fn init_octahedron_base(
+            self: Pin<&mut voronoicell_neighbor>,
+            l: f64,
+        );
+        fn init_tetrahedron_base(
+            self: Pin<&mut voronoicell_neighbor>,
+            x0: f64,
+            y0: f64,
+            z0: f64,
+            x1: f64,
+            y1: f64,
+            z1: f64,
+            x2: f64,
+            y2: f64,
+            z2: f64,
+            x3: f64,
+            y3: f64,
+            z3: f64,
+        );
+        fn translate(
+            self: Pin<&mut voronoicell_neighbor>,
+            x: f64,
+            y: f64,
+            z: f64,
+        );
+        fn volume(self: Pin<&mut voronoicell_neighbor>) -> f64;
+        fn max_radius_squared(
+            self: Pin<&mut voronoicell_neighbor>,
+        ) -> f64;
+        fn total_edge_distance(
+            self: Pin<&mut voronoicell_neighbor>,
+        ) -> f64;
+        fn surface_area(self: Pin<&mut voronoicell_neighbor>)
+            -> f64;
+        fn centroid(
+            self: Pin<&mut voronoicell_neighbor>,
+            cx: &mut f64,
+            cy: &mut f64,
+            cz: &mut f64,
+        );
+        fn number_of_faces(
+            self: Pin<&mut voronoicell_neighbor>,
+        ) -> i32;
+        fn number_of_edges(
+            self: Pin<&mut voronoicell_neighbor>,
+        ) -> i32;
+        fn vertex_orders(
+            self: Pin<&mut voronoicell_neighbor>,
+            v: Pin<&mut CxxVector<i32>>,
+        );
+        #[rust_name = "vertices_local"]
+        fn vertices(
+            self: Pin<&mut voronoicell_neighbor>,
+            v: Pin<&mut CxxVector<f64>>,
+        );
+        #[rust_name = "vertices_global"]
+        fn vertices(
+            self: Pin<&mut voronoicell_neighbor>,
+            x: f64,
+            y: f64,
+            z: f64,
+            v: Pin<&mut CxxVector<f64>>,
+        );
+        fn face_areas(
+            self: Pin<&mut voronoicell_neighbor>,
+            v: Pin<&mut CxxVector<f64>>,
+        );
+        fn face_orders(
+            self: Pin<&mut voronoicell_neighbor>,
+            v: Pin<&mut CxxVector<i32>>,
+        );
+        fn face_freq_table(
+            self: Pin<&mut voronoicell_neighbor>,
+            v: Pin<&mut CxxVector<i32>>,
+        );
+        fn face_vertices(
+            self: Pin<&mut voronoicell_neighbor>,
+            v: Pin<&mut CxxVector<i32>>,
+        );
+        fn face_perimeters(
+            self: Pin<&mut voronoicell_neighbor>,
+            v: Pin<&mut CxxVector<f64>>,
+        );
+        fn normals(
+            self: Pin<&mut voronoicell_neighbor>,
+            v: Pin<&mut CxxVector<f64>>,
+        );
+        fn plane_intersects(
+            self: Pin<&mut voronoicell_neighbor>,
+            x: f64,
+            y: f64,
+            z: f64,
+            rsq: f64,
+        ) -> bool;
+        fn plane_intersects_guess(
+            self: Pin<&mut voronoicell_neighbor>,
+            x: f64,
+            y: f64,
+            z: f64,
+            rsq: f64,
+        ) -> bool;
     }
 }
 
@@ -199,7 +314,7 @@ impl VoronoiCellNoNeighbor {
     /// * `xyz_max`: the maximum xyz coordinates.
     pub fn new(xyz_min: Vec3, xyz_max: Vec3) -> Self {
         let mut val = Self {
-            inner: ffi::construct(),
+            inner: ffi::new_voronoicell(),
         };
         val.inner.pin_mut().init_base(
             xyz_min[0], xyz_max[0], xyz_min[1], xyz_max[1],
@@ -214,7 +329,7 @@ impl VoronoiCellNoNeighbor {
     /// * `l`: a parameter setting the size of the octahedron.
     pub fn new_octahedron(l: f64) -> Self {
         let mut val = Self {
-            inner: ffi::construct(),
+            inner: ffi::new_voronoicell(),
         };
         val.inner.pin_mut().init_octahedron_base(l);
         val
@@ -233,7 +348,7 @@ impl VoronoiCellNoNeighbor {
         xyz3: Vec3,
     ) -> Self {
         let mut val = Self {
-            inner: ffi::construct(),
+            inner: ffi::new_voronoicell(),
         };
         val.inner.pin_mut().init_tetrahedron_base(
             xyz0[0], xyz0[1], xyz0[2], xyz1[0], xyz1[1],
