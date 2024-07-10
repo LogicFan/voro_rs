@@ -218,7 +218,7 @@ pub enum WallMut<'a> {
     Cone(&'a mut WallCone),
 }
 
-/// `wall_sphere` abstract class in voro++.
+/// `wall_sphere` class in voro++.
 /// 
 /// A class representing a spherical wall object.
 pub struct WallSphere {
@@ -299,7 +299,7 @@ impl<'a> Into<WallMut<'a>> for &'a mut WallSphere {
     }
 }
 
-/// `wall_plane` abstract class in voro++.
+/// `wall_plane` class in voro++.
 /// 
 /// A class representing a plane wall object.
 pub struct WallPlane {
@@ -380,7 +380,7 @@ impl<'a> Into<WallMut<'a>> for &'a mut WallPlane {
     }
 }
 
-/// `wall_cylinder` abstract class in voro++.
+/// `wall_cylinder` class in voro++.
 /// 
 /// A class representing a cylindrical wall object.
 pub struct WallCylinder {
@@ -468,7 +468,7 @@ impl<'a> Into<WallMut<'a>> for &'a mut WallCylinder {
     }
 }
 
-/// `wall_cone` abstract class in voro++.
+/// `wall_cone` class in voro++.
 /// 
 /// A class representing a conical wall object.
 pub struct WallCone {
