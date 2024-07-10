@@ -313,7 +313,6 @@ use cxx::{CxxVector, UniquePtr};
 
 type DVec3 = [f64; 3];
 
-
 /// `voronoicell` class in voro++.
 ///
 /// A class represent a Voronoi cell without neighbor information.
