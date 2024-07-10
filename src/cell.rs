@@ -480,7 +480,7 @@ pub trait VoroCell {
     fn plane(&mut self, xyz: DVec3) -> bool;
 }
 
-/// A enum to store mutable reference of any `VoroCell`. This is 
+/// A enum to store mutable reference of any `VoroCell`. This is
 /// to mimic the override in C++.
 pub enum VoroCellMut<'a> {
     Sgl(&'a mut VoroCellSgl),

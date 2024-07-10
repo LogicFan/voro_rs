@@ -181,7 +181,7 @@ use cxx::UniquePtr;
 type DVec3 = [f64; 3];
 
 /// `wall` abstract class in voro++.
-/// 
+///
 /// This is a trait for a generic wall object. A wall object
 /// can be specified by deriving a new struct from this and specifying the
 /// functions.
@@ -209,7 +209,7 @@ pub trait Wall {
     ) -> bool;
 }
 
-/// A enum to store mutable reference of any `Wall`. This is 
+/// A enum to store mutable reference of any `Wall`. This is
 /// to mimic the override in C++.
 pub enum WallMut<'a> {
     Sphere(&'a mut WallSphere),
@@ -219,7 +219,7 @@ pub enum WallMut<'a> {
 }
 
 /// `wall_sphere` class in voro++.
-/// 
+///
 /// A class representing a spherical wall object.
 pub struct WallSphere {
     pub(crate) inner: UniquePtr<ffi::wall_sphere>,
@@ -300,7 +300,7 @@ impl<'a> Into<WallMut<'a>> for &'a mut WallSphere {
 }
 
 /// `wall_plane` class in voro++.
-/// 
+///
 /// A class representing a plane wall object.
 pub struct WallPlane {
     pub(crate) inner: UniquePtr<ffi::wall_plane>,
@@ -381,7 +381,7 @@ impl<'a> Into<WallMut<'a>> for &'a mut WallPlane {
 }
 
 /// `wall_cylinder` class in voro++.
-/// 
+///
 /// A class representing a cylindrical wall object.
 pub struct WallCylinder {
     pub(crate) inner: UniquePtr<ffi::wall_cylinder>,
@@ -469,7 +469,7 @@ impl<'a> Into<WallMut<'a>> for &'a mut WallCylinder {
 }
 
 /// `wall_cone` class in voro++.
-/// 
+///
 /// A class representing a conical wall object.
 pub struct WallCone {
     pub(crate) inner: UniquePtr<ffi::wall_cone>,
