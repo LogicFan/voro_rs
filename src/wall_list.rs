@@ -51,6 +51,7 @@ pub mod ffi {
     }
 }
 
+use crate::cell::VoroCellMut;
 use crate::wall::ffi::{
     wall_cone_to_wall, wall_cylinder_to_wall,
     wall_plane_to_wall, wall_sphere_to_wall,
@@ -59,8 +60,20 @@ use crate::wall::WallMut;
 use cxx::UniquePtr;
 use std::marker::PhantomData;
 
+type DVec3 = [f64; 3];
+
 pub trait Walls<'a> {
     fn add_wall(&mut self, wall: impl Into<WallMut<'a>>);
+    fn add_walls(&mut self, walls: impl Into<WallsMut<'a>>);
+    fn apply_walls<'b>(
+        &mut self,
+        cell: impl Into<VoroCellMut<'b>>,
+        xyz: DVec3,
+    ) -> bool;
+}
+
+pub enum WallsMut<'a> {
+    WallList(&'a mut WallList<'a>),
 }
 
 pub struct WallList<'a> {
@@ -94,11 +107,100 @@ impl<'a> Walls<'a> for WallList<'a> {
             }
         };
         unsafe {
-            // ensure the lifetime of `self` is within the lifetime of 
-            // `wall` based on the lifetime specifier `'a`.
+            // ensure the lifetime of `self` is within the lifetime of
+            // `wall` using the lifetime specifier `'a`.
             self.inner.pin_mut().add_wall(w0);
+        }
+    }
+
+    fn add_walls(
+        &mut self,
+        walls: impl Into<WallsMut<'a>>,
+    ) {
+        unsafe {
+            // ensure the lifetime of `self` is within the lifetime of
+            // `wall` using the lifetime specifier `'a`.
+            match walls.into() {
+                WallsMut::WallList(w) => self
+                    .inner
+                    .pin_mut()
+                    .add_walls(w.inner.pin_mut()),
+            }
+        }
+    }
+
+    fn apply_walls<'b>(
+        &mut self,
+        cell: impl Into<VoroCellMut<'b>>,
+        xyz: DVec3,
+    ) -> bool {
+        match cell.into() {
+            VoroCellMut::Sgl(c) => {
+                self.inner.pin_mut().apply_walls_0(
+                    c.inner.pin_mut(),
+                    xyz[0],
+                    xyz[1],
+                    xyz[2],
+                )
+            }
+            VoroCellMut::Nbr(c) => {
+                self.inner.pin_mut().apply_walls_1(
+                    c.inner.pin_mut(),
+                    xyz[0],
+                    xyz[1],
+                    xyz[2],
+                )
+            }
         }
     }
 }
 
-// TODO: add_wall and add_walls need to ensure lifetime.
+impl<'a> Into<WallsMut<'a>> for &'a mut WallList<'a> {
+    fn into(self) -> WallsMut<'a> {
+        WallsMut::WallList(self)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::{prelude::{VoroCell, VoroCellSgl}, wall::{Wall, WallSphere}};
+    use super::*;
+
+    #[test]
+    fn basic_test() {
+        let mut c0 = VoroCellSgl::new(
+            [-1.0, -1.0, -1.0],
+            [1.0, 1.0, 1.0],
+        );
+        let mut c1 = c0.clone();
+        let mut c2 = c0.clone();
+        let mut c3 = c0.clone();
+        assert_eq!(c0.volume(), 8.0);
+        assert_eq!(c1.volume(), 8.0);
+        assert_eq!(c2.volume(), 8.0);
+        assert_eq!(c3.volume(), 8.0);
+
+        let mut w0 = WallSphere::new([0.0, 0.0, 100.0], 100.0);
+        let mut w1 = WallSphere::new([0.0, 100.0, 0.0], 100.0);
+        w0.cut_cell(&mut c0, [0.0, 0.0, 0.0]);
+        assert_eq!(c0.volume(), 4.0);
+        w1.cut_cell(&mut c0, [0.0, 0.0, 0.0]);
+        assert_eq!(c0.volume(), 2.0);
+
+        let mut wl = WallList::new();
+        wl.add_wall(&mut w0);
+        wl.apply_walls(&mut c1, [0.0, 0.0, 0.0]);
+        assert_eq!(c1.volume(), 4.0);
+        wl.add_wall(&mut w1);
+        wl.apply_walls(&mut c1, [0.0, 0.0, 0.0]);
+        wl.apply_walls(&mut c2, [0.0, 0.0, 0.0]);
+        assert_eq!(c1.volume(), 2.0);
+        assert_eq!(c2.volume(), 2.0);
+
+        let mut wl2 = WallList::new();
+        wl2.add_walls(&mut wl);
+        wl2.apply_walls(&mut c3, [0.0, 0.0, 0.0]);
+        assert_eq!(c3.volume(), 2.0);
+    }
+}
+
