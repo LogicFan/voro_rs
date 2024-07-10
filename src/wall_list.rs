@@ -85,7 +85,7 @@ pub trait Walls<'a> {
     /// * `xyz`: the position to test.
     ///
     /// Return true if it is inside, false if it is outside.
-    fn inside_walls(&mut self, xyz: DVec3) -> bool;
+    fn point_inside_walls(&mut self, xyz: DVec3) -> bool;
 
     /// Cuts a Voronoi cell by all of the walls currently on the list.
     ///
@@ -171,7 +171,7 @@ impl<'a> Walls<'a> for WallList<'a> {
         }
     }
 
-    fn inside_walls(&mut self, xyz: DVec3) -> bool {
+    fn point_inside_walls(&mut self, xyz: DVec3) -> bool {
         self.inner
             .pin_mut()
             .point_inside_walls(xyz[0], xyz[1], xyz[2])
