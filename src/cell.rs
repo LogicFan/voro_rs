@@ -9,7 +9,9 @@ pub mod ffi {
         type voronoicell;
         #[rust_name = "new_voronoicell"]
         fn construct() -> UniquePtr<voronoicell>;
-        fn clone_voronoicell(value: &UniquePtr<voronoicell>) -> UniquePtr<voronoicell>;
+        fn clone_voronoicell(
+            value: &UniquePtr<voronoicell>,
+        ) -> UniquePtr<voronoicell>;
         fn init_base(
             self: Pin<&mut voronoicell>,
             xmin: f64,
@@ -155,7 +157,9 @@ pub mod ffi {
         #[rust_name = "new_voronoicell_neighbor"]
         fn construct() -> UniquePtr<voronoicell_neighbor>;
         #[rust_name = "clone_voronoicell_neighbor"]
-        fn clone_voronoicell(value: &UniquePtr<voronoicell_neighbor>) -> UniquePtr<voronoicell_neighbor>;
+        fn clone_voronoicell(
+            value: &UniquePtr<voronoicell_neighbor>,
+        ) -> UniquePtr<voronoicell_neighbor>;
         fn init_base(
             self: Pin<&mut voronoicell_neighbor>,
             xmin: f64,
@@ -301,7 +305,7 @@ pub mod ffi {
         ) -> bool;
         fn neighbors(
             self: Pin<&mut voronoicell_neighbor>,
-            v: Pin<&mut CxxVector<i32>>
+            v: Pin<&mut CxxVector<i32>>,
         );
     }
 }
@@ -548,7 +552,9 @@ impl VoroCellSgl {
 
 impl Clone for VoroCellSgl {
     fn clone(&self) -> Self {
-        Self { inner: ffi::clone_voronoicell(&self.inner) }
+        Self {
+            inner: ffi::clone_voronoicell(&self.inner),
+        }
     }
 }
 
@@ -776,7 +782,11 @@ impl VoroCellNbr {
 
 impl Clone for VoroCellNbr {
     fn clone(&self) -> Self {
-        Self { inner: ffi::clone_voronoicell_neighbor(&self.inner) }
+        Self {
+            inner: ffi::clone_voronoicell_neighbor(
+                &self.inner,
+            ),
+        }
     }
 }
 
@@ -940,14 +950,20 @@ mod tests {
 
     #[test]
     fn basic_test() {
-        let mut c0 = VoroCellSgl::new([0.0, 1.0, 1.0], [2.0, 2.0, 2.0]);
+        let mut c0 = VoroCellSgl::new(
+            [0.0, 1.0, 1.0],
+            [2.0, 2.0, 2.0],
+        );
         assert_eq!(c0.volume(), 2.0);
         assert_eq!(c0.volume(), 2.0);
         let mut c1 = c0.clone();
         assert_eq!(c0.volume(), 2.0);
         assert_eq!(c1.volume(), 2.0);
 
-        let mut c2 = VoroCellNbr::new([1.0, 1.0, 1.0], [2.0, 2.0, 4.0]);
+        let mut c2 = VoroCellNbr::new(
+            [1.0, 1.0, 1.0],
+            [2.0, 2.0, 4.0],
+        );
         assert_eq!(c2.volume(), 3.0);
         assert_eq!(c2.volume(), 3.0);
         let mut c3 = c2.clone();

@@ -20,7 +20,9 @@ pub mod ffi {
             w_id_: i32,
         ) -> UniquePtr<wall_sphere>;
         #[rust_name = "clone_wall_sphere"]
-        fn clone_wall(value: &UniquePtr<wall_sphere>) -> UniquePtr<wall_sphere>;
+        fn clone_wall(
+            value: &UniquePtr<wall_sphere>,
+        ) -> UniquePtr<wall_sphere>;
         fn point_inside(
             self: Pin<&mut wall_sphere>,
             x: f64,
@@ -54,7 +56,9 @@ pub mod ffi {
             w_id_: i32,
         ) -> UniquePtr<wall_plane>;
         #[rust_name = "clone_wall_plane"]
-        fn clone_wall(value: &UniquePtr<wall_plane>) -> UniquePtr<wall_plane>;
+        fn clone_wall(
+            value: &UniquePtr<wall_plane>,
+        ) -> UniquePtr<wall_plane>;
         fn point_inside(
             self: Pin<&mut wall_plane>,
             x: f64,
@@ -91,7 +95,9 @@ pub mod ffi {
             w_id_: i32,
         ) -> UniquePtr<wall_cylinder>;
         #[rust_name = "clone_wall_cylinder"]
-        fn clone_wall(value: &UniquePtr<wall_cylinder>) -> UniquePtr<wall_cylinder>;
+        fn clone_wall(
+            value: &UniquePtr<wall_cylinder>,
+        ) -> UniquePtr<wall_cylinder>;
         fn point_inside(
             self: Pin<&mut wall_cylinder>,
             x: f64,
@@ -128,7 +134,9 @@ pub mod ffi {
             w_id_: i32,
         ) -> UniquePtr<wall_cone>;
         #[rust_name = "clone_wall_cone"]
-        fn clone_wall(value: &UniquePtr<wall_cone>) -> UniquePtr<wall_cone>;
+        fn clone_wall(
+            value: &UniquePtr<wall_cone>,
+        ) -> UniquePtr<wall_cone>;
         fn point_inside(
             self: Pin<&mut wall_cone>,
             x: f64,
@@ -220,7 +228,9 @@ impl WallSphere {
 
 impl Clone for WallSphere {
     fn clone(&self) -> Self {
-        Self { inner: ffi::clone_wall_sphere(&self.inner) }
+        Self {
+            inner: ffi::clone_wall_sphere(&self.inner),
+        }
     }
 }
 
@@ -291,7 +301,9 @@ impl WallPlane {
 
 impl Clone for WallPlane {
     fn clone(&self) -> Self {
-        Self { inner: ffi::clone_wall_plane(&self.inner) }
+        Self {
+            inner: ffi::clone_wall_plane(&self.inner),
+        }
     }
 }
 
@@ -369,7 +381,9 @@ impl WallCylinder {
 
 impl Clone for WallCylinder {
     fn clone(&self) -> Self {
-        Self { inner: ffi::clone_wall_cylinder(&self.inner) }
+        Self {
+            inner: ffi::clone_wall_cylinder(&self.inner),
+        }
     }
 }
 
@@ -448,7 +462,9 @@ impl WallCone {
 
 impl Clone for WallCone {
     fn clone(&self) -> Self {
-        Self { inner: ffi::clone_wall_cone(&self.inner) }
+        Self {
+            inner: ffi::clone_wall_cone(&self.inner),
+        }
     }
 }
 
@@ -492,14 +508,15 @@ mod tests {
 
     #[test]
     fn basic_test() {
-        let mut w0 = WallSphere::new([10.0, 0.0, 0.0], 10.0);
+        let mut w0 =
+            WallSphere::new([10.0, 0.0, 0.0], 10.0);
         let mut c0 = VoroCellSgl::new(
             [-1.0, -1.0, -1.0],
             [1.0, 1.0, 1.0],
         );
 
         assert_eq!(c0.volume(), 8.0);
-        
+
         let mut c1 = c0.clone();
         assert_eq!(c1.volume(), 8.0);
 
