@@ -3,7 +3,6 @@
 #[cxx::bridge(namespace = "voro")]
 pub mod ffi {
     unsafe extern "C++" {
-        include!("voro_rs/cpp/voro++.hh");
         include!("voro_rs/cpp/boilerplate.hh");
 
         type voronoicell = crate::cell::ffi::voronoicell;
@@ -159,6 +158,20 @@ pub mod ffi {
             y: f64,
             z: f64,
         ) -> bool;
+
+        type wall;
+        fn wall_sphere_to_wall<'a>(
+            w: Pin<&'a mut wall_sphere>,
+        ) -> Pin<&'a mut wall>;
+        fn wall_plane_to_wall<'a>(
+            w: Pin<&'a mut wall_plane>,
+        ) -> Pin<&'a mut wall>;
+        fn wall_cylinder_to_wall<'a>(
+            w: Pin<&'a mut wall_cylinder>,
+        ) -> Pin<&'a mut wall>;
+        fn wall_cone_to_wall<'a>(
+            w: Pin<&'a mut wall_cone>,
+        ) -> Pin<&'a mut wall>;
     }
 }
 
@@ -192,6 +205,13 @@ pub trait Wall: Clone {
         cell: impl Into<VoroCellMut<'a>>,
         xyz: DVec3,
     ) -> bool;
+}
+
+pub enum WallMut<'a> {
+    Sphere(&'a mut WallSphere),
+    Plane(&'a mut WallPlane),
+    Cylinder(&'a mut WallCylinder),
+    Cone(&'a mut WallCone),
 }
 
 /// A class representing a spherical wall object.
@@ -247,7 +267,7 @@ impl Wall for WallSphere {
         xyz: DVec3,
     ) -> bool {
         match cell.into() {
-            VoroCellMut::Standalone(c) => {
+            VoroCellMut::Sgl(c) => {
                 self.inner.pin_mut().cut_cell_0(
                     c.inner.pin_mut(),
                     xyz[0],
@@ -255,7 +275,7 @@ impl Wall for WallSphere {
                     xyz[2],
                 )
             }
-            VoroCellMut::WithNeighbor(c) => {
+            VoroCellMut::Nbr(c) => {
                 self.inner.pin_mut().cut_cell_1(
                     c.inner.pin_mut(),
                     xyz[0],
@@ -264,6 +284,12 @@ impl Wall for WallSphere {
                 )
             }
         }
+    }
+}
+
+impl<'a> Into<WallMut<'a>> for &'a mut WallSphere {
+    fn into(self) -> WallMut<'a> {
+        WallMut::Sphere(self)
     }
 }
 
@@ -320,7 +346,7 @@ impl Wall for WallPlane {
         xyz: DVec3,
     ) -> bool {
         match cell.into() {
-            VoroCellMut::Standalone(c) => {
+            VoroCellMut::Sgl(c) => {
                 self.inner.pin_mut().cut_cell_0(
                     c.inner.pin_mut(),
                     xyz[0],
@@ -328,7 +354,7 @@ impl Wall for WallPlane {
                     xyz[2],
                 )
             }
-            VoroCellMut::WithNeighbor(c) => {
+            VoroCellMut::Nbr(c) => {
                 self.inner.pin_mut().cut_cell_1(
                     c.inner.pin_mut(),
                     xyz[0],
@@ -337,6 +363,12 @@ impl Wall for WallPlane {
                 )
             }
         }
+    }
+}
+
+impl<'a> Into<WallMut<'a>> for &'a mut WallPlane {
+    fn into(self) -> WallMut<'a> {
+        WallMut::Plane(self)
     }
 }
 
@@ -400,7 +432,7 @@ impl Wall for WallCylinder {
         xyz: DVec3,
     ) -> bool {
         match cell.into() {
-            VoroCellMut::Standalone(c) => {
+            VoroCellMut::Sgl(c) => {
                 self.inner.pin_mut().cut_cell_0(
                     c.inner.pin_mut(),
                     xyz[0],
@@ -408,7 +440,7 @@ impl Wall for WallCylinder {
                     xyz[2],
                 )
             }
-            VoroCellMut::WithNeighbor(c) => {
+            VoroCellMut::Nbr(c) => {
                 self.inner.pin_mut().cut_cell_1(
                     c.inner.pin_mut(),
                     xyz[0],
@@ -417,6 +449,12 @@ impl Wall for WallCylinder {
                 )
             }
         }
+    }
+}
+
+impl<'a> Into<WallMut<'a>> for &'a mut WallCylinder {
+    fn into(self) -> WallMut<'a> {
+        WallMut::Cylinder(self)
     }
 }
 
@@ -481,7 +519,7 @@ impl Wall for WallCone {
         xyz: DVec3,
     ) -> bool {
         match cell.into() {
-            VoroCellMut::Standalone(c) => {
+            VoroCellMut::Sgl(c) => {
                 self.inner.pin_mut().cut_cell_0(
                     c.inner.pin_mut(),
                     xyz[0],
@@ -489,7 +527,7 @@ impl Wall for WallCone {
                     xyz[2],
                 )
             }
-            VoroCellMut::WithNeighbor(c) => {
+            VoroCellMut::Nbr(c) => {
                 self.inner.pin_mut().cut_cell_1(
                     c.inner.pin_mut(),
                     xyz[0],
@@ -498,6 +536,12 @@ impl Wall for WallCone {
                 )
             }
         }
+    }
+}
+
+impl<'a> Into<WallMut<'a>> for &'a mut WallCone {
+    fn into(self) -> WallMut<'a> {
+        WallMut::Cone(self)
     }
 }
 

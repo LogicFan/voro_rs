@@ -3,7 +3,6 @@
 #[cxx::bridge(namespace = "voro")]
 pub mod ffi {
     unsafe extern "C++" {
-        include!("voro_rs/cpp/voro++.hh");
         include!("voro_rs/cpp/boilerplate.hh");
 
         type voronoicell;
@@ -482,8 +481,8 @@ pub trait VoroCell: Clone {
 }
 
 pub enum VoroCellMut<'a> {
-    Standalone(&'a mut VoroCellSgl),
-    WithNeighbor(&'a mut VoroCellNbr),
+    Sgl(&'a mut VoroCellSgl),
+    Nbr(&'a mut VoroCellNbr),
 }
 
 /// `voronoicell` class in voro++.
@@ -708,7 +707,7 @@ impl VoroCell for VoroCellSgl {
 
 impl<'a> Into<VoroCellMut<'a>> for &'a mut VoroCellSgl {
     fn into(self) -> VoroCellMut<'a> {
-        VoroCellMut::Standalone(self)
+        VoroCellMut::Sgl(self)
     }
 }
 
@@ -940,7 +939,7 @@ impl VoroCell for VoroCellNbr {
 
 impl<'a> Into<VoroCellMut<'a>> for &'a mut VoroCellNbr {
     fn into(self) -> VoroCellMut<'a> {
-        VoroCellMut::WithNeighbor(self)
+        VoroCellMut::Nbr(self)
     }
 }
 
