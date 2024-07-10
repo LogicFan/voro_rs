@@ -53,7 +53,7 @@ use crate::wall::ffi::{
     wall_cone_to_wall, wall_cylinder_to_wall,
     wall_plane_to_wall, wall_sphere_to_wall,
 };
-use crate::wall::WallMut;
+use crate::wall::bridge::WallMut;
 use cxx::UniquePtr;
 use std::marker::PhantomData;
 

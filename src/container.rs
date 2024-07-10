@@ -127,12 +127,12 @@ pub mod ffi {
     }
 }
 
-use crate::cell::{VoroCellFactory, bridge::VoroCellMut};
+use crate::cell::{bridge::VoroCellMut, VoroCellFactory};
+use crate::wall::bridge::WallMut;
 use crate::wall::ffi::{
     wall_cone_to_wall, wall_cylinder_to_wall,
     wall_plane_to_wall, wall_sphere_to_wall,
 };
-use crate::wall::WallMut;
 use crate::wall_list::{Walls, WallsMut};
 use cxx::UniquePtr;
 use std::marker::PhantomData;
@@ -176,10 +176,7 @@ impl<'a> ContainerStd<'a> {
 }
 
 impl<'a> Walls<'a> for ContainerStd<'a> {
-    fn add_wall(
-        &mut self,
-        wall: impl Into<WallMut<'a>>,
-    ) {
+    fn add_wall(&mut self, wall: impl Into<WallMut<'a>>) {
         let w0 = match wall.into() {
             WallMut::Sphere(w) => {
                 wall_sphere_to_wall(w.inner.pin_mut())
