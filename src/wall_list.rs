@@ -9,11 +9,6 @@ pub mod ffi {
         type voronoicell_neighbor =
             crate::cell::ffi::voronoicell_neighbor;
 
-        type wall_sphere = crate::wall::ffi::wall_sphere;
-        type wall_plane = crate::wall::ffi::wall_plane;
-        type wall_cylinder =
-            crate::wall::ffi::wall_cylinder;
-        type wall_cone = crate::wall::ffi::wall_cone;
         type wall = crate::wall::ffi::wall;
 
         type wall_list;
