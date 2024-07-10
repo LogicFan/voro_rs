@@ -1,3 +1,5 @@
+//! Walls trait and related classes.
+
 #[cxx::bridge(namespace = "voro")]
 pub mod ffi {
     unsafe extern "C++" {
