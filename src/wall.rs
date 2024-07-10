@@ -19,6 +19,8 @@ pub mod ffi {
             rc_: f64,
             w_id_: i32,
         ) -> UniquePtr<wall_sphere>;
+        #[rust_name = "clone_wall_sphere"]
+        fn clone_wall(value: &UniquePtr<wall_sphere>) -> UniquePtr<wall_sphere>;
         fn point_inside(
             self: Pin<&mut wall_sphere>,
             x: f64,
@@ -51,6 +53,8 @@ pub mod ffi {
             rc_: f64,
             w_id_: i32,
         ) -> UniquePtr<wall_plane>;
+        #[rust_name = "clone_wall_plane"]
+        fn clone_wall(value: &UniquePtr<wall_plane>) -> UniquePtr<wall_plane>;
         fn point_inside(
             self: Pin<&mut wall_plane>,
             x: f64,
@@ -86,6 +90,8 @@ pub mod ffi {
             rc_: f64,
             w_id_: i32,
         ) -> UniquePtr<wall_cylinder>;
+        #[rust_name = "clone_wall_cylinder"]
+        fn clone_wall(value: &UniquePtr<wall_cylinder>) -> UniquePtr<wall_cylinder>;
         fn point_inside(
             self: Pin<&mut wall_cylinder>,
             x: f64,
@@ -121,6 +127,8 @@ pub mod ffi {
             ang: f64,
             w_id_: i32,
         ) -> UniquePtr<wall_cone>;
+        #[rust_name = "clone_wall_cone"]
+        fn clone_wall(value: &UniquePtr<wall_cone>) -> UniquePtr<wall_cone>;
         fn point_inside(
             self: Pin<&mut wall_cone>,
             x: f64,
@@ -154,7 +162,7 @@ type DVec3 = [f64; 3];
 /// This is a trait for a generic wall object. A wall object
 /// can be specified by deriving a new struct from this and specifying the
 /// functions.
-pub trait Wall {
+pub trait Wall: Clone {
     /// Tests to see whether a point is inside the sphere wall object.
     ///
     /// * `x,y,z`: the vector to test.
@@ -207,6 +215,12 @@ impl WallSphere {
                 c[0], c[1], c[2], r, id,
             ),
         }
+    }
+}
+
+impl Clone for WallSphere {
+    fn clone(&self) -> Self {
+        Self { inner: ffi::clone_wall_sphere(&self.inner) }
     }
 }
 
@@ -272,6 +286,12 @@ impl WallPlane {
                 c[0], c[1], c[2], a, id,
             ),
         }
+    }
+}
+
+impl Clone for WallPlane {
+    fn clone(&self) -> Self {
+        Self { inner: ffi::clone_wall_plane(&self.inner) }
     }
 }
 
@@ -344,6 +364,12 @@ impl WallCylinder {
                 c[0], c[1], c[2], a[0], a[1], a[2], r, id,
             ),
         }
+    }
+}
+
+impl Clone for WallCylinder {
+    fn clone(&self) -> Self {
+        Self { inner: ffi::clone_wall_cylinder(&self.inner) }
     }
 }
 
@@ -420,6 +446,12 @@ impl WallCone {
     }
 }
 
+impl Clone for WallCone {
+    fn clone(&self) -> Self {
+        Self { inner: ffi::clone_wall_cone(&self.inner) }
+    }
+}
+
 impl Wall for WallCone {
     fn point_inside(&mut self, xyz: DVec3) -> bool {
         self.inner
@@ -456,16 +488,29 @@ impl Wall for WallCone {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::prelude::VoroCellSgl;
+    use crate::prelude::{VoroCell, VoroCellSgl};
 
     #[test]
     fn basic_test() {
-        let mut w = WallSphere::new([0.0, 0.0, 0.0], 1.0);
-        let mut c = VoroCellSgl::new(
+        let mut w0 = WallSphere::new([10.0, 0.0, 0.0], 10.0);
+        let mut c0 = VoroCellSgl::new(
+            [-1.0, -1.0, -1.0],
             [1.0, 1.0, 1.0],
-            [2.0, 2.0, 2.0],
         );
 
-        let _ = w.cut_cell(&mut c, [0.0, 0.0, 0.0]);
+        assert_eq!(c0.volume(), 8.0);
+        
+        let mut c1 = c0.clone();
+        assert_eq!(c1.volume(), 8.0);
+
+        let b = w0.cut_cell(&mut c1, [0.0, 0.0, 0.0]);
+        assert_eq!(c0.volume(), 8.0);
+        assert_eq!(c1.volume(), 4.0);
+        assert_eq!(b, true);
+
+        let mut w1 = w0.clone();
+        let c = w1.cut_cell(&mut c0, [0.0, 0.0, 0.0]);
+        assert_eq!(c0.volume(), 4.0);
+        assert_eq!(c, true);
     }
 }

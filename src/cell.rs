@@ -953,5 +953,7 @@ mod tests {
         let mut c3 = c2.clone();
         assert_eq!(c2.volume(), 3.0);
         assert_eq!(c3.volume(), 3.0);
+
+        assert_eq!(c0.centroid(), [1.0, 1.5, 1.5]);
     }
 }

@@ -1,5 +1,6 @@
 pub mod cell;
 pub mod wall;
+pub mod container;
 
 pub mod prelude {
     pub use crate::cell::{

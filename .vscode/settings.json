@@ -18,10 +18,4 @@
         "zmin",
         "zperiodic"
     ],
-    "files.associations": {
-        "*.m": "octave",
-        "memory": "cpp",
-        "vector": "cpp",
-        "cmath": "cpp"
-    }
 }
