@@ -313,6 +313,157 @@ use cxx::{CxxVector, UniquePtr};
 
 type DVec3 = [f64; 3];
 
+
+/// `voronoicell` class in voro++.
+///
+/// A class represent a Voronoi cell without neighbor information.
+///
+/// This class is an extension of the voronoicell_base class, in cases when
+/// is not necessary to track the IDs of neighboring particles associated
+/// with each face of the Voronoi cell.
+pub struct VoroCellSgl {
+    pub(crate) inner: UniquePtr<ffi::voronoicell>,
+}
+
+impl VoroCellSgl {
+    /// Initializes the Voronoi cell to be rectangular box with the
+    /// given dimensions.
+    ///
+    /// * `xyz_min`: the minimum xyz coordinates.
+    /// * `xyz_max`: the maximum xyz coordinates.
+    pub fn new(xyz_min: DVec3, xyz_max: DVec3) -> Self {
+        let mut val = Self {
+            inner: ffi::new_voronoicell(),
+        };
+        val.inner.pin_mut().init_base(
+            xyz_min[0], xyz_max[0], xyz_min[1], xyz_max[1],
+            xyz_min[2], xyz_max[2],
+        );
+        val
+    }
+
+    /// Initializes the cell to be an octahedron with vertices at
+    /// (l,0,0), (-l,0,0), (0,l,0), (0,-l,0), (0,0,l), and (0,0,-l).
+    ///
+    /// * `l`: a parameter setting the size of the octahedron.
+    pub fn new_octahedron(l: f64) -> Self {
+        let mut val = Self {
+            inner: ffi::new_voronoicell(),
+        };
+        val.inner.pin_mut().init_octahedron_base(l);
+        val
+    }
+
+    /// Initializes the cell to be a tetrahedron.
+    ///
+    /// * `xyz0`: the coordinates of the first vertex.
+    /// * `xyz1`: the coordinates of the second vertex.
+    /// * `xyz2`: the coordinates of the third vertex.
+    /// * `xyz3`: the coordinates of the fourth vertex.
+    pub fn new_tetrahedron(
+        xyz0: DVec3,
+        xyz1: DVec3,
+        xyz2: DVec3,
+        xyz3: DVec3,
+    ) -> Self {
+        let mut val = Self {
+            inner: ffi::new_voronoicell(),
+        };
+        val.inner.pin_mut().init_tetrahedron_base(
+            xyz0[0], xyz0[1], xyz0[2], xyz1[0], xyz1[1],
+            xyz1[2], xyz2[0], xyz2[1], xyz2[2], xyz3[0],
+            xyz3[1], xyz3[2],
+        );
+        val
+    }
+}
+
+/// `voronoicell_neighbor` class in voro++.
+/// A class to represent a Voronoi cell with neighbor information, in cases when the
+///  IDs of neighboring particles associated with each face of the Voronoi cell.
+///  It contains additional data structures for storing this
+///  information.
+pub struct VoroCellNbr {
+    pub(crate) inner: UniquePtr<ffi::voronoicell_neighbor>,
+}
+
+impl VoroCellNbr {
+    /// Initializes the Voronoi cell to be rectangular box with the
+    /// given dimensions.
+    ///
+    /// * `xyz_min`: the minimum xyz coordinates.
+    /// * `xyz_max`: the maximum xyz coordinates.
+    pub fn new(xyz_min: DVec3, xyz_max: DVec3) -> Self {
+        let mut val = Self {
+            inner: ffi::new_voronoicell_neighbor(),
+        };
+        val.inner.pin_mut().init_base(
+            xyz_min[0], xyz_max[0], xyz_min[1], xyz_max[1],
+            xyz_min[2], xyz_max[2],
+        );
+        val
+    }
+
+    /// Initializes the cell to be an octahedron with vertices at
+    /// (l,0,0), (-l,0,0), (0,l,0), (0,-l,0), (0,0,l), and (0,0,-l).
+    ///
+    /// * `l`: a parameter setting the size of the octahedron.
+    pub fn new_octahedron(l: f64) -> Self {
+        let mut val = Self {
+            inner: ffi::new_voronoicell_neighbor(),
+        };
+        val.inner.pin_mut().init_octahedron_base(l);
+        val
+    }
+
+    /// Initializes the cell to be a tetrahedron.
+    ///
+    /// * `xyz0`: the coordinates of the first vertex.
+    /// * `xyz1`: the coordinates of the second vertex.
+    /// * `xyz2`: the coordinates of the third vertex.
+    /// * `xyz3`: the coordinates of the fourth vertex.
+    pub fn new_tetrahedron(
+        xyz0: DVec3,
+        xyz1: DVec3,
+        xyz2: DVec3,
+        xyz3: DVec3,
+    ) -> Self {
+        let mut val = Self {
+            inner: ffi::new_voronoicell_neighbor(),
+        };
+        val.inner.pin_mut().init_tetrahedron_base(
+            xyz0[0], xyz0[1], xyz0[2], xyz1[0], xyz1[1],
+            xyz1[2], xyz2[0], xyz2[1], xyz2[2], xyz3[0],
+            xyz3[1], xyz3[2],
+        );
+        val
+    }
+
+    pub fn neighbors(&mut self) -> Vec<i32> {
+        let mut v = CxxVector::new();
+        self.inner.pin_mut().neighbors(v.pin_mut());
+        v.into_iter().copied().collect()
+    }
+}
+
+impl Clone for VoroCellSgl {
+    fn clone(&self) -> Self {
+        Self {
+            inner: ffi::clone_voronoicell(&self.inner),
+        }
+    }
+}
+
+impl Clone for VoroCellNbr {
+    fn clone(&self) -> Self {
+        Self {
+            inner: ffi::clone_voronoicell_neighbor(
+                &self.inner,
+            ),
+        }
+    }
+}
+
 /// `voronoicell_base` abstract class in voro++.
 ///
 /// A trait representing a single Voronoi cell.
@@ -480,85 +631,6 @@ pub trait VoroCell {
     fn plane(&mut self, xyz: DVec3) -> bool;
 }
 
-/// A enum to store mutable reference of any `VoroCell`. This is
-/// to mimic the override in C++.
-pub enum VoroCellMut<'a> {
-    Sgl(&'a mut VoroCellSgl),
-    Nbr(&'a mut VoroCellNbr),
-}
-
-/// `voronoicell` class in voro++.
-///
-/// A class represent a Voronoi cell without neighbor information.
-///
-/// This class is an extension of the voronoicell_base class, in cases when
-/// is not necessary to track the IDs of neighboring particles associated
-/// with each face of the Voronoi cell.
-pub struct VoroCellSgl {
-    pub(crate) inner: UniquePtr<ffi::voronoicell>,
-}
-
-impl VoroCellSgl {
-    /// Initializes the Voronoi cell to be rectangular box with the
-    /// given dimensions.
-    ///
-    /// * `xyz_min`: the minimum xyz coordinates.
-    /// * `xyz_max`: the maximum xyz coordinates.
-    pub fn new(xyz_min: DVec3, xyz_max: DVec3) -> Self {
-        let mut val = Self {
-            inner: ffi::new_voronoicell(),
-        };
-        val.inner.pin_mut().init_base(
-            xyz_min[0], xyz_max[0], xyz_min[1], xyz_max[1],
-            xyz_min[2], xyz_max[2],
-        );
-        val
-    }
-
-    /// Initializes the cell to be an octahedron with vertices at
-    /// (l,0,0), (-l,0,0), (0,l,0), (0,-l,0), (0,0,l), and (0,0,-l).
-    ///
-    /// * `l`: a parameter setting the size of the octahedron.
-    pub fn new_octahedron(l: f64) -> Self {
-        let mut val = Self {
-            inner: ffi::new_voronoicell(),
-        };
-        val.inner.pin_mut().init_octahedron_base(l);
-        val
-    }
-
-    /// Initializes the cell to be a tetrahedron.
-    ///
-    /// * `xyz0`: the coordinates of the first vertex.
-    /// * `xyz1`: the coordinates of the second vertex.
-    /// * `xyz2`: the coordinates of the third vertex.
-    /// * `xyz3`: the coordinates of the fourth vertex.
-    pub fn new_tetrahedron(
-        xyz0: DVec3,
-        xyz1: DVec3,
-        xyz2: DVec3,
-        xyz3: DVec3,
-    ) -> Self {
-        let mut val = Self {
-            inner: ffi::new_voronoicell(),
-        };
-        val.inner.pin_mut().init_tetrahedron_base(
-            xyz0[0], xyz0[1], xyz0[2], xyz1[0], xyz1[1],
-            xyz1[2], xyz2[0], xyz2[1], xyz2[2], xyz3[0],
-            xyz3[1], xyz3[2],
-        );
-        val
-    }
-}
-
-impl Clone for VoroCellSgl {
-    fn clone(&self) -> Self {
-        Self {
-            inner: ffi::clone_voronoicell(&self.inner),
-        }
-    }
-}
-
 impl VoroCell for VoroCellSgl {
     fn translate(&mut self, xyz: DVec3) {
         self.inner
@@ -707,90 +779,6 @@ impl VoroCell for VoroCellSgl {
     }
 }
 
-impl<'a> Into<VoroCellMut<'a>> for &'a mut VoroCellSgl {
-    fn into(self) -> VoroCellMut<'a> {
-        VoroCellMut::Sgl(self)
-    }
-}
-
-/// `voronoicell_neighbor` class in voro++.
-/// A class to represent a Voronoi cell with neighbor information, in cases when the
-///  IDs of neighboring particles associated with each face of the Voronoi cell.
-///  It contains additional data structures for storing this
-///  information.
-pub struct VoroCellNbr {
-    pub(crate) inner: UniquePtr<ffi::voronoicell_neighbor>,
-}
-
-impl VoroCellNbr {
-    /// Initializes the Voronoi cell to be rectangular box with the
-    /// given dimensions.
-    ///
-    /// * `xyz_min`: the minimum xyz coordinates.
-    /// * `xyz_max`: the maximum xyz coordinates.
-    pub fn new(xyz_min: DVec3, xyz_max: DVec3) -> Self {
-        let mut val = Self {
-            inner: ffi::new_voronoicell_neighbor(),
-        };
-        val.inner.pin_mut().init_base(
-            xyz_min[0], xyz_max[0], xyz_min[1], xyz_max[1],
-            xyz_min[2], xyz_max[2],
-        );
-        val
-    }
-
-    /// Initializes the cell to be an octahedron with vertices at
-    /// (l,0,0), (-l,0,0), (0,l,0), (0,-l,0), (0,0,l), and (0,0,-l).
-    ///
-    /// * `l`: a parameter setting the size of the octahedron.
-    pub fn new_octahedron(l: f64) -> Self {
-        let mut val = Self {
-            inner: ffi::new_voronoicell_neighbor(),
-        };
-        val.inner.pin_mut().init_octahedron_base(l);
-        val
-    }
-
-    /// Initializes the cell to be a tetrahedron.
-    ///
-    /// * `xyz0`: the coordinates of the first vertex.
-    /// * `xyz1`: the coordinates of the second vertex.
-    /// * `xyz2`: the coordinates of the third vertex.
-    /// * `xyz3`: the coordinates of the fourth vertex.
-    pub fn new_tetrahedron(
-        xyz0: DVec3,
-        xyz1: DVec3,
-        xyz2: DVec3,
-        xyz3: DVec3,
-    ) -> Self {
-        let mut val = Self {
-            inner: ffi::new_voronoicell_neighbor(),
-        };
-        val.inner.pin_mut().init_tetrahedron_base(
-            xyz0[0], xyz0[1], xyz0[2], xyz1[0], xyz1[1],
-            xyz1[2], xyz2[0], xyz2[1], xyz2[2], xyz3[0],
-            xyz3[1], xyz3[2],
-        );
-        val
-    }
-
-    pub fn neighbors(&mut self) -> Vec<i32> {
-        let mut v = CxxVector::new();
-        self.inner.pin_mut().neighbors(v.pin_mut());
-        v.into_iter().copied().collect()
-    }
-}
-
-impl Clone for VoroCellNbr {
-    fn clone(&self) -> Self {
-        Self {
-            inner: ffi::clone_voronoicell_neighbor(
-                &self.inner,
-            ),
-        }
-    }
-}
-
 impl VoroCell for VoroCellNbr {
     fn translate(&mut self, xyz: DVec3) {
         self.inner
@@ -936,6 +924,19 @@ impl VoroCell for VoroCellNbr {
 
     fn plane(&mut self, xyz: DVec3) -> bool {
         self.inner.pin_mut().plane(xyz[0], xyz[1], xyz[2])
+    }
+}
+
+/// A enum to store mutable reference of any `VoroCell`. This is
+/// to mimic the override in C++.
+pub enum VoroCellMut<'a> {
+    Sgl(&'a mut VoroCellSgl),
+    Nbr(&'a mut VoroCellNbr),
+}
+
+impl<'a> Into<VoroCellMut<'a>> for &'a mut VoroCellSgl {
+    fn into(self) -> VoroCellMut<'a> {
+        VoroCellMut::Sgl(self)
     }
 }
 
