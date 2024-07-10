@@ -48,7 +48,7 @@ pub mod ffi {
     }
 }
 
-use crate::cell::VoroCellMut;
+use crate::cell::bridge::VoroCellMut;
 use crate::wall::ffi::{
     wall_cone_to_wall, wall_cylinder_to_wall,
     wall_plane_to_wall, wall_sphere_to_wall,

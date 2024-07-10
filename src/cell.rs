@@ -325,15 +325,19 @@ pub struct VoroCellSgl {
 }
 
 impl VoroCellSgl {
+    fn new_empty() -> Self {
+        Self {
+            inner: ffi::new_voronoicell(),
+        }
+    }
+
     /// Initializes the Voronoi cell to be rectangular box with the
     /// given dimensions.
     ///
     /// * `xyz_min`: the minimum xyz coordinates.
     /// * `xyz_max`: the maximum xyz coordinates.
     pub fn new(xyz_min: DVec3, xyz_max: DVec3) -> Self {
-        let mut val = Self {
-            inner: ffi::new_voronoicell(),
-        };
+        let mut val = Self::new_empty();
         val.inner.pin_mut().init_base(
             xyz_min[0], xyz_max[0], xyz_min[1], xyz_max[1],
             xyz_min[2], xyz_max[2],
@@ -346,9 +350,7 @@ impl VoroCellSgl {
     ///
     /// * `l`: a parameter setting the size of the octahedron.
     pub fn new_octahedron(l: f64) -> Self {
-        let mut val = Self {
-            inner: ffi::new_voronoicell(),
-        };
+        let mut val = Self::new_empty();
         val.inner.pin_mut().init_octahedron_base(l);
         val
     }
@@ -365,9 +367,7 @@ impl VoroCellSgl {
         xyz2: DVec3,
         xyz3: DVec3,
     ) -> Self {
-        let mut val = Self {
-            inner: ffi::new_voronoicell(),
-        };
+        let mut val = Self::new_empty();
         val.inner.pin_mut().init_tetrahedron_base(
             xyz0[0], xyz0[1], xyz0[2], xyz1[0], xyz1[1],
             xyz1[2], xyz2[0], xyz2[1], xyz2[2], xyz3[0],
@@ -387,15 +387,19 @@ pub struct VoroCellNbr {
 }
 
 impl VoroCellNbr {
+    fn new_empty() -> Self {
+        Self {
+            inner: ffi::new_voronoicell_neighbor(),
+        }
+    }
+
     /// Initializes the Voronoi cell to be rectangular box with the
     /// given dimensions.
     ///
     /// * `xyz_min`: the minimum xyz coordinates.
     /// * `xyz_max`: the maximum xyz coordinates.
     pub fn new(xyz_min: DVec3, xyz_max: DVec3) -> Self {
-        let mut val = Self {
-            inner: ffi::new_voronoicell_neighbor(),
-        };
+        let mut val = Self::new_empty();
         val.inner.pin_mut().init_base(
             xyz_min[0], xyz_max[0], xyz_min[1], xyz_max[1],
             xyz_min[2], xyz_max[2],
@@ -408,9 +412,7 @@ impl VoroCellNbr {
     ///
     /// * `l`: a parameter setting the size of the octahedron.
     pub fn new_octahedron(l: f64) -> Self {
-        let mut val = Self {
-            inner: ffi::new_voronoicell_neighbor(),
-        };
+        let mut val = Self::new_empty();
         val.inner.pin_mut().init_octahedron_base(l);
         val
     }
@@ -427,9 +429,7 @@ impl VoroCellNbr {
         xyz2: DVec3,
         xyz3: DVec3,
     ) -> Self {
-        let mut val = Self {
-            inner: ffi::new_voronoicell_neighbor(),
-        };
+        let mut val = Self::new_empty();
         val.inner.pin_mut().init_tetrahedron_base(
             xyz0[0], xyz0[1], xyz0[2], xyz1[0], xyz1[1],
             xyz1[2], xyz2[0], xyz2[1], xyz2[2], xyz3[0],
@@ -926,22 +926,40 @@ impl VoroCell for VoroCellNbr {
     }
 }
 
-/// A enum to store mutable reference of any `VoroCell`. This is
-/// to mimic the override in C++.
-pub enum VoroCellMut<'a> {
-    Sgl(&'a mut VoroCellSgl),
-    Nbr(&'a mut VoroCellNbr),
-}
+pub mod bridge {
+    use super::*;
 
-impl<'a> Into<VoroCellMut<'a>> for &'a mut VoroCellSgl {
-    fn into(self) -> VoroCellMut<'a> {
-        VoroCellMut::Sgl(self)
+    /// A enum to store mutable reference of any `VoroCell`. This is
+    /// to mimic the override in C++.
+    pub enum VoroCellMut<'a> {
+        Sgl(&'a mut VoroCellSgl),
+        Nbr(&'a mut VoroCellNbr),
+    }
+
+    impl<'a> Into<VoroCellMut<'a>> for &'a mut VoroCellSgl {
+        fn into(self) -> VoroCellMut<'a> {
+            VoroCellMut::Sgl(self)
+        }
+    }
+
+    impl<'a> Into<VoroCellMut<'a>> for &'a mut VoroCellNbr {
+        fn into(self) -> VoroCellMut<'a> {
+            VoroCellMut::Nbr(self)
+        }
     }
 }
 
-impl<'a> Into<VoroCellMut<'a>> for &'a mut VoroCellNbr {
-    fn into(self) -> VoroCellMut<'a> {
-        VoroCellMut::Nbr(self)
+pub struct VoroCellFactory;
+
+impl Into<VoroCellSgl> for VoroCellFactory {
+    fn into(self) -> VoroCellSgl {
+        VoroCellSgl::new_empty()
+    }
+}
+
+impl Into<VoroCellNbr> for VoroCellFactory {
+    fn into(self) -> VoroCellNbr {
+        VoroCellNbr::new_empty()
     }
 }
 

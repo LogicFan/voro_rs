@@ -127,7 +127,7 @@ pub mod ffi {
     }
 }
 
-use crate::cell::VoroCellMut;
+use crate::cell::{VoroCellFactory, bridge::VoroCellMut};
 use crate::wall::ffi::{
     wall_cone_to_wall, wall_cylinder_to_wall,
     wall_plane_to_wall, wall_sphere_to_wall,
@@ -140,10 +140,6 @@ use std::marker::PhantomData;
 type DVec3 = [f64; 3];
 type IVec3 = [i32; 3];
 type BVec3 = [bool; 3];
-
-// pub trait Container {
-//     fn
-// }
 
 pub struct ContainerStd<'a> {
     pub(crate) inner: UniquePtr<ffi::container>,
@@ -182,7 +178,7 @@ impl<'a> ContainerStd<'a> {
 impl<'a> Walls<'a> for ContainerStd<'a> {
     fn add_wall(
         &mut self,
-        wall: impl Into<crate::wall::WallMut<'a>>,
+        wall: impl Into<WallMut<'a>>,
     ) {
         let w0 = match wall.into() {
             WallMut::Sphere(w) => {
@@ -207,7 +203,7 @@ impl<'a> Walls<'a> for ContainerStd<'a> {
 
     fn add_walls(
         &mut self,
-        walls: impl Into<crate::wall_list::WallsMut<'a>>,
+        walls: impl Into<WallsMut<'a>>,
     ) {
         unsafe {
             // ensure the lifetime of `self` is within the lifetime of
@@ -221,7 +217,7 @@ impl<'a> Walls<'a> for ContainerStd<'a> {
         }
     }
 
-    fn inside_walls(&mut self, xyz: DVec3) -> bool {
+    fn point_inside_walls(&mut self, xyz: DVec3) -> bool {
         self.inner
             .pin_mut()
             .point_inside_walls(xyz[0], xyz[1], xyz[2])
@@ -229,7 +225,7 @@ impl<'a> Walls<'a> for ContainerStd<'a> {
 
     fn apply_walls<'b>(
         &mut self,
-        cell: impl Into<crate::cell::VoroCellMut<'b>>,
+        cell: impl Into<VoroCellMut<'b>>,
         xyz: DVec3,
     ) -> bool {
         match cell.into() {
@@ -250,5 +246,95 @@ impl<'a> Walls<'a> for ContainerStd<'a> {
                 )
             }
         }
+    }
+}
+
+pub trait Container {
+    fn point_inside(&mut self, xyz: DVec3) -> bool;
+    fn total_particles(&mut self) -> i32;
+
+    fn clear(&mut self);
+    fn put(&mut self, n: i32, xyz: DVec3);
+    fn sum_cell_volumes(&mut self) -> f64;
+    fn find_voronoi_cell(
+        &mut self,
+        xyz: DVec3,
+    ) -> Option<(i32, DVec3)>;
+    fn compute_cell_with_index<T>(
+        &mut self,
+        ijk: i32,
+        q: i32,
+    ) -> Option<T>
+    where
+        T: From<VoroCellFactory>;
+    fn compute_ghost_cell<T>(
+        &mut self,
+        xyz: DVec3,
+    ) -> Option<T>
+    where
+        T: From<VoroCellFactory>;
+}
+
+impl<'a> Container for ContainerStd<'a> {
+    fn point_inside(&mut self, xyz: DVec3) -> bool {
+        self.inner
+            .pin_mut()
+            .point_inside(xyz[0], xyz[1], xyz[2])
+    }
+
+    fn total_particles(&mut self) -> i32 {
+        self.inner.pin_mut().total_particles()
+    }
+
+    fn clear(&mut self) {
+        self.inner.pin_mut().clear()
+    }
+
+    fn put(&mut self, n: i32, xyz: DVec3) {
+        self.inner.pin_mut().put(n, xyz[0], xyz[1], xyz[2])
+    }
+
+    fn sum_cell_volumes(&mut self) -> f64 {
+        self.inner.pin_mut().sum_cell_volumes()
+    }
+
+    fn find_voronoi_cell(
+        &mut self,
+        xyz: DVec3,
+    ) -> Option<(i32, DVec3)> {
+        let mut pid = 0;
+        let mut rx = 0.0;
+        let mut ry = 0.0;
+        let mut rz = 0.0;
+        let b = self.inner.pin_mut().find_voronoi_cell(
+            xyz[0], xyz[1], xyz[2], &mut rx, &mut ry,
+            &mut rz, &mut pid,
+        );
+        if b {
+            Some((pid, [rx, ry, rz]))
+        } else {
+            None
+        }
+    }
+
+    fn compute_cell_with_index<T>(
+        &mut self,
+        ijk: i32,
+        q: i32,
+    ) -> Option<T>
+    where
+        VoroCellFactory: Into<T>,
+    {
+        todo!()
+    }
+
+    fn compute_ghost_cell<T>(
+        &mut self,
+        xyz: DVec3,
+    ) -> Option<T>
+    where
+        T: From<VoroCellFactory>,
+    {
+        todo!()
     }
 }

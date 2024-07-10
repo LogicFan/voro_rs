@@ -175,7 +175,7 @@ pub mod ffi {
     }
 }
 
-use crate::cell::VoroCellMut;
+use crate::cell::bridge::VoroCellMut;
 use cxx::UniquePtr;
 
 type DVec3 = [f64; 3];
