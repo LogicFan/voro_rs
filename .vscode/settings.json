@@ -10,10 +10,13 @@
         "worklist",
         "xmax",
         "xmin",
+        "xperiodic",
         "ymax",
         "ymin",
+        "yperiodic",
         "zmax",
-        "zmin"
+        "zmin",
+        "zperiodic"
     ],
     "files.associations": {
         "*.m": "octave",

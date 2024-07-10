@@ -7,4 +7,12 @@ namespace voro
     {
         return std::make_unique<T>(args...);
     }
+
+    template <typename T>
+    inline std::unique_ptr<T> clone_voronoicell(std::unique_ptr<T> const &c0) {
+        auto c1 = construct<T>();
+        // voronoicell has a well-define copy assignment operator
+        *c1 = *c0;
+        return c1;
+    }
 }
