@@ -324,7 +324,7 @@ type DVec3 = [f64; 3];
 /// by a plane, which forms the key routine for the Voronoi cell computation.
 /// It contains numerous routine for computing statistics about the Voronoi cell,
 /// and it can output the cell in several formats.
-pub trait VoroCell: Clone {
+pub trait VoroCell {
     /// Translates the vertices of the Voronoi cell by a given vector.
     ///
     /// * `xyz`: the coordinates of the vector.
@@ -480,6 +480,8 @@ pub trait VoroCell: Clone {
     fn plane(&mut self, xyz: DVec3) -> bool;
 }
 
+/// A enum to store mutable reference of any `VoroCell`. This is 
+/// to mimic the override in C++.
 pub enum VoroCellMut<'a> {
     Sgl(&'a mut VoroCellSgl),
     Nbr(&'a mut VoroCellNbr),
