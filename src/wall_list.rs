@@ -128,7 +128,7 @@ pub struct WallList<'a> {
 }
 
 impl<'a> WallList<'a> {
-    /// Create an empty `WallList```
+    /// Create an empty `WallList`
     pub fn new() -> Self {
         Self {
             inner: ffi::new_wall_list(),
