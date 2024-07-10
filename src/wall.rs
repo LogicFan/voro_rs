@@ -231,11 +231,7 @@ impl WallSphere {
     /// * `c`: a position vector for the sphere's center.
     /// * `r`: the radius of the sphere.
     pub fn new(c: DVec3, r: f64) -> Self {
-        Self {
-            inner: ffi::new_wall_sphere(
-                c[0], c[1], c[2], r, -99,
-            ),
-        }
+        Self::new_with_id(c, r, -99)
     }
 
     /// Constructs a spherical wall object.
@@ -312,11 +308,7 @@ impl WallPlane {
     /// * `c`: a normal vector to the plane.
     /// * `a`: a displacement along the normal vector.
     pub fn new(c: DVec3, a: f64) -> Self {
-        Self {
-            inner: ffi::new_wall_plane(
-                c[0], c[1], c[2], a, -99,
-            ),
-        }
+        Self::new_with_id(c, a, -99)
     }
 
     /// Constructs a plane wall object.
@@ -394,11 +386,7 @@ impl WallCylinder {
     /// * `a`: a vector pointing along the direction of the cylinder.
     /// * `r`: the radius of the cylinder.
     pub fn new(c: DVec3, a: DVec3, r: f64) -> Self {
-        Self {
-            inner: ffi::new_wall_cylinder(
-                c[0], c[1], c[2], a[0], a[1], a[2], r, -99,
-            ),
-        }
+        Self::new_with_id(c, a, r,-99)
     }
 
     /// Constructs a cylinder wall object.
@@ -482,12 +470,7 @@ impl WallCone {
     /// * `a`: a vector pointing along the axis of the cone.
     /// * `ang`: the angle (in radians) of the cone, measured from the axis.
     pub fn new(c: DVec3, a: DVec3, ang: f64) -> Self {
-        Self {
-            inner: ffi::new_wall_cone(
-                c[0], c[1], c[2], a[0], a[1], a[2], ang,
-                -99,
-            ),
-        }
+        Self::new_with_id(c, a, ang,-99)
     }
 
     /// Constructs a cone wall object.
