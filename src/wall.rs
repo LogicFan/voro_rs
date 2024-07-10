@@ -216,7 +216,7 @@ pub enum WallMut<'a> {
 
 /// A class representing a spherical wall object.
 pub struct WallSphere {
-    inner: UniquePtr<ffi::wall_sphere>,
+    pub(crate) inner: UniquePtr<ffi::wall_sphere>,
 }
 
 impl WallSphere {
@@ -295,7 +295,7 @@ impl<'a> Into<WallMut<'a>> for &'a mut WallSphere {
 
 /// A class representing a plane wall object.
 pub struct WallPlane {
-    inner: UniquePtr<ffi::wall_plane>,
+    pub(crate) inner: UniquePtr<ffi::wall_plane>,
 }
 
 impl WallPlane {
@@ -374,7 +374,7 @@ impl<'a> Into<WallMut<'a>> for &'a mut WallPlane {
 
 /// A class representing a cylindrical wall object.
 pub struct WallCylinder {
-    inner: UniquePtr<ffi::wall_cylinder>,
+    pub(crate) inner: UniquePtr<ffi::wall_cylinder>,
 }
 
 impl WallCylinder {
@@ -460,7 +460,7 @@ impl<'a> Into<WallMut<'a>> for &'a mut WallCylinder {
 
 /// A class representing a conical wall object.
 pub struct WallCone {
-    inner: UniquePtr<ffi::wall_cone>,
+    pub(crate) inner: UniquePtr<ffi::wall_cone>,
 }
 
 impl WallCone {
