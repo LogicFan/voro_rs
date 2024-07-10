@@ -62,9 +62,41 @@ use std::marker::PhantomData;
 
 type DVec3 = [f64; 3];
 
+/// The interface of `wall_list` class in voro++.
+///
+/// This trait contains several simple routines that make use of the wall
+/// classes (such as telling whether a
+/// given position is inside all of the walls or not).
 pub trait Walls<'a> {
+    /// Adds a wall to the list.
+    ///
+    /// * `wall`: a reference to the wall to add. Since this method will not
+    /// take ownership nor copy the wall, the `wall`
+    /// need to outlive the struct holding it.
     fn add_wall(&mut self, wall: impl Into<WallMut<'a>>);
+
+    /// Adds all of the walls on another wall_list to this class.
+    ///
+    /// * `walls`: a reference to the `Walls` struct. Since this method
+    /// will not take ownership nor copy the wall, the `walls` need to
+    /// outlive the struct holding it.
     fn add_walls(&mut self, walls: impl Into<WallsMut<'a>>);
+
+    /// Determines whether a given position is inside all of the
+    /// walls on the list.
+    ///
+    /// * `xyz`: the position to test.
+    ///
+    /// Return true if it is inside, false if it is outside.
+    fn inside_walls(&mut self, xyz: DVec3) -> bool;
+
+    /// Cuts a Voronoi cell by all of the walls currently on the list.
+    ///
+    /// * `cell`: a reference to the Voronoi cell class.
+    /// * `xyz`: the position of the cell.
+    ///
+    /// Return true if the cell still exists, false if the cell is
+    /// deleted.
     fn apply_walls<'b>(
         &mut self,
         cell: impl Into<VoroCellMut<'b>>,
@@ -72,16 +104,29 @@ pub trait Walls<'a> {
     ) -> bool;
 }
 
+/// A enum to store mutable reference of any `Walls`. This is
+/// to mimic the override in C++.
 pub enum WallsMut<'a> {
     WallList(&'a mut WallList<'a>),
 }
 
+/// `wall_list` class in voro++.
+///
+/// A class for storing a list of pointers to walls.
+///
+/// This class does not implement `Clone` trait because there is no
+/// well-defined copy constructor in the original voro++ code.
+///
+/// There is a lifetime specifier because it does not take the ownership
+/// of wall inside the list. All walls added into this struct must outlive
+/// this struct.
 pub struct WallList<'a> {
-    inner: UniquePtr<ffi::wall_list>,
-    phantom: PhantomData<&'a mut ffi::wall_list>,
+    pub(crate) inner: UniquePtr<ffi::wall_list>,
+    phantom: PhantomData<&'a ()>,
 }
 
 impl<'a> WallList<'a> {
+    /// Create an empty `WallList```
     pub fn new() -> Self {
         Self {
             inner: ffi::new_wall_list(),
@@ -129,6 +174,12 @@ impl<'a> Walls<'a> for WallList<'a> {
         }
     }
 
+    fn inside_walls(&mut self, xyz: DVec3) -> bool {
+        self.inner
+            .pin_mut()
+            .point_inside_walls(xyz[0], xyz[1], xyz[2])
+    }
+
     fn apply_walls<'b>(
         &mut self,
         cell: impl Into<VoroCellMut<'b>>,
@@ -163,8 +214,11 @@ impl<'a> Into<WallsMut<'a>> for &'a mut WallList<'a> {
 
 #[cfg(test)]
 mod tests {
-    use crate::{prelude::{VoroCell, VoroCellSgl}, wall::{Wall, WallSphere}};
     use super::*;
+    use crate::{
+        prelude::{VoroCell, VoroCellSgl},
+        wall::{Wall, WallSphere},
+    };
 
     #[test]
     fn basic_test() {
@@ -180,8 +234,10 @@ mod tests {
         assert_eq!(c2.volume(), 8.0);
         assert_eq!(c3.volume(), 8.0);
 
-        let mut w0 = WallSphere::new([0.0, 0.0, 100.0], 100.0);
-        let mut w1 = WallSphere::new([0.0, 100.0, 0.0], 100.0);
+        let mut w0 =
+            WallSphere::new([0.0, 0.0, 100.0], 100.0);
+        let mut w1 =
+            WallSphere::new([0.0, 100.0, 0.0], 100.0);
         w0.cut_cell(&mut c0, [0.0, 0.0, 0.0]);
         assert_eq!(c0.volume(), 4.0);
         w1.cut_cell(&mut c0, [0.0, 0.0, 0.0]);
@@ -203,4 +259,3 @@ mod tests {
         assert_eq!(c3.volume(), 2.0);
     }
 }
-
