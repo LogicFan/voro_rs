@@ -386,7 +386,7 @@ impl WallCylinder {
     /// * `a`: a vector pointing along the direction of the cylinder.
     /// * `r`: the radius of the cylinder.
     pub fn new(c: DVec3, a: DVec3, r: f64) -> Self {
-        Self::new_with_id(c, a, r,-99)
+        Self::new_with_id(c, a, r, -99)
     }
 
     /// Constructs a cylinder wall object.
@@ -470,7 +470,7 @@ impl WallCone {
     /// * `a`: a vector pointing along the axis of the cone.
     /// * `ang`: the angle (in radians) of the cone, measured from the axis.
     pub fn new(c: DVec3, a: DVec3, ang: f64) -> Self {
-        Self::new_with_id(c, a, ang,-99)
+        Self::new_with_id(c, a, ang, -99)
     }
 
     /// Constructs a cone wall object.
