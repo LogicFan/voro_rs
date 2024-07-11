@@ -967,8 +967,8 @@ mod tests {
         let rc: f64 = 10.0;
         let dq: f64 = xd * xd + yd * yd + zd * zd;
         let dq: f64 = 2.0_f64 * (dq.sqrt() * rc - dq);
-        let res = c0.nplane_rsq([xd, yd, zd], dq, -99);
-        println!("{}", c0.volume());
+        c0.nplane_rsq([xd, yd, zd], dq, -99);
+        assert_eq!(c0.volume(), 4.0);
     }
 
     #[test]
@@ -983,7 +983,7 @@ mod tests {
         let rc: f64 = 10.0;
         let dq: f64 = xd * xd + yd * yd + zd * zd;
         let dq: f64 = 2.0_f64 * (dq.sqrt() * rc - dq);
-        let res = c0.nplane_rsq([xd, yd, zd], dq, -99);
-        println!("{}", c0.volume());
+        c0.nplane_rsq([xd, yd, zd], dq, -99);
+        assert_eq!(c0.volume(), 4.0);
     }
 }
