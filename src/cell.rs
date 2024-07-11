@@ -11,7 +11,7 @@ pub mod ffi {
         fn clone_voronoicell(
             value: &UniquePtr<voronoicell>,
         ) -> UniquePtr<voronoicell>;
-        fn init_base(
+        fn init(
             self: Pin<&mut voronoicell>,
             xmin: f64,
             xmax: f64,
@@ -159,7 +159,7 @@ pub mod ffi {
         fn clone_voronoicell(
             value: &UniquePtr<voronoicell_neighbor>,
         ) -> UniquePtr<voronoicell_neighbor>;
-        fn init_base(
+        fn init(
             self: Pin<&mut voronoicell_neighbor>,
             xmin: f64,
             xmax: f64,
@@ -338,7 +338,7 @@ impl VoroCellSgl {
     /// * `xyz_max`: the maximum xyz coordinates.
     pub fn new(xyz_min: DVec3, xyz_max: DVec3) -> Self {
         let mut val = Self::new_empty();
-        val.inner.pin_mut().init_base(
+        val.inner.pin_mut().init(
             xyz_min[0], xyz_max[0], xyz_min[1], xyz_max[1],
             xyz_min[2], xyz_max[2],
         );
@@ -400,7 +400,7 @@ impl VoroCellNbr {
     /// * `xyz_max`: the maximum xyz coordinates.
     pub fn new(xyz_min: DVec3, xyz_max: DVec3) -> Self {
         let mut val = Self::new_empty();
-        val.inner.pin_mut().init_base(
+        val.inner.pin_mut().init(
             xyz_min[0], xyz_max[0], xyz_min[1], xyz_max[1],
             xyz_min[2], xyz_max[2],
         );
@@ -953,5 +953,37 @@ mod tests {
         assert_eq!(c3.volume(), 3.0);
 
         assert_eq!(c0.centroid(), [1.0, 1.5, 1.5]);
+    }
+
+    #[test]
+    fn test_sgl() {
+        let mut c0 = VoroCellSgl::new(
+            [-1.0, -1.0, -1.0],
+            [1.0, 1.0, 1.0],
+        );
+        let xd: f64 = 10.0;
+        let yd: f64 = 0.0;
+        let zd: f64 = 0.0;
+        let rc: f64 = 10.0;
+        let dq: f64 = xd * xd + yd * yd + zd * zd;
+        let dq: f64 = 2.0_f64 * (dq.sqrt() * rc - dq);
+        let res = c0.nplane_rsq([xd, yd, zd], dq, -99);
+        println!("{}", c0.volume());
+    }
+
+    #[test]
+    fn test_nbr() {
+        let mut c0 = VoroCellNbr::new(
+            [-1.0, -1.0, -1.0],
+            [1.0, 1.0, 1.0],
+        );
+        let xd: f64 = 10.0;
+        let yd: f64 = 0.0;
+        let zd: f64 = 0.0;
+        let rc: f64 = 10.0;
+        let dq: f64 = xd * xd + yd * yd + zd * zd;
+        let dq: f64 = 2.0_f64 * (dq.sqrt() * rc - dq);
+        let res = c0.nplane_rsq([xd, yd, zd], dq, -99);
+        println!("{}", c0.volume());
     }
 }
