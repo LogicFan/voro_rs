@@ -571,6 +571,19 @@ mod tests {
     }
 
     #[test]
+    fn test_nbr() {
+        let mut w0 =
+            WallSphere::new([10.0, 0.0, 0.0], 10.0);
+        let mut c0 = VoroCellNbr::new(
+            [-1.0, -1.0, -1.0],
+            [1.0, 1.0, 1.0],
+        );
+
+        w0.cut_cell(&mut c0, [0.0, 0.0, 0.0]);
+        assert_eq!(c0.volume(), 4.0);
+    }
+
+    #[test]
     fn overload_test() {
         let mut w0 =
             WallSphere::new([10.0, 0.0, 0.0], 10.0);
@@ -591,7 +604,15 @@ mod tests {
     fn all_types() {
         WallPlane::new([10.0, 0.0, 0.0], 10.0);
         WallPlane::new([1.0, 0.0, 0.0], 10.0);
-        WallCylinder::new([0.0, 0.0, 0.0], [1.0, 0.0, 0.0], 10.0);
-        WallCone::new([0.0, 0.0, 0.0], [1.0, 0.0, 0.0], 1.0);
+        WallCylinder::new(
+            [0.0, 0.0, 0.0],
+            [1.0, 0.0, 0.0],
+            10.0,
+        );
+        WallCone::new(
+            [0.0, 0.0, 0.0],
+            [1.0, 0.0, 0.0],
+            1.0,
+        );
     }
 }

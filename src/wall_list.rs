@@ -251,7 +251,7 @@ impl<'a> Walls<'a> for WallList<'a> {}
 mod tests {
     use super::*;
     use crate::{
-        prelude::{VoroCell, VoroCellSgl},
+        cell::{VoroCell, VoroCellSgl},
         wall::{Wall1, WallSphere},
     };
 
