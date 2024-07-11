@@ -965,4 +965,66 @@ mod tests {
         wl2.apply_walls(&mut c2, [0.0, 0.0, 0.0]);
         assert_eq!(c2.volume(), 2.0);
     }
+
+    #[test]
+    fn container_std_test() {
+        let mut con = ContainerStd::new(
+            [-10.0, -10.0, -10.0],
+            [10.0, 10.0, 10.0],
+            [20, 20, 20],
+            [false, false, false],
+        );
+        con.clear();
+        con.put(0, [0.0, 0.0, 0.0]);
+        con.put(1, [1.0, 0.0, 0.0]);
+        con.put(2, [2.0, 0.0, 0.0]);
+        con.put(3, [3.0, 0.0, 0.0]);
+        con.put(4, [4.0, 0.0, 0.0]);
+        con.put(5, [4.0, 1.0, 0.0]);
+        con.put(6, [4.0, 2.0, 0.0]);
+        con.put(7, [4.0, 3.0, 0.0]);
+        con.put(8, [4.0, 4.0, 0.0]);
+        assert_eq!(con.total_particles(), 9);
+        assert_eq!(con.sum_cell_volumes(), 8000.0);
+
+        let c = con.find_voronoi_cell([4.0, 4.0, 0.0]);
+        assert!(c.is_some());
+        assert_eq!(c.unwrap().0, 8);
+
+        con.clear();
+        assert_eq!(con.total_particles(), 0);
+        let c = con.find_voronoi_cell([4.0, 4.0, 0.0]);
+        assert!(c.is_none());
+    }
+
+    #[test]
+    fn container_rad_test() {
+        let mut con = ContainerRad::new(
+            [-10.0, -10.0, -10.0],
+            [10.0, 10.0, 10.0],
+            [20, 20, 20],
+            [false, false, false],
+        );
+        con.clear();
+        con.put(0, [0.0, 0.0, 0.0], 0.1);
+        con.put(1, [1.0, 0.0, 0.0], 0.1);
+        con.put(2, [2.0, 0.0, 0.0], 0.1);
+        con.put(3, [3.0, 0.0, 0.0], 0.1);
+        con.put(4, [4.0, 0.0, 0.0], 0.1);
+        con.put(5, [4.0, 1.0, 0.0], 0.1);
+        con.put(6, [4.0, 2.0, 0.0], 0.1);
+        con.put(7, [4.0, 3.0, 0.0], 0.1);
+        con.put(8, [4.0, 4.0, 0.0], 0.1);
+        assert_eq!(con.total_particles(), 9);
+        assert_eq!(con.sum_cell_volumes(), 8000.0);
+
+        let c = con.find_voronoi_cell([4.0, 4.0, 0.0]);
+        assert!(c.is_some());
+        assert_eq!(c.unwrap().0, 8);
+
+        con.clear();
+        assert_eq!(con.total_particles(), 0);
+        let c = con.find_voronoi_cell([4.0, 4.0, 0.0]);
+        assert!(c.is_none());
+    }
 }
