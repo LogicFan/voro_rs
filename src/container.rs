@@ -127,7 +127,8 @@ pub mod ffi {
     }
 }
 
-use crate::cell::{bridge::VoroCellMut, VoroCellFactory};
+use crate::cell::bridge::VoroCellMut;
+use crate::prelude::VoroCell;
 use crate::wall::bridge::WallMut;
 use crate::wall::ffi::{
     wall_cone_to_wall, wall_cylinder_to_wall,
@@ -263,13 +264,11 @@ pub trait Container {
         q: i32,
     ) -> Option<T>
     where
-        T: From<VoroCellFactory>;
+        T: VoroCell;
     fn compute_ghost_cell<T>(
         &mut self,
         xyz: DVec3,
-    ) -> Option<T>
-    where
-        T: From<VoroCellFactory>;
+    ) -> Option<T>;
 }
 
 impl<'a> Container for ContainerStd<'a> {
@@ -319,8 +318,7 @@ impl<'a> Container for ContainerStd<'a> {
         ijk: i32,
         q: i32,
     ) -> Option<T>
-    where
-        VoroCellFactory: Into<T>,
+    where T:VoroCell,
     {
         todo!()
     }
@@ -329,8 +327,6 @@ impl<'a> Container for ContainerStd<'a> {
         &mut self,
         xyz: DVec3,
     ) -> Option<T>
-    where
-        T: From<VoroCellFactory>,
     {
         todo!()
     }
