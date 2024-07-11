@@ -278,6 +278,7 @@ pub mod ffi {
 
 use crate::cell::{VoroCellNbr, VoroCellSgl};
 use crate::particle_marker::ParticleMarker;
+use crate::prelude::VoroCell;
 use crate::wall::ffi::{
     wall_cone_to_wall, wall_cylinder_to_wall,
     wall_plane_to_wall, wall_sphere_to_wall,
@@ -770,6 +771,63 @@ impl<'a> ContainerRad<'a> {
             xyz[2],
             r,
         );
+    }
+}
+
+pub trait ContainerStd0<T: VoroCell> {
+    fn compute_ghost_cell(
+        &mut self,
+        xyz: DVec3,
+    ) -> Option<T>;
+}
+
+impl<'a> ContainerStd0<VoroCellSgl> for ContainerStd<'a> {
+    fn compute_ghost_cell(
+        &mut self,
+        xyz: DVec3,
+    ) -> Option<VoroCellSgl> {
+        let mut cell = VoroCellSgl::new_empty();
+        let b = self.inner.pin_mut().compute_ghost_0(
+            cell.inner.pin_mut(),
+            xyz[0],
+            xyz[1],
+            xyz[2],
+        );
+        if b {
+            Some(cell)
+        } else {
+            None
+        }
+    }
+}
+
+pub trait ContainerRad0<T: VoroCell> {
+    fn compute_ghost_cell(
+        &mut self,
+        xyz: DVec3,
+        r: f64,
+    ) -> Option<T>;
+}
+
+impl<'a> ContainerRad0<VoroCellSgl> for ContainerRad<'a> {
+    fn compute_ghost_cell(
+        &mut self,
+        xyz: DVec3,
+        r: f64,
+    ) -> Option<VoroCellSgl> {
+        let mut cell = VoroCellSgl::new_empty();
+        let b = self.inner.pin_mut().compute_ghost_0(
+            cell.inner.pin_mut(),
+            xyz[0],
+            xyz[1],
+            xyz[2],
+            r,
+        );
+        if b {
+            Some(cell)
+        } else {
+            None
+        }
     }
 }
 
