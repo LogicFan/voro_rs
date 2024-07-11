@@ -216,7 +216,22 @@ impl<'a> ContainerStd<'a> {
         xyz_max: DVec3,
         sub_grids: IVec3,
         is_periodic: BVec3,
-        init_mem_alloc: i32,
+    ) -> Self {
+        Self::new_with_memory(
+            xyz_min,
+            xyz_max,
+            sub_grids,
+            is_periodic,
+            16,
+        )
+    }
+
+    pub fn new_with_memory(
+        xyz_min: DVec3,
+        xyz_max: DVec3,
+        sub_grids: IVec3,
+        is_periodic: BVec3,
+        initial_memory: i32,
     ) -> Self {
         Self {
             inner: ffi::new_container(
@@ -232,7 +247,7 @@ impl<'a> ContainerStd<'a> {
                 is_periodic[0],
                 is_periodic[1],
                 is_periodic[2],
-                init_mem_alloc,
+                initial_memory,
             ),
             phantom: PhantomData,
         }
@@ -250,7 +265,22 @@ impl<'a> ContainerRad<'a> {
         xyz_max: DVec3,
         sub_grids: IVec3,
         is_periodic: BVec3,
-        init_mem_alloc: i32,
+    ) -> Self {
+        Self::new_with_memory(
+            xyz_min,
+            xyz_max,
+            sub_grids,
+            is_periodic,
+            16,
+        )
+    }
+
+    pub fn new_with_memory(
+        xyz_min: DVec3,
+        xyz_max: DVec3,
+        sub_grids: IVec3,
+        is_periodic: BVec3,
+        initial_memory: i32,
     ) -> Self {
         Self {
             inner: ffi::new_container_poly(
@@ -266,7 +296,7 @@ impl<'a> ContainerRad<'a> {
                 is_periodic[0],
                 is_periodic[1],
                 is_periodic[2],
-                init_mem_alloc,
+                initial_memory,
             ),
             phantom: PhantomData,
         }
@@ -522,10 +552,10 @@ impl<'a> Walls3<'a, ContainerRad<'a>> for ContainerRad<'a> {
 impl<'a> Walls<'a> for ContainerStd<'a> {}
 impl<'a> Walls<'a> for ContainerRad<'a> {}
 
-// pub trait Container {
+/// A part of trait `Container` whose parameter does not depends any type.
+// pub trait Container0 {
 //     fn point_inside(&mut self, xyz: DVec3) -> bool;
 //     fn total_particles(&mut self) -> i32;
-
 //     fn clear(&mut self);
 //     fn put(&mut self, n: i32, xyz: DVec3);
 //     fn sum_cell_volumes(&mut self) -> f64;
@@ -533,6 +563,9 @@ impl<'a> Walls<'a> for ContainerRad<'a> {}
 //         &mut self,
 //         xyz: DVec3,
 //     ) -> Option<(i32, DVec3)>;
+// }
+
+// pub trait Container {
 //     fn compute_cell_with_index<T>(
 //         &mut self,
 //         ijk: i32,
@@ -637,14 +670,12 @@ mod tests {
             [1.0, 1.0, 1.0],
             [1, 1, 1],
             [false, false, false],
-            1,
         );
         let mut wl2 = ContainerRad::new(
             [-1.0, -1.0, -1.0],
             [1.0, 1.0, 1.0],
             [1, 1, 1],
             [false, false, false],
-            1,
         );
 
         wl0.add_wall(&mut w0);
