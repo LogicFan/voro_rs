@@ -303,6 +303,13 @@ type BVec3 = [bool; 3];
 /// A class that has routines
 /// specifically for computing the regular Voronoi tessellation with no
 /// dependence on particle radii.
+///
+/// This class does not implement `Clone` trait because there is no
+/// well-defined copy constructor in the original voro++ code.
+///
+/// There is a lifetime specifier because it does not take the ownership
+/// of wall inside the list. All walls added into this struct must outlive
+/// this struct.
 pub struct ContainerStd<'a> {
     pub(crate) inner: UniquePtr<ffi::container>,
     phantom: PhantomData<&'a ()>,
@@ -370,6 +377,18 @@ impl<'a> ContainerStd<'a> {
     }
 }
 
+/// This class for computing radical Voronoi tessellations.
+///
+/// This class is an extension of container_base class that has routines
+/// specifically for computing the radical Voronoi tessellation that depends on
+/// the particle radii.
+///
+/// This class does not implement `Clone` trait because there is no
+/// well-defined copy constructor in the original voro++ code.
+///
+/// There is a lifetime specifier because it does not take the ownership
+/// of wall inside the list. All walls added into this struct must outlive
+/// this struct.
 pub struct ContainerRad<'a> {
     pub(crate) inner: UniquePtr<ffi::container_poly>,
     phantom: PhantomData<&'a ()>,
