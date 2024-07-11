@@ -325,7 +325,7 @@ pub struct VoroCellSgl {
 }
 
 impl VoroCellSgl {
-    fn new_empty() -> Self {
+    pub(crate) fn new_empty() -> Self {
         Self {
             inner: ffi::new_voronoicell(),
         }
@@ -387,7 +387,7 @@ pub struct VoroCellNbr {
 }
 
 impl VoroCellNbr {
-    fn new_empty() -> Self {
+    pub(crate) fn new_empty() -> Self {
         Self {
             inner: ffi::new_voronoicell_neighbor(),
         }
@@ -923,43 +923,6 @@ impl VoroCell for VoroCellNbr {
 
     fn plane(&mut self, xyz: DVec3) -> bool {
         self.inner.pin_mut().plane(xyz[0], xyz[1], xyz[2])
-    }
-}
-
-pub mod bridge {
-    use super::*;
-
-    /// A enum to store mutable reference of any `VoroCell`. This is
-    /// to mimic the override in C++.
-    pub enum VoroCellMut<'a> {
-        Sgl(&'a mut VoroCellSgl),
-        Nbr(&'a mut VoroCellNbr),
-    }
-
-    impl<'a> Into<VoroCellMut<'a>> for &'a mut VoroCellSgl {
-        fn into(self) -> VoroCellMut<'a> {
-            VoroCellMut::Sgl(self)
-        }
-    }
-
-    impl<'a> Into<VoroCellMut<'a>> for &'a mut VoroCellNbr {
-        fn into(self) -> VoroCellMut<'a> {
-            VoroCellMut::Nbr(self)
-        }
-    }
-}
-
-pub struct VoroCellFactory;
-
-impl Into<VoroCellSgl> for VoroCellFactory {
-    fn into(self) -> VoroCellSgl {
-        VoroCellSgl::new_empty()
-    }
-}
-
-impl Into<VoroCellNbr> for VoroCellFactory {
-    fn into(self) -> VoroCellNbr {
-        VoroCellNbr::new_empty()
     }
 }
 

@@ -175,7 +175,7 @@ pub mod ffi {
     }
 }
 
-use crate::cell::bridge::VoroCellMut;
+use crate::prelude::{VoroCell, VoroCellNbr, VoroCellSgl};
 use cxx::UniquePtr;
 
 type DVec3 = [f64; 3];
@@ -346,19 +346,50 @@ impl Clone for WallCone {
     }
 }
 
-/// `wall` abstract class in voro++.
-///
-/// This is a trait for a generic wall object. A wall object
-/// can be specified by deriving a new struct from this and specifying the
-/// functions.
-pub trait Wall {
+/// A part of trait `Wall` whose parameter does not depends on cell type.
+pub trait Wall0 {
     /// Tests to see whether a point is inside the sphere wall object.
     ///
     /// * `x,y,z`: the vector to test.
     ///
     /// Return true if the point is inside, false if the point is outside.
     fn point_inside(&mut self, xyz: DVec3) -> bool;
+}
 
+impl Wall0 for WallSphere {
+    fn point_inside(&mut self, xyz: DVec3) -> bool {
+        self.inner
+            .pin_mut()
+            .point_inside(xyz[0], xyz[1], xyz[2])
+    }
+}
+
+impl Wall0 for WallPlane {
+    fn point_inside(&mut self, xyz: DVec3) -> bool {
+        self.inner
+            .pin_mut()
+            .point_inside(xyz[0], xyz[1], xyz[2])
+    }
+}
+
+impl Wall0 for WallCylinder {
+    fn point_inside(&mut self, xyz: DVec3) -> bool {
+        self.inner
+            .pin_mut()
+            .point_inside(xyz[0], xyz[1], xyz[2])
+    }
+}
+
+impl Wall0 for WallCone {
+    fn point_inside(&mut self, xyz: DVec3) -> bool {
+        self.inner
+            .pin_mut()
+            .point_inside(xyz[0], xyz[1], xyz[2])
+    }
+}
+
+/// A part of trait `Wall` whose parameter depends on cell type.
+pub trait Wall1<T: VoroCell> {
     /// Cuts a cell by the sphere wall object. The spherical wall is approximated by
     /// a single plane applied at the point on the sphere which is closest to the center
     /// of the cell. This works well for particle arrangements that are packed against
@@ -370,142 +401,144 @@ pub trait Wall {
     /// Return true if the cell still exists, false if the cell is deleted.
     fn cut_cell<'a>(
         &mut self,
-        cell: impl Into<VoroCellMut<'a>>,
+        cell: &mut T,
         xyz: DVec3,
     ) -> bool;
 }
 
-impl Wall for WallSphere {
-    fn point_inside(&mut self, xyz: DVec3) -> bool {
-        self.inner
-            .pin_mut()
-            .point_inside(xyz[0], xyz[1], xyz[2])
-    }
-
+impl Wall1<VoroCellSgl> for WallSphere {
     fn cut_cell<'a>(
         &mut self,
-        cell: impl Into<VoroCellMut<'a>>,
+        cell: &mut VoroCellSgl,
         xyz: DVec3,
     ) -> bool {
-        match cell.into() {
-            VoroCellMut::Sgl(c) => {
-                self.inner.pin_mut().cut_cell_0(
-                    c.inner.pin_mut(),
-                    xyz[0],
-                    xyz[1],
-                    xyz[2],
-                )
-            }
-            VoroCellMut::Nbr(c) => {
-                self.inner.pin_mut().cut_cell_1(
-                    c.inner.pin_mut(),
-                    xyz[0],
-                    xyz[1],
-                    xyz[2],
-                )
-            }
-        }
+        self.inner.pin_mut().cut_cell_0(
+            cell.inner.pin_mut(),
+            xyz[0],
+            xyz[1],
+            xyz[2],
+        )
     }
 }
 
-impl Wall for WallPlane {
-    fn point_inside(&mut self, xyz: DVec3) -> bool {
-        self.inner
-            .pin_mut()
-            .point_inside(xyz[0], xyz[1], xyz[2])
-    }
-
+impl Wall1<VoroCellNbr> for WallSphere {
     fn cut_cell<'a>(
         &mut self,
-        cell: impl Into<VoroCellMut<'a>>,
+        cell: &mut VoroCellNbr,
         xyz: DVec3,
     ) -> bool {
-        match cell.into() {
-            VoroCellMut::Sgl(c) => {
-                self.inner.pin_mut().cut_cell_0(
-                    c.inner.pin_mut(),
-                    xyz[0],
-                    xyz[1],
-                    xyz[2],
-                )
-            }
-            VoroCellMut::Nbr(c) => {
-                self.inner.pin_mut().cut_cell_1(
-                    c.inner.pin_mut(),
-                    xyz[0],
-                    xyz[1],
-                    xyz[2],
-                )
-            }
-        }
+        self.inner.pin_mut().cut_cell_1(
+            cell.inner.pin_mut(),
+            xyz[0],
+            xyz[1],
+            xyz[2],
+        )
     }
 }
 
-impl Wall for WallCylinder {
-    fn point_inside(&mut self, xyz: DVec3) -> bool {
-        self.inner
-            .pin_mut()
-            .point_inside(xyz[0], xyz[1], xyz[2])
-    }
-
+impl Wall1<VoroCellSgl> for WallPlane {
     fn cut_cell<'a>(
         &mut self,
-        cell: impl Into<VoroCellMut<'a>>,
+        cell: &mut VoroCellSgl,
         xyz: DVec3,
     ) -> bool {
-        match cell.into() {
-            VoroCellMut::Sgl(c) => {
-                self.inner.pin_mut().cut_cell_0(
-                    c.inner.pin_mut(),
-                    xyz[0],
-                    xyz[1],
-                    xyz[2],
-                )
-            }
-            VoroCellMut::Nbr(c) => {
-                self.inner.pin_mut().cut_cell_1(
-                    c.inner.pin_mut(),
-                    xyz[0],
-                    xyz[1],
-                    xyz[2],
-                )
-            }
-        }
+        self.inner.pin_mut().cut_cell_0(
+            cell.inner.pin_mut(),
+            xyz[0],
+            xyz[1],
+            xyz[2],
+        )
     }
 }
 
-impl Wall for WallCone {
-    fn point_inside(&mut self, xyz: DVec3) -> bool {
-        self.inner
-            .pin_mut()
-            .point_inside(xyz[0], xyz[1], xyz[2])
-    }
-
+impl Wall1<VoroCellNbr> for WallPlane {
     fn cut_cell<'a>(
         &mut self,
-        cell: impl Into<VoroCellMut<'a>>,
+        cell: &mut VoroCellNbr,
         xyz: DVec3,
     ) -> bool {
-        match cell.into() {
-            VoroCellMut::Sgl(c) => {
-                self.inner.pin_mut().cut_cell_0(
-                    c.inner.pin_mut(),
-                    xyz[0],
-                    xyz[1],
-                    xyz[2],
-                )
-            }
-            VoroCellMut::Nbr(c) => {
-                self.inner.pin_mut().cut_cell_1(
-                    c.inner.pin_mut(),
-                    xyz[0],
-                    xyz[1],
-                    xyz[2],
-                )
-            }
-        }
+        self.inner.pin_mut().cut_cell_1(
+            cell.inner.pin_mut(),
+            xyz[0],
+            xyz[1],
+            xyz[2],
+        )
     }
 }
+
+impl Wall1<VoroCellSgl> for WallCylinder {
+    fn cut_cell<'a>(
+        &mut self,
+        cell: &mut VoroCellSgl,
+        xyz: DVec3,
+    ) -> bool {
+        self.inner.pin_mut().cut_cell_0(
+            cell.inner.pin_mut(),
+            xyz[0],
+            xyz[1],
+            xyz[2],
+        )
+    }
+}
+
+impl Wall1<VoroCellNbr> for WallCylinder {
+    fn cut_cell<'a>(
+        &mut self,
+        cell: &mut VoroCellNbr,
+        xyz: DVec3,
+    ) -> bool {
+        self.inner.pin_mut().cut_cell_1(
+            cell.inner.pin_mut(),
+            xyz[0],
+            xyz[1],
+            xyz[2],
+        )
+    }
+}
+
+impl Wall1<VoroCellSgl> for WallCone {
+    fn cut_cell<'a>(
+        &mut self,
+        cell: &mut VoroCellSgl,
+        xyz: DVec3,
+    ) -> bool {
+        self.inner.pin_mut().cut_cell_0(
+            cell.inner.pin_mut(),
+            xyz[0],
+            xyz[1],
+            xyz[2],
+        )
+    }
+}
+
+impl Wall1<VoroCellNbr> for WallCone {
+    fn cut_cell<'a>(
+        &mut self,
+        cell: &mut VoroCellNbr,
+        xyz: DVec3,
+    ) -> bool {
+        self.inner.pin_mut().cut_cell_1(
+            cell.inner.pin_mut(),
+            xyz[0],
+            xyz[1],
+            xyz[2],
+        )
+    }
+}
+
+/// `wall` abstract class in voro++.
+///
+/// This is a trait for a generic wall object. A wall object
+/// can be specified by deriving a new struct from this and specifying the
+/// functions.
+pub trait Wall:
+    Wall0 + Wall1<VoroCellSgl> + Wall1<VoroCellNbr>
+{
+}
+impl Wall for WallSphere {}
+impl Wall for WallPlane {}
+impl Wall for WallCylinder {}
+impl Wall for WallCone {}
 
 pub mod bridge {
     use super::*;
@@ -572,5 +605,22 @@ mod tests {
         let c = w1.cut_cell(&mut c0, [0.0, 0.0, 0.0]);
         assert_eq!(c0.volume(), 4.0);
         assert_eq!(c, true);
+    }
+
+    #[test]
+    fn overload_test() {
+        let mut w0 =
+            WallSphere::new([10.0, 0.0, 0.0], 10.0);
+        let mut c0 = VoroCellSgl::new(
+            [-1.0, -1.0, -1.0],
+            [1.0, 1.0, 1.0],
+        );
+        let mut c1 = VoroCellSgl::new(
+            [-1.0, -1.0, -1.0],
+            [1.0, 1.0, 1.0],
+        );
+
+        w0.cut_cell(&mut c0, [0.0, 0.0, 0.0]);
+        w0.cut_cell(&mut c1, [0.0, 0.0, 0.0]);
     }
 }
