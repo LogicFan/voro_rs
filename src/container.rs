@@ -1,3 +1,5 @@
+//!  Container and related classes.
+
 #[cxx::bridge(namespace = "voro")]
 pub mod ffi {
     unsafe extern "C++" {
@@ -9,6 +11,9 @@ pub mod ffi {
 
         type wall = crate::wall::ffi::wall;
         type wall_list = crate::wall_list::ffi::wall_list;
+
+        type particle_order =
+            crate::particle_marker::ffi::particle_order;
 
         fn container_to_wall_list(
             value: Pin<&mut container>,
@@ -85,7 +90,15 @@ pub mod ffi {
             y: f64,
             z: f64,
         );
-        // TODO: put with particle_order
+        #[rust_name = "put_with_particle_order"]
+        fn put(
+            self: Pin<&mut container>,
+            vo: Pin<&mut particle_order>,
+            n: i32,
+            x: f64,
+            y: f64,
+            z: f64,
+        );
         fn compute_all_cells(self: Pin<&mut container>);
         fn sum_cell_volumes(
             self: Pin<&mut container>,
@@ -181,10 +194,90 @@ pub mod ffi {
             y: f64,
             z: f64,
         ) -> bool;
+
+        fn point_inside(
+            self: Pin<&mut container_poly>,
+            x: f64,
+            y: f64,
+            z: f64,
+        ) -> bool;
+        fn total_particles(
+            self: Pin<&mut container_poly>,
+        ) -> i32;
+
+        fn clear(self: Pin<&mut container_poly>);
+        fn put(
+            self: Pin<&mut container_poly>,
+            n: i32,
+            x: f64,
+            y: f64,
+            z: f64,
+            r: f64,
+        );
+        #[rust_name = "put_with_particle_order"]
+        fn put(
+            self: Pin<&mut container_poly>,
+            vo: Pin<&mut particle_order>,
+            n: i32,
+            x: f64,
+            y: f64,
+            z: f64,
+            r: f64,
+        );
+        fn compute_all_cells(
+            self: Pin<&mut container_poly>,
+        );
+        fn sum_cell_volumes(
+            self: Pin<&mut container_poly>,
+        ) -> f64;
+        fn find_voronoi_cell(
+            self: Pin<&mut container_poly>,
+            x: f64,
+            y: f64,
+            z: f64,
+            rx: &mut f64,
+            ry: &mut f64,
+            rz: &mut f64,
+            pid: &mut i32,
+        ) -> bool;
+        // TODO: compute_cell with c_loop
+        #[rust_name = "compute_cell_with_index_0"]
+        fn compute_cell(
+            self: Pin<&mut container_poly>,
+            c: Pin<&mut voronoicell>,
+            ijk: i32,
+            q: i32,
+        ) -> bool;
+        #[rust_name = "compute_cell_with_index_1"]
+        fn compute_cell(
+            self: Pin<&mut container_poly>,
+            c: Pin<&mut voronoicell_neighbor>,
+            ijk: i32,
+            q: i32,
+        ) -> bool;
+        #[rust_name = "compute_ghost_0"]
+        fn compute_ghost_cell(
+            self: Pin<&mut container_poly>,
+            c: Pin<&mut voronoicell>,
+            x: f64,
+            y: f64,
+            z: f64,
+            r: f64,
+        ) -> bool;
+        #[rust_name = "compute_ghost_1"]
+        fn compute_ghost_cell(
+            self: Pin<&mut container_poly>,
+            c: Pin<&mut voronoicell_neighbor>,
+            x: f64,
+            y: f64,
+            z: f64,
+            r: f64,
+        ) -> bool;
     }
 }
 
 use crate::cell::{VoroCellNbr, VoroCellSgl};
+use crate::particle_marker::ParticleMarker;
 use crate::wall::ffi::{
     wall_cone_to_wall, wall_cylinder_to_wall,
     wall_plane_to_wall, wall_sphere_to_wall,
@@ -552,18 +645,146 @@ impl<'a> Walls3<'a, ContainerRad<'a>> for ContainerRad<'a> {
 impl<'a> Walls<'a> for ContainerStd<'a> {}
 impl<'a> Walls<'a> for ContainerRad<'a> {}
 
+impl<'a> ContainerStd<'a> {
+    pub fn put(&mut self, n: i32, xyz: DVec3) {
+        self.inner.pin_mut().put(n, xyz[0], xyz[1], xyz[2])
+    }
+    pub fn put_with_marker(
+        &mut self,
+        marker: &mut ParticleMarker,
+        n: i32,
+        xyz: DVec3,
+    ) {
+        self.inner.pin_mut().put_with_particle_order(
+            marker.inner.pin_mut(),
+            n,
+            xyz[0],
+            xyz[1],
+            xyz[2],
+        )
+    }
+}
+
+impl<'a> ContainerRad<'a> {
+    pub fn put(&mut self, n: i32, xyz: DVec3, r: f64) {
+        self.inner
+            .pin_mut()
+            .put(n, xyz[0], xyz[1], xyz[2], r)
+    }
+    pub fn put_with_marker(
+        &mut self,
+        marker: &mut ParticleMarker,
+        n: i32,
+        xyz: DVec3,
+        r: f64,
+    ) {
+        self.inner.pin_mut().put_with_particle_order(
+            marker.inner.pin_mut(),
+            n,
+            xyz[0],
+            xyz[1],
+            xyz[2],
+            r,
+        );
+    }
+}
+
 /// A part of trait `Container` whose parameter does not depends any type.
-// pub trait Container0 {
-//     fn point_inside(&mut self, xyz: DVec3) -> bool;
-//     fn total_particles(&mut self) -> i32;
-//     fn clear(&mut self);
-//     fn put(&mut self, n: i32, xyz: DVec3);
-//     fn sum_cell_volumes(&mut self) -> f64;
-//     fn find_voronoi_cell(
-//         &mut self,
-//         xyz: DVec3,
-//     ) -> Option<(i32, DVec3)>;
-// }
+pub trait Container0 {
+    fn point_inside(&mut self, xyz: DVec3) -> bool;
+    fn total_particles(&mut self) -> i32;
+    fn clear(&mut self);
+    // fn put(&mut self, n: i32, xyz: DVec3);
+    // fn put_with_marker(
+    //     &mut self,
+    //     marker: &mut ParticleMarker,
+    //     n: i32,
+    //     xyz: DVec3,
+    // );
+    fn sum_cell_volumes(&mut self) -> f64;
+    fn find_voronoi_cell(
+        &mut self,
+        xyz: DVec3,
+    ) -> Option<(i32, DVec3)>;
+}
+
+impl<'a> Container0 for ContainerStd<'a> {
+    fn point_inside(&mut self, xyz: DVec3) -> bool {
+        self.inner
+            .pin_mut()
+            .point_inside(xyz[0], xyz[1], xyz[2])
+    }
+
+    fn total_particles(&mut self) -> i32 {
+        self.inner.pin_mut().total_particles()
+    }
+
+    fn clear(&mut self) {
+        self.inner.pin_mut().clear()
+    }
+
+    fn sum_cell_volumes(&mut self) -> f64 {
+        self.inner.pin_mut().sum_cell_volumes()
+    }
+
+    fn find_voronoi_cell(
+        &mut self,
+        xyz: DVec3,
+    ) -> Option<(i32, DVec3)> {
+        let mut pid = 0;
+        let mut rx = 0.0;
+        let mut ry = 0.0;
+        let mut rz = 0.0;
+        let b = self.inner.pin_mut().find_voronoi_cell(
+            xyz[0], xyz[1], xyz[2], &mut rx, &mut ry,
+            &mut rz, &mut pid,
+        );
+        if b {
+            Some((pid, [rx, ry, rz]))
+        } else {
+            None
+        }
+    }
+}
+
+impl<'a> Container0 for ContainerRad<'a> {
+    fn point_inside(&mut self, xyz: DVec3) -> bool {
+        self.inner
+            .pin_mut()
+            .point_inside(xyz[0], xyz[1], xyz[2])
+    }
+
+    fn total_particles(&mut self) -> i32 {
+        self.inner.pin_mut().total_particles()
+    }
+
+    fn clear(&mut self) {
+        self.inner.pin_mut().clear()
+    }
+
+    fn sum_cell_volumes(&mut self) -> f64 {
+        self.inner.pin_mut().sum_cell_volumes()
+    }
+
+    fn find_voronoi_cell(
+        &mut self,
+        xyz: DVec3,
+    ) -> Option<(i32, DVec3)> {
+        let mut pid = 0;
+        let mut rx = 0.0;
+        let mut ry = 0.0;
+        let mut rz = 0.0;
+        let b = self.inner.pin_mut().find_voronoi_cell(
+            xyz[0], xyz[1], xyz[2], &mut rx, &mut ry,
+            &mut rz, &mut pid,
+        );
+        if b {
+            Some((pid, [rx, ry, rz]))
+        } else {
+            None
+        }
+    }
+}
 
 // pub trait Container {
 //     fn compute_cell_with_index<T>(
@@ -580,47 +801,9 @@ impl<'a> Walls<'a> for ContainerRad<'a> {}
 // }
 
 // impl<'a> Container for ContainerStd<'a> {
-//     fn point_inside(&mut self, xyz: DVec3) -> bool {
-//         self.inner
-//             .pin_mut()
-//             .point_inside(xyz[0], xyz[1], xyz[2])
-//     }
-
-//     fn total_particles(&mut self) -> i32 {
-//         self.inner.pin_mut().total_particles()
-//     }
-
-//     fn clear(&mut self) {
-//         self.inner.pin_mut().clear()
-//     }
-
-//     fn put(&mut self, n: i32, xyz: DVec3) {
-//         self.inner.pin_mut().put(n, xyz[0], xyz[1], xyz[2])
-//     }
-
 //     fn sum_cell_volumes(&mut self) -> f64 {
 //         self.inner.pin_mut().sum_cell_volumes()
 //     }
-
-//     fn find_voronoi_cell(
-//         &mut self,
-//         xyz: DVec3,
-//     ) -> Option<(i32, DVec3)> {
-//         let mut pid = 0;
-//         let mut rx = 0.0;
-//         let mut ry = 0.0;
-//         let mut rz = 0.0;
-//         let b = self.inner.pin_mut().find_voronoi_cell(
-//             xyz[0], xyz[1], xyz[2], &mut rx, &mut ry,
-//             &mut rz, &mut pid,
-//         );
-//         if b {
-//             Some((pid, [rx, ry, rz]))
-//         } else {
-//             None
-//         }
-//     }
-
 //     fn compute_cell_with_index<T>(
 //         &mut self,
 //         ijk: i32,

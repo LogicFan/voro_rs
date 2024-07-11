@@ -15,11 +15,11 @@ pub mod ffi {
 
 use cxx::UniquePtr;
 
-pub struct ParticleOrder {
+pub struct ParticleMarker {
     pub(crate) inner: UniquePtr<ffi::particle_order>,
 }
 
-impl ParticleOrder {
+impl ParticleMarker {
     pub fn new() -> Self {
         Self::new_with_memory(16)
     }

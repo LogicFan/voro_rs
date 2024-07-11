@@ -4,7 +4,7 @@ fn main() {
         "src/container.rs",
         "src/wall.rs",
         "src/wall_list.rs",
-        "src/particle_order.rs",
+        "src/particle_marker.rs",
     ])
     .file("cpp/voro++.cc")
     .cpp(true)
