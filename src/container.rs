@@ -782,6 +782,14 @@ pub trait ContainerStd0<T: VoroCell> {
 }
 
 impl<'a> ContainerStd0<VoroCellSgl> for ContainerStd<'a> {
+    /// Computes the Voronoi cell for a ghost particle at a given location.
+    ///
+    /// * `xyz`: the location of the ghost particle.
+    ///
+    /// Return some value if the cell was computed. If the cell cannot be
+    /// computed, if it is removed entirely by a wall or boundary
+    /// condition, then the routine returns `None`. If a value is
+    /// returned, it is the computed Voronoi cell.
     fn compute_ghost_cell(
         &mut self,
         xyz: DVec3,
@@ -810,6 +818,15 @@ pub trait ContainerRad0<T: VoroCell> {
 }
 
 impl<'a> ContainerRad0<VoroCellSgl> for ContainerRad<'a> {
+    /// Computes the Voronoi cell for a ghost particle at a given location.
+    ///
+    /// * `xyz`: the location of the ghost particle.
+    /// * `r`: the radius of the ghost particle.
+    ///
+    /// Return some value if the cell was computed. If the cell cannot be
+    /// computed, if it is removed entirely by a wall or boundary
+    /// condition, then the routine returns `None`. If a value is
+    /// returned, it is the computed Voronoi cell.
     fn compute_ghost_cell(
         &mut self,
         xyz: DVec3,
