@@ -124,6 +124,56 @@ pub mod ffi {
             y: f64,
             z: f64,
         ) -> bool;
+
+        type container_poly;
+        #[rust_name = "new_container_poly"]
+        fn construct(
+            ax_: f64,
+            bx_: f64,
+            ay_: f64,
+            by_: f64,
+            az_: f64,
+            bz_: f64,
+            nx_: i32,
+            ny_: i32,
+            nz_: i32,
+            xperiodic_: bool,
+            yperiodic_: bool,
+            zperiodic_: bool,
+            init_mem: i32,
+        ) -> UniquePtr<container_poly>;
+
+        unsafe fn add_wall(
+            self: Pin<&mut container_poly>,
+            w: Pin<&mut wall>,
+        );
+        #[rust_name = "add_walls"]
+        unsafe fn add_wall(
+            self: Pin<&mut container_poly>,
+            w: Pin<&mut wall_list>,
+        );
+        fn point_inside_walls(
+            self: Pin<&mut container_poly>,
+            x: f64,
+            y: f64,
+            z: f64,
+        ) -> bool;
+        #[rust_name = "apply_walls_0"]
+        fn apply_walls(
+            self: Pin<&mut container_poly>,
+            c: Pin<&mut voronoicell>,
+            x: f64,
+            y: f64,
+            z: f64,
+        ) -> bool;
+        #[rust_name = "apply_walls_1"]
+        fn apply_walls(
+            self: Pin<&mut container_poly>,
+            c: Pin<&mut voronoicell_neighbor>,
+            x: f64,
+            y: f64,
+            z: f64,
+        ) -> bool;
     }
 }
 
@@ -179,7 +229,49 @@ impl<'a> ContainerStd<'a> {
     }
 }
 
+pub struct ContainerRad<'a> {
+    pub(crate) inner: UniquePtr<ffi::container_poly>,
+    phantom: PhantomData<&'a ()>,
+}
+
+impl<'a> ContainerRad<'a> {
+    pub fn new(
+        xyz_min: DVec3,
+        xyz_max: DVec3,
+        sub_grids: IVec3,
+        is_periodic: BVec3,
+        init_mem_alloc: i32,
+    ) -> Self {
+        Self {
+            inner: ffi::new_container_poly(
+                xyz_min[0],
+                xyz_max[0],
+                xyz_min[1],
+                xyz_max[1],
+                xyz_min[2],
+                xyz_max[2],
+                sub_grids[0],
+                sub_grids[1],
+                sub_grids[2],
+                is_periodic[0],
+                is_periodic[1],
+                is_periodic[2],
+                init_mem_alloc,
+            ),
+            phantom: PhantomData,
+        }
+    }
+}
+
 impl<'a> Walls0 for ContainerStd<'a> {
+    fn point_inside_walls(&mut self, xyz: DVec3) -> bool {
+        self.inner
+            .pin_mut()
+            .point_inside_walls(xyz[0], xyz[1], xyz[2])
+    }
+}
+
+impl<'a> Walls0 for ContainerRad<'a> {
     fn point_inside_walls(&mut self, xyz: DVec3) -> bool {
         self.inner
             .pin_mut()
@@ -203,6 +295,36 @@ impl<'a> Walls1<VoroCellSgl> for ContainerStd<'a> {
 }
 
 impl<'a> Walls1<VoroCellNbr> for ContainerStd<'a> {
+    fn apply_walls(
+        &mut self,
+        cell: &mut VoroCellNbr,
+        xyz: DVec3,
+    ) -> bool {
+        self.inner.pin_mut().apply_walls_1(
+            cell.inner.pin_mut(),
+            xyz[0],
+            xyz[1],
+            xyz[2],
+        )
+    }
+}
+
+impl<'a> Walls1<VoroCellSgl> for ContainerRad<'a> {
+    fn apply_walls(
+        &mut self,
+        cell: &mut VoroCellSgl,
+        xyz: DVec3,
+    ) -> bool {
+        self.inner.pin_mut().apply_walls_0(
+            cell.inner.pin_mut(),
+            xyz[0],
+            xyz[1],
+            xyz[2],
+        )
+    }
+}
+
+impl<'a> Walls1<VoroCellNbr> for ContainerRad<'a> {
     fn apply_walls(
         &mut self,
         cell: &mut VoroCellNbr,
@@ -262,6 +384,51 @@ impl<'a> Walls2<'a, WallCone> for ContainerStd<'a> {
     }
 }
 
+impl<'a> Walls2<'a, WallSphere> for ContainerRad<'a> {
+    fn add_wall(&mut self, wall: &'a mut WallSphere) {
+        let w0 = wall_sphere_to_wall(wall.inner.pin_mut());
+        unsafe {
+            // ensure the lifetime of `self` is within the lifetime of
+            // `wall` using the lifetime specifier `'a`.
+            self.inner.pin_mut().add_wall(w0);
+        }
+    }
+}
+
+impl<'a> Walls2<'a, WallPlane> for ContainerRad<'a> {
+    fn add_wall(&mut self, wall: &'a mut WallPlane) {
+        let w0 = wall_plane_to_wall(wall.inner.pin_mut());
+        unsafe {
+            // ensure the lifetime of `self` is within the lifetime of
+            // `wall` using the lifetime specifier `'a`.
+            self.inner.pin_mut().add_wall(w0);
+        }
+    }
+}
+
+impl<'a> Walls2<'a, WallCylinder> for ContainerRad<'a> {
+    fn add_wall(&mut self, wall: &'a mut WallCylinder) {
+        let w0 =
+            wall_cylinder_to_wall(wall.inner.pin_mut());
+        unsafe {
+            // ensure the lifetime of `self` is within the lifetime of
+            // `wall` using the lifetime specifier `'a`.
+            self.inner.pin_mut().add_wall(w0);
+        }
+    }
+}
+
+impl<'a> Walls2<'a, WallCone> for ContainerRad<'a> {
+    fn add_wall(&mut self, wall: &'a mut WallCone) {
+        let w0 = wall_cone_to_wall(wall.inner.pin_mut());
+        unsafe {
+            // ensure the lifetime of `self` is within the lifetime of
+            // `wall` using the lifetime specifier `'a`.
+            self.inner.pin_mut().add_wall(w0);
+        }
+    }
+}
+
 impl<'a> Walls3<'a, WallList<'a>> for ContainerStd<'a> {
     fn add_walls(&mut self, walls: &mut WallList<'a>) {
         unsafe {
@@ -274,7 +441,20 @@ impl<'a> Walls3<'a, WallList<'a>> for ContainerStd<'a> {
     }
 }
 
+impl<'a> Walls3<'a, WallList<'a>> for ContainerRad<'a> {
+    fn add_walls(&mut self, walls: &mut WallList<'a>) {
+        unsafe {
+            // ensure the lifetime of `self` is within the lifetime of
+            // `wall` using the lifetime specifier `'a`.self
+            self.inner
+                .pin_mut()
+                .add_walls(walls.inner.pin_mut())
+        }
+    }
+}
+
 impl<'a> Walls<'a> for ContainerStd<'a> {}
+impl<'a> Walls<'a> for ContainerRad<'a> {}
 
 // pub trait Container {
 //     fn point_inside(&mut self, xyz: DVec3) -> bool;
@@ -360,3 +540,58 @@ impl<'a> Walls<'a> for ContainerStd<'a> {}
 //         todo!()
 //     }
 // }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::{
+        cell::{VoroCell, VoroCellNbr},
+        wall::WallSphere,
+    };
+
+    #[test]
+    fn walls_test() {
+        let mut c0 = VoroCellNbr::new(
+            [-1.0, -1.0, -1.0],
+            [1.0, 1.0, 1.0],
+        );
+        let mut c1 = c0.clone();
+        let mut c2 = c0.clone();
+        assert_eq!(c0.volume(), 8.0);
+        assert_eq!(c1.volume(), 8.0);
+        assert_eq!(c2.volume(), 8.0);
+        let mut w0 =
+            WallSphere::new([0.0, 0.0, 100.0], 100.0);
+        let mut w1 =
+            WallSphere::new([0.0, 100.0, 0.0], 100.0);
+
+        let mut wl0 = WallList::new();
+        let mut wl1 = ContainerStd::new(
+            [-1.0, -1.0, -1.0],
+            [1.0, 1.0, 1.0],
+            [1, 1, 1],
+            [false, false, false],
+            1,
+        );
+        let mut wl2 = ContainerRad::new(
+            [-1.0, -1.0, -1.0],
+            [1.0, 1.0, 1.0],
+            [1, 1, 1],
+            [false, false, false],
+            1,
+        );
+
+        wl0.add_wall(&mut w0);
+        wl0.add_wall(&mut w1);
+        wl0.apply_walls(&mut c0, [0.0, 0.0, 0.0]);
+        assert_eq!(c0.volume(), 2.0);
+
+        wl1.add_walls(&mut wl0);
+        wl1.apply_walls(&mut c1, [0.0, 0.0, 0.0]);
+        assert_eq!(c1.volume(), 2.0);
+
+        wl2.add_walls(&mut wl0);
+        wl2.apply_walls(&mut c2, [0.0, 0.0, 0.0]);
+        assert_eq!(c2.volume(), 2.0);
+    }
+}
