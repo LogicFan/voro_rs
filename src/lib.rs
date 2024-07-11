@@ -1,5 +1,5 @@
 pub mod cell;
-// pub mod container;
+pub mod container;
 pub mod wall;
 pub mod wall_list;
 

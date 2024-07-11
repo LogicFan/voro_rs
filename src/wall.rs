@@ -540,43 +540,6 @@ impl Wall for WallPlane {}
 impl Wall for WallCylinder {}
 impl Wall for WallCone {}
 
-pub mod bridge {
-    use super::*;
-
-    /// A enum to store mutable reference of any `Wall`. This is
-    /// to mimic the override in C++.
-    pub enum WallMut<'a> {
-        Sphere(&'a mut WallSphere),
-        Plane(&'a mut WallPlane),
-        Cylinder(&'a mut WallCylinder),
-        Cone(&'a mut WallCone),
-    }
-
-    impl<'a> Into<WallMut<'a>> for &'a mut WallSphere {
-        fn into(self) -> WallMut<'a> {
-            WallMut::Sphere(self)
-        }
-    }
-
-    impl<'a> Into<WallMut<'a>> for &'a mut WallPlane {
-        fn into(self) -> WallMut<'a> {
-            WallMut::Plane(self)
-        }
-    }
-
-    impl<'a> Into<WallMut<'a>> for &'a mut WallCylinder {
-        fn into(self) -> WallMut<'a> {
-            WallMut::Cylinder(self)
-        }
-    }
-
-    impl<'a> Into<WallMut<'a>> for &'a mut WallCone {
-        fn into(self) -> WallMut<'a> {
-            WallMut::Cone(self)
-        }
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
