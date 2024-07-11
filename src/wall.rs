@@ -399,7 +399,7 @@ pub trait Wall1<T: VoroCell> {
     /// * `xyz`: the location of the Voronoi cell.
     ///
     /// Return true if the cell still exists, false if the cell is deleted.
-    fn cut_cell<'a>(
+    fn cut_cell(
         &mut self,
         cell: &mut T,
         xyz: DVec3,
@@ -407,7 +407,7 @@ pub trait Wall1<T: VoroCell> {
 }
 
 impl Wall1<VoroCellSgl> for WallSphere {
-    fn cut_cell<'a>(
+    fn cut_cell(
         &mut self,
         cell: &mut VoroCellSgl,
         xyz: DVec3,
@@ -422,7 +422,7 @@ impl Wall1<VoroCellSgl> for WallSphere {
 }
 
 impl Wall1<VoroCellNbr> for WallSphere {
-    fn cut_cell<'a>(
+    fn cut_cell(
         &mut self,
         cell: &mut VoroCellNbr,
         xyz: DVec3,
@@ -437,7 +437,7 @@ impl Wall1<VoroCellNbr> for WallSphere {
 }
 
 impl Wall1<VoroCellSgl> for WallPlane {
-    fn cut_cell<'a>(
+    fn cut_cell(
         &mut self,
         cell: &mut VoroCellSgl,
         xyz: DVec3,
@@ -452,7 +452,7 @@ impl Wall1<VoroCellSgl> for WallPlane {
 }
 
 impl Wall1<VoroCellNbr> for WallPlane {
-    fn cut_cell<'a>(
+    fn cut_cell(
         &mut self,
         cell: &mut VoroCellNbr,
         xyz: DVec3,
@@ -467,7 +467,7 @@ impl Wall1<VoroCellNbr> for WallPlane {
 }
 
 impl Wall1<VoroCellSgl> for WallCylinder {
-    fn cut_cell<'a>(
+    fn cut_cell(
         &mut self,
         cell: &mut VoroCellSgl,
         xyz: DVec3,
@@ -482,7 +482,7 @@ impl Wall1<VoroCellSgl> for WallCylinder {
 }
 
 impl Wall1<VoroCellNbr> for WallCylinder {
-    fn cut_cell<'a>(
+    fn cut_cell(
         &mut self,
         cell: &mut VoroCellNbr,
         xyz: DVec3,
@@ -497,7 +497,7 @@ impl Wall1<VoroCellNbr> for WallCylinder {
 }
 
 impl Wall1<VoroCellSgl> for WallCone {
-    fn cut_cell<'a>(
+    fn cut_cell(
         &mut self,
         cell: &mut VoroCellSgl,
         xyz: DVec3,
@@ -512,7 +512,7 @@ impl Wall1<VoroCellSgl> for WallCone {
 }
 
 impl Wall1<VoroCellNbr> for WallCone {
-    fn cut_cell<'a>(
+    fn cut_cell(
         &mut self,
         cell: &mut VoroCellNbr,
         xyz: DVec3,
