@@ -49,6 +49,10 @@ pub mod ffi {
 }
 
 use crate::cell::{VoroCell, VoroCellNbr, VoroCellSgl};
+use crate::container::ffi::{
+    container_poly_to_wall_list, container_to_wall_list,
+};
+use crate::container::{ContainerRad, ContainerStd};
 use crate::wall::ffi::{
     wall_cone_to_wall, wall_cylinder_to_wall,
     wall_plane_to_wall, wall_sphere_to_wall,
@@ -228,6 +232,34 @@ impl<'a> Walls3<'a, WallList<'a>> for WallList<'a> {
     }
 }
 
+impl<'a> Walls3<'a, ContainerStd<'a>> for WallList<'a> {
+    fn add_walls(&mut self, walls: &mut ContainerStd<'a>) {
+        unsafe {
+            // ensure the lifetime of `self` is within the lifetime of
+            // `wall` using the lifetime specifier `'a`.self
+            self.inner.pin_mut().add_walls(
+                container_to_wall_list(
+                    walls.inner.pin_mut(),
+                ),
+            )
+        }
+    }
+}
+
+impl<'a> Walls3<'a, ContainerRad<'a>> for WallList<'a> {
+    fn add_walls(&mut self, walls: &mut ContainerRad<'a>) {
+        unsafe {
+            // ensure the lifetime of `self` is within the lifetime of
+            // `wall` using the lifetime specifier `'a`.self
+            self.inner.pin_mut().add_walls(
+                container_poly_to_wall_list(
+                    walls.inner.pin_mut(),
+                ),
+            )
+        }
+    }
+}
+
 /// The interface of `wall_list` class in voro++.
 ///
 /// This trait contains several simple routines that make use of the wall
@@ -242,6 +274,8 @@ pub trait Walls<'a>:
     + Walls2<'a, WallCylinder>
     + Walls2<'a, WallCone>
     + Walls3<'a, WallList<'a>>
+    + Walls3<'a, ContainerStd<'a>>
+    + Walls3<'a, ContainerRad<'a>>
 {
 }
 

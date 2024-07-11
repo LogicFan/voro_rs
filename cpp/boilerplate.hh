@@ -41,4 +41,13 @@ namespace voro
     {
         return w;
     }
+
+    inline wall_list &container_to_wall_list(container &c)
+    {
+        return c;
+    }
+    inline wall_list &container_poly_to_wall_list(container_poly &c)
+    {
+        return c;
+    }
 }

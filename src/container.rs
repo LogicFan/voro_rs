@@ -10,6 +10,13 @@ pub mod ffi {
         type wall = crate::wall::ffi::wall;
         type wall_list = crate::wall_list::ffi::wall_list;
 
+        fn container_to_wall_list(
+            value: Pin<&mut container>,
+        ) -> Pin<&mut wall_list>;
+        fn container_poly_to_wall_list(
+            value: Pin<&mut container_poly>,
+        ) -> Pin<&mut wall_list>;
+
         type container;
         #[rust_name = "new_container"]
         fn construct(
@@ -189,6 +196,9 @@ use crate::wall_list::{
     WallList, Walls, Walls0, Walls1, Walls2, Walls3,
 };
 use cxx::UniquePtr;
+use ffi::{
+    container_poly_to_wall_list, container_to_wall_list,
+};
 use std::marker::PhantomData;
 
 type DVec3 = [f64; 3];
@@ -441,6 +451,34 @@ impl<'a> Walls3<'a, WallList<'a>> for ContainerStd<'a> {
     }
 }
 
+impl<'a> Walls3<'a, ContainerStd<'a>> for ContainerStd<'a> {
+    fn add_walls(&mut self, walls: &mut ContainerStd<'a>) {
+        unsafe {
+            // ensure the lifetime of `self` is within the lifetime of
+            // `wall` using the lifetime specifier `'a`.self
+            self.inner.pin_mut().add_walls(
+                container_to_wall_list(
+                    walls.inner.pin_mut(),
+                ),
+            )
+        }
+    }
+}
+
+impl<'a> Walls3<'a, ContainerRad<'a>> for ContainerStd<'a> {
+    fn add_walls(&mut self, walls: &mut ContainerRad<'a>) {
+        unsafe {
+            // ensure the lifetime of `self` is within the lifetime of
+            // `wall` using the lifetime specifier `'a`.self
+            self.inner.pin_mut().add_walls(
+                container_poly_to_wall_list(
+                    walls.inner.pin_mut(),
+                ),
+            )
+        }
+    }
+}
+
 impl<'a> Walls3<'a, WallList<'a>> for ContainerRad<'a> {
     fn add_walls(&mut self, walls: &mut WallList<'a>) {
         unsafe {
@@ -449,6 +487,34 @@ impl<'a> Walls3<'a, WallList<'a>> for ContainerRad<'a> {
             self.inner
                 .pin_mut()
                 .add_walls(walls.inner.pin_mut())
+        }
+    }
+}
+
+impl<'a> Walls3<'a, ContainerStd<'a>> for ContainerRad<'a> {
+    fn add_walls(&mut self, walls: &mut ContainerStd<'a>) {
+        unsafe {
+            // ensure the lifetime of `self` is within the lifetime of
+            // `wall` using the lifetime specifier `'a`.self
+            self.inner.pin_mut().add_walls(
+                container_to_wall_list(
+                    walls.inner.pin_mut(),
+                ),
+            )
+        }
+    }
+}
+
+impl<'a> Walls3<'a, ContainerRad<'a>> for ContainerRad<'a> {
+    fn add_walls(&mut self, walls: &mut ContainerRad<'a>) {
+        unsafe {
+            // ensure the lifetime of `self` is within the lifetime of
+            // `wall` using the lifetime specifier `'a`.self
+            self.inner.pin_mut().add_walls(
+                container_poly_to_wall_list(
+                    walls.inner.pin_mut(),
+                ),
+            )
         }
     }
 }
@@ -590,7 +656,7 @@ mod tests {
         wl1.apply_walls(&mut c1, [0.0, 0.0, 0.0]);
         assert_eq!(c1.volume(), 2.0);
 
-        wl2.add_walls(&mut wl0);
+        wl2.add_walls(&mut wl1);
         wl2.apply_walls(&mut c2, [0.0, 0.0, 0.0]);
         assert_eq!(c2.volume(), 2.0);
     }
