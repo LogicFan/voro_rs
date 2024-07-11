@@ -1,5 +1,6 @@
 pub mod cell;
 pub mod container;
+pub mod particle_order;
 pub mod wall;
 pub mod wall_list;
 
