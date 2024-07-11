@@ -13,7 +13,7 @@ Here is the list of classes/functions plan to have a high-level binding in rust.
 - [x] `wall_list`
 - [ ] `container`/`container_poly`
 - [ ] `c_loop_all`/`c_loop_subset`/`c_loop_order`
-- [ ] `particle_order`
+- [x] `particle_order`
 - [ ] `container_periodic`/`container_periodic_poly`
 - [ ] `c_loop_all_periodic`/`c_loop_order_periodic`
 - [ ] `pre_container`/`pre_container_poly`
