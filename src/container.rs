@@ -687,9 +687,20 @@ impl<'a> Walls<'a> for ContainerStd<'a> {}
 impl<'a> Walls<'a> for ContainerRad<'a> {}
 
 impl<'a> ContainerStd<'a> {
+    /// Put a particle into the correct region of the container.
+    ///
+    /// * `n`: the numerical ID of the inserted particle.
+    /// * `xyz`: the position vector of the inserted particle.
     pub fn put(&mut self, n: i32, xyz: DVec3) {
         self.inner.pin_mut().put(n, xyz[0], xyz[1], xyz[2])
     }
+
+    /// Put a particle into the correct region of the container, also recording
+    /// into which region it was stored.
+    /// 
+    /// * `marker`: the marker class in which to record the region.
+    /// * `n`: the numerical ID of the inserted particle.
+    /// * `xyz`: the position vector of the inserted particle.
     pub fn put_with_marker(
         &mut self,
         marker: &mut ParticleMarker,
@@ -735,13 +746,6 @@ pub trait Container0 {
     fn point_inside(&mut self, xyz: DVec3) -> bool;
     fn total_particles(&mut self) -> i32;
     fn clear(&mut self);
-    // fn put(&mut self, n: i32, xyz: DVec3);
-    // fn put_with_marker(
-    //     &mut self,
-    //     marker: &mut ParticleMarker,
-    //     n: i32,
-    //     xyz: DVec3,
-    // );
     fn sum_cell_volumes(&mut self) -> f64;
     fn find_voronoi_cell(
         &mut self,
