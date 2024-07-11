@@ -586,4 +586,12 @@ mod tests {
         w0.cut_cell(&mut c0, [0.0, 0.0, 0.0]);
         w0.cut_cell(&mut c1, [0.0, 0.0, 0.0]);
     }
+
+    #[test]
+    fn all_types() {
+        WallPlane::new([10.0, 0.0, 0.0], 10.0);
+        WallPlane::new([1.0, 0.0, 0.0], 10.0);
+        WallCylinder::new([0.0, 0.0, 0.0], [1.0, 0.0, 0.0], 10.0);
+        WallCone::new([0.0, 0.0, 0.0], [1.0, 0.0, 0.0], 1.0);
+    }
 }
