@@ -807,8 +807,7 @@ pub trait Container0 {
     /// Return values if a particle was found. If the container has no particles,
     /// then the search will not find a Voronoi cell and `None` is returned. If
     /// there is return value, the first element is the ID of the particle; and
-    /// the second element is
-    /// \param[out] (rx,ry,rz) the position of the particle whose Voronoi cell
+    /// the second element is the position of the particle whose Voronoi cell
     /// contains the vector. If the container is periodic,
     /// this may point to a particle in a periodic image of
     /// the primary domain.
