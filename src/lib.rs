@@ -1,3 +1,9 @@
+//! # voro_rs
+//!
+//! A Rust binding for voro++ library.
+//!
+//! This binding has been tested on Windows, Linux and MacOS.
+
 pub mod cell;
 pub mod container;
 pub mod particle_marker;
