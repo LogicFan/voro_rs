@@ -756,10 +756,43 @@ impl<'a> ContainerRad<'a> {
 
 /// A part of trait `Container` whose parameter does not depends any type.
 pub trait Container0 {
+    /// This function tests to see if a given vector lies within the container
+    /// bounds and any walls.
+    ///
+    /// *  `xyz`: the position vector to be tested.
+    ///
+    /// Return true if the point is inside the container, false if the point is
+    /// outside.
     fn point_inside(&mut self, xyz: DVec3) -> bool;
+
+    /// Sums up the total number of stored particles.
+    ///
+    /// Return the number of particles.
     fn total_particles(&mut self) -> i32;
+
+    /// Clears a container of particles.
     fn clear(&mut self);
+
+    /// Calculates all of the Voronoi cells and sums their volumes. In most cases
+    /// without walls, the sum of the Voronoi cell volumes should equal the volume
+    /// of the container to numerical precision.
+    /// Return the sum of all of the computed Voronoi volumes.
     fn sum_cell_volumes(&mut self) -> f64;
+
+    /// Takes a vector and finds the particle whose Voronoi cell contains that
+    /// vector. This is equivalent to finding the particle which is nearest to the
+    /// vector. Additional wall classes are not considered by this routine.
+    ///
+    /// * `xyz` the vector to test.
+    ///
+    /// Return values if a particle was found. If the container has no particles,
+    /// then the search will not find a Voronoi cell and `None` is returned. If
+    /// there is return value, the first element is the ID of the particle; and
+    /// the second element is
+    /// \param[out] (rx,ry,rz) the position of the particle whose Voronoi cell
+    /// contains the vector. If the container is periodic,
+    /// this may point to a particle in a periodic image of
+    /// the primary domain.
     fn find_voronoi_cell(
         &mut self,
         xyz: DVec3,
