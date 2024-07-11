@@ -298,12 +298,25 @@ type DVec3 = [f64; 3];
 type IVec3 = [i32; 3];
 type BVec3 = [bool; 3];
 
+/// A class for computing regular Voronoi tessellations.
+///
+/// A class that has routines
+/// specifically for computing the regular Voronoi tessellation with no
+/// dependence on particle radii.
 pub struct ContainerStd<'a> {
     pub(crate) inner: UniquePtr<ffi::container>,
     phantom: PhantomData<&'a ()>,
 }
 
 impl<'a> ContainerStd<'a> {
+    /// The class constructor sets up the geometry of container.
+    ///
+    /// * `xyz_min`: the minimum coordinates.
+    /// * `xyz_max`: the maximum coordinates.
+    /// * `sub_grids`: the number of grid blocks in each of the
+    /// three coordinate directions.
+    /// * `is_periodic`: flags setting whether the container is
+    /// periodic in each coordinate direction.
     pub fn new(
         xyz_min: DVec3,
         xyz_max: DVec3,
@@ -319,6 +332,16 @@ impl<'a> ContainerStd<'a> {
         )
     }
 
+    /// The class constructor sets up the geometry of container.
+    ///
+    /// * `xyz_min`: the minimum coordinates.
+    /// * `xyz_max`: the maximum coordinates.
+    /// * `sub_grids`: the number of grid blocks in each of the
+    /// three coordinate directions.
+    /// * `is_periodic`: flags setting whether the container is
+    /// periodic in each coordinate direction.
+    /// * `initial_memory`: the initial memory allocation for each sub-grid,
+    /// in terms of particle count.
     pub fn new_with_memory(
         xyz_min: DVec3,
         xyz_max: DVec3,
@@ -353,6 +376,14 @@ pub struct ContainerRad<'a> {
 }
 
 impl<'a> ContainerRad<'a> {
+    /// The class constructor sets up the geometry of container.
+    ///
+    /// * `xyz_min`: the minimum coordinates.
+    /// * `xyz_max`: the maximum coordinates.
+    /// * `sub_grids`: the number of grid blocks in each of the three
+    /// coordinate directions.
+    /// * `is_periodic`: flags setting whether the container is
+    /// periodic in each coordinate direction.
     pub fn new(
         xyz_min: DVec3,
         xyz_max: DVec3,
@@ -368,6 +399,16 @@ impl<'a> ContainerRad<'a> {
         )
     }
 
+    /// The class constructor sets up the geometry of container.
+    ///
+    /// * `xyz_min`: the minimum coordinates.
+    /// * `xyz_max`: the maximum coordinates.
+    /// * `sub_grids`: the number of grid blocks in each of the three
+    /// coordinate directions.
+    /// * `is_periodic`: flags setting whether the container is
+    /// periodic in each coordinate direction.
+    /// * `initial_memory`: the initial memory allocation for each sub-grid,
+    /// in terms of particle count.
     pub fn new_with_memory(
         xyz_min: DVec3,
         xyz_max: DVec3,
