@@ -697,7 +697,7 @@ impl<'a> ContainerStd<'a> {
 
     /// Put a particle into the correct region of the container, also recording
     /// into which region it was stored.
-    /// 
+    ///
     /// * `marker`: the marker class in which to record the region.
     /// * `n`: the numerical ID of the inserted particle.
     /// * `xyz`: the position vector of the inserted particle.
@@ -719,7 +719,7 @@ impl<'a> ContainerStd<'a> {
 
 impl<'a> ContainerRad<'a> {
     /// Put a particle into the correct region of the container.
-    /// 
+    ///
     /// * `n`: the numerical ID of the inserted particle.
     /// * `xyz`: the position vector of the inserted particle.
     /// * `r`: the radius of the particle.
@@ -731,7 +731,7 @@ impl<'a> ContainerRad<'a> {
 
     /// Put a particle into the correct region of the container, also recording
     /// into which region it was stored.
-    /// 
+    ///
     /// * `marker`: the marker class in which to record the region.
     /// * `n`: the numerical ID of the inserted particle.
     /// * `xyz`: the position vector of the inserted particle.
