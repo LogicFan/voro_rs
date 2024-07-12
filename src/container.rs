@@ -401,20 +401,20 @@ impl<'a> ContainerStd<'a> {
     ///
     /// * `xyz_min`: the minimum coordinates.
     /// * `xyz_max`: the maximum coordinates.
-    /// * `sub_grids`: the number of grid blocks in each of the
+    /// * `grids`: the number of grid blocks in each of the
     /// three coordinate directions.
     /// * `is_periodic`: flags setting whether the container is
     /// periodic in each coordinate direction.
     pub fn new(
         xyz_min: DVec3,
         xyz_max: DVec3,
-        sub_grids: IVec3,
+        grids: IVec3,
         is_periodic: BVec3,
     ) -> Self {
         Self::new_with_memory(
             xyz_min,
             xyz_max,
-            sub_grids,
+            grids,
             is_periodic,
             16,
         )
@@ -424,16 +424,16 @@ impl<'a> ContainerStd<'a> {
     ///
     /// * `xyz_min`: the minimum coordinates.
     /// * `xyz_max`: the maximum coordinates.
-    /// * `sub_grids`: the number of grid blocks in each of the
+    /// * `grids`: the number of grid blocks in each of the
     /// three coordinate directions.
     /// * `is_periodic`: flags setting whether the container is
     /// periodic in each coordinate direction.
-    /// * `initial_memory`: the initial memory allocation for each sub-grid,
+    /// * `initial_memory`: the initial memory allocation for each grid,
     /// in terms of particle count.
     pub fn new_with_memory(
         xyz_min: DVec3,
         xyz_max: DVec3,
-        sub_grids: IVec3,
+        grids: IVec3,
         is_periodic: BVec3,
         initial_memory: i32,
     ) -> Self {
@@ -445,9 +445,9 @@ impl<'a> ContainerStd<'a> {
                 xyz_max[1],
                 xyz_min[2],
                 xyz_max[2],
-                sub_grids[0],
-                sub_grids[1],
-                sub_grids[2],
+                grids[0],
+                grids[1],
+                grids[2],
                 is_periodic[0],
                 is_periodic[1],
                 is_periodic[2],
@@ -480,20 +480,20 @@ impl<'a> ContainerRad<'a> {
     ///
     /// * `xyz_min`: the minimum coordinates.
     /// * `xyz_max`: the maximum coordinates.
-    /// * `sub_grids`: the number of grid blocks in each of the three
+    /// * `grids`: the number of grid blocks in each of the three
     /// coordinate directions.
     /// * `is_periodic`: flags setting whether the container is
     /// periodic in each coordinate direction.
     pub fn new(
         xyz_min: DVec3,
         xyz_max: DVec3,
-        sub_grids: IVec3,
+        grids: IVec3,
         is_periodic: BVec3,
     ) -> Self {
         Self::new_with_memory(
             xyz_min,
             xyz_max,
-            sub_grids,
+            grids,
             is_periodic,
             16,
         )
@@ -503,16 +503,16 @@ impl<'a> ContainerRad<'a> {
     ///
     /// * `xyz_min`: the minimum coordinates.
     /// * `xyz_max`: the maximum coordinates.
-    /// * `sub_grids`: the number of grid blocks in each of the three
+    /// * `grids`: the number of grid blocks in each of the three
     /// coordinate directions.
     /// * `is_periodic`: flags setting whether the container is
     /// periodic in each coordinate direction.
-    /// * `initial_memory`: the initial memory allocation for each sub-grid,
+    /// * `initial_memory`: the initial memory allocation for each grid,
     /// in terms of particle count.
     pub fn new_with_memory(
         xyz_min: DVec3,
         xyz_max: DVec3,
-        sub_grids: IVec3,
+        grids: IVec3,
         is_periodic: BVec3,
         initial_memory: i32,
     ) -> Self {
@@ -524,9 +524,9 @@ impl<'a> ContainerRad<'a> {
                 xyz_max[1],
                 xyz_min[2],
                 xyz_max[2],
-                sub_grids[0],
-                sub_grids[1],
-                sub_grids[2],
+                grids[0],
+                grids[1],
+                grids[2],
                 is_periodic[0],
                 is_periodic[1],
                 is_periodic[2],
