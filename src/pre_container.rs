@@ -95,9 +95,13 @@ pub mod ffi {
     }
 }
 
+use crate::prelude::{
+    ContainerRad, ContainerStd, ParticleMarker,
+};
 use cxx::UniquePtr;
 
 type DVec3 = [f64; 3];
+type IVec3 = [i32; 3];
 type BVec3 = [bool; 3];
 
 /// A class for storing an arbitrary number of particles without radius
@@ -169,5 +173,121 @@ impl PreContainerRad {
                 is_periodic[2],
             ),
         }
+    }
+}
+
+pub trait PreContainer<T> {
+    /// Makes a guess at the optimal grid of blocks to use.
+    ///
+    /// Return the number of grids to use.
+    fn optimal_grids(&mut self) -> IVec3;
+
+    /// Calculates and returns the total number of particles stored
+    /// within the class.
+    ///
+    /// Return The number of particles.
+    fn total_particles(&mut self) -> i32;
+
+    /// Stores a particle ID and position, allocating a new memory chunk if necessary.
+    ///
+    /// * `n`: the numerical ID of the inserted particle.
+    /// * `xyz`: the position vector of the inserted particle.
+    /// * `r`: the radius of the particle. This is ignored for `PreContainerStd`.
+    fn put(&mut self, n: i32, xyz: DVec3, r: f64);
+
+    /// Transfers the particles stored within the class to a container class.
+    ///
+    /// * `container`: the container class to transfer to.
+    fn setup(&mut self, container: &mut T);
+
+    /// Transfers the particles stored within the class to a container class, also
+    /// recording the order in which particles were stored.
+    ///
+    /// * `marker`: the ordering class to use.
+    /// * `container`: the container class to transfer to.
+    fn setup_with_marker(
+        &mut self,
+        marker: &mut ParticleMarker,
+        container: &mut T,
+    );
+}
+
+impl<'a> PreContainer<ContainerStd<'a>>
+    for PreContainerStd
+{
+    fn optimal_grids(&mut self) -> IVec3 {
+        let mut nx = 0;
+        let mut ny = 0;
+        let mut nz = 0;
+        self.inner
+            .pin_mut()
+            .guess_optimal(&mut nx, &mut ny, &mut nz);
+        [nx, ny, nz]
+    }
+
+    fn total_particles(&mut self) -> i32 {
+        self.inner.pin_mut().total_particles()
+    }
+
+    fn put(&mut self, n: i32, xyz: DVec3, _: f64) {
+        self.inner.pin_mut().put(n, xyz[0], xyz[1], xyz[2]);
+    }
+
+    fn setup(&mut self, container: &mut ContainerStd) {
+        self.inner
+            .pin_mut()
+            .setup(container.inner.pin_mut());
+    }
+
+    fn setup_with_marker(
+        &mut self,
+        marker: &mut ParticleMarker,
+        container: &mut ContainerStd,
+    ) {
+        self.inner.pin_mut().setup_with_particle_order(
+            marker.inner.pin_mut(),
+            container.inner.pin_mut(),
+        );
+    }
+}
+
+impl<'a> PreContainer<ContainerRad<'a>>
+    for PreContainerRad
+{
+    fn optimal_grids(&mut self) -> IVec3 {
+        let mut nx = 0;
+        let mut ny = 0;
+        let mut nz = 0;
+        self.inner
+            .pin_mut()
+            .guess_optimal(&mut nx, &mut ny, &mut nz);
+        [nx, ny, nz]
+    }
+
+    fn total_particles(&mut self) -> i32 {
+        self.inner.pin_mut().total_particles()
+    }
+
+    fn put(&mut self, n: i32, xyz: DVec3, r: f64) {
+        self.inner
+            .pin_mut()
+            .put(n, xyz[0], xyz[1], xyz[2], r);
+    }
+
+    fn setup(&mut self, container: &mut ContainerRad) {
+        self.inner
+            .pin_mut()
+            .setup(container.inner.pin_mut());
+    }
+
+    fn setup_with_marker(
+        &mut self,
+        marker: &mut ParticleMarker,
+        container: &mut ContainerRad,
+    ) {
+        self.inner.pin_mut().setup_with_particle_order(
+            marker.inner.pin_mut(),
+            container.inner.pin_mut(),
+        );
     }
 }
