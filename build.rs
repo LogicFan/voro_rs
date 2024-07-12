@@ -19,5 +19,6 @@ fn main() {
     ]);
     bridge.cpp(true);
     bridge.warnings(false);
+    bridge.std("c++14");
     bridge.compile("bridge");
 }
