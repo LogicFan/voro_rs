@@ -15,6 +15,14 @@ pub mod prelude {
     pub use crate::cell::{
         VoroCell, VoroCellNbr, VoroCellSgl,
     };
+    pub use crate::container::{
+        Container, Container0, Container1, Container2,
+        ContainerRad, ContainerStd,
+    };
+    pub use crate::container_loop::{
+        ContainerLoop, LoopAll, LoopMarked, LoopSubset,
+    };
+    pub use crate::particle_marker::ParticleMarker;
     pub use crate::wall::{
         Wall, Wall0, Wall1, WallCone, WallCylinder,
         WallPlane, WallSphere,

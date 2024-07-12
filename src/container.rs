@@ -1453,6 +1453,21 @@ impl<'a> Container2<VoroCellNbr, LoopMarked>
     }
 }
 
+pub trait Container:
+    Container0
+    + Container1<VoroCellSgl>
+    + Container1<VoroCellNbr>
+    + Container2<VoroCellSgl, LoopAll>
+    + Container2<VoroCellNbr, LoopAll>
+    + Container2<VoroCellSgl, LoopMarked>
+    + Container2<VoroCellNbr, LoopMarked>
+    + Container2<VoroCellSgl, LoopSubset>
+    + Container2<VoroCellNbr, LoopSubset>
+{
+}
+impl<'a> Container for ContainerStd<'a> {}
+impl<'a> Container for ContainerRad<'a> {}
+
 #[cfg(test)]
 mod tests {
     use super::*;
