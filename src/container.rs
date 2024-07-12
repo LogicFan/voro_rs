@@ -1568,4 +1568,43 @@ mod tests {
         let c = con.find_voronoi_cell([4.0, 4.0, 0.0]);
         assert!(c.is_none());
     }
+
+    
+    #[test]
+    fn loop_test() {
+        let mut con = ContainerStd::new(
+            [-10.0, -10.0, -10.0],
+            [10.0, 10.0, 10.0],
+            [20, 20, 20],
+            [false, false, false],
+        );
+        con.clear();
+        con.put(0, [0.0, 0.0, 0.0]);
+        con.put(1, [1.0, 0.0, 0.0]);
+        con.put(2, [2.0, 0.0, 0.0]);
+        con.put(3, [3.0, 0.0, 0.0]);
+        con.put(4, [4.0, 0.0, 0.0]);
+        con.put(5, [4.0, 1.0, 0.0]);
+        con.put(6, [4.0, 2.0, 0.0]);
+        con.put(7, [4.0, 3.0, 0.0]);
+        con.put(8, [4.0, 4.0, 0.0]);
+
+        let mut volume = 0.0;
+        let mut cl = LoopAll::of_container_std(&mut con);
+        cl.start();
+
+        loop {
+            let cell: Option<VoroCellSgl> = con.compute_cell(&mut cl);
+            assert!(cell.is_some());
+
+            println!("{}", cl.particle_id());
+            volume += cell.unwrap().volume();
+
+            if !cl.inc() {
+                break;
+            }
+        }
+
+        assert_eq!(volume, 8000.0);
+    }
 }
