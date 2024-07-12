@@ -20,6 +20,10 @@ pub mod ffi {
         fn construct(
             con: Pin<&mut container_poly>,
         ) -> UniquePtr<c_loop_all>;
+        fn x(self: Pin<&mut c_loop_all>) -> f64;
+        fn y(self: Pin<&mut c_loop_all>) -> f64;
+        fn z(self: Pin<&mut c_loop_all>) -> f64;
+        fn pid(self: Pin<&mut c_loop_all>) -> i32;
         fn start(self: Pin<&mut c_loop_all>) -> bool;
         fn inc(self: Pin<&mut c_loop_all>) -> bool;
 
@@ -32,6 +36,10 @@ pub mod ffi {
         fn construct(
             con: Pin<&mut container_poly>,
         ) -> UniquePtr<c_loop_subset>;
+        fn x(self: Pin<&mut c_loop_subset>) -> f64;
+        fn y(self: Pin<&mut c_loop_subset>) -> f64;
+        fn z(self: Pin<&mut c_loop_subset>) -> f64;
+        fn pid(self: Pin<&mut c_loop_subset>) -> i32;
         fn start(self: Pin<&mut c_loop_subset>) -> bool;
         fn inc(self: Pin<&mut c_loop_subset>) -> bool;
 
@@ -46,6 +54,10 @@ pub mod ffi {
             con: Pin<&mut container_poly>,
             vo: Pin<&mut particle_order>,
         ) -> UniquePtr<c_loop_order>;
+        fn x(self: Pin<&mut c_loop_order>) -> f64;
+        fn y(self: Pin<&mut c_loop_order>) -> f64;
+        fn z(self: Pin<&mut c_loop_order>) -> f64;
+        fn pid(self: Pin<&mut c_loop_order>) -> i32;
         fn start(self: Pin<&mut c_loop_order>) -> bool;
         fn inc(self: Pin<&mut c_loop_order>) -> bool;
     }
@@ -56,6 +68,8 @@ use crate::{
     particle_marker::ParticleMarker,
 };
 use cxx::UniquePtr;
+
+type DVec3 = [f64; 3];
 
 pub struct LoopAll {
     pub(crate) inner: UniquePtr<ffi::c_loop_all>,
@@ -140,11 +154,62 @@ impl LoopMarked {
 }
 
 pub trait ContainerLoop {
+    /// Returns the x position of the particle currently being
+    /// considered by the loop. 
+    fn x(&mut self) -> f64;
+    
+    /// Returns the y position of the particle currently being
+    /// considered by the loop. 
+    fn y(&mut self) -> f64;
+    
+    /// Returns the z position of the particle currently being
+    /// considered by the loop. 
+    fn z(&mut self) -> f64;
+
+    /// Returns the position vector of the particle currently being
+    /// considered by the loop.
+    fn position(&mut self) -> DVec3 {
+        [
+            self.x(),
+            self.y(),
+            self.z()
+        ]
+    }
+
+    /// Returns the ID of the particle currently being considered
+    /// by the loop. 
+    fn particle_id(&mut self) -> i32;
+
+    /// Sets the class to consider the first particle.
+    /// 
+    /// Return true if there is any particle to consider, false
+    /// otherwise.
     fn start(&mut self) -> bool;
+
+    /// Finds the next particle to test.
+    /// 
+    /// Return true if there is another particle, false if no more
+    /// particles are available.
     fn inc(&mut self) -> bool;
 }
 
 impl ContainerLoop for LoopAll {
+    fn x(&mut self) -> f64 {
+        self.inner.pin_mut().x()
+    }
+    
+    fn y(&mut self) -> f64 {
+        self.inner.pin_mut().y()
+    }
+    
+    fn z(&mut self) -> f64 {
+        self.inner.pin_mut().z()
+    }
+    
+    fn particle_id(&mut self) -> i32 {
+        self.inner.pin_mut().pid()
+    }
+    
     fn start(&mut self) -> bool {
         self.inner.pin_mut().start()
     }
@@ -155,6 +220,22 @@ impl ContainerLoop for LoopAll {
 }
 
 impl ContainerLoop for LoopSubset {
+    fn x(&mut self) -> f64 {
+        self.inner.pin_mut().x()
+    }
+    
+    fn y(&mut self) -> f64 {
+        self.inner.pin_mut().y()
+    }
+    
+    fn z(&mut self) -> f64 {
+        self.inner.pin_mut().z()
+    }
+    
+    fn particle_id(&mut self) -> i32 {
+        self.inner.pin_mut().pid()
+    }
+    
     fn start(&mut self) -> bool {
         self.inner.pin_mut().start()
     }
@@ -165,6 +246,22 @@ impl ContainerLoop for LoopSubset {
 }
 
 impl ContainerLoop for LoopMarked {
+    fn x(&mut self) -> f64 {
+        self.inner.pin_mut().x()
+    }
+    
+    fn y(&mut self) -> f64 {
+        self.inner.pin_mut().y()
+    }
+    
+    fn z(&mut self) -> f64 {
+        self.inner.pin_mut().z()
+    }
+    
+    fn particle_id(&mut self) -> i32 {
+        self.inner.pin_mut().pid()
+    }
+    
     fn start(&mut self) -> bool {
         self.inner.pin_mut().start()
     }
