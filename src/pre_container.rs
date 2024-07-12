@@ -98,7 +98,76 @@ pub mod ffi {
 use cxx::UniquePtr;
 
 type DVec3 = [f64; 3];
+type BVec3 = [bool; 3];
 
+/// A class for storing an arbitrary number of particles without radius
+/// information, prior to setting up a container geometry.
 pub struct PreContainerStd {
     pub(crate) inner: UniquePtr<ffi::pre_container>,
+}
+
+impl PreContainerStd {
+    /// The class constructor sets up the geometry of container,
+    /// initializing the minimum and maximum coordinates in each
+    /// direction.
+    ///
+    /// * `xyz_min`: the minimum coordinates.
+    /// * `xyz_max`: the maximum coordinates.
+    /// * `is_periodic`: flags setting whether the container is periodic in
+    /// each coordinate direction.
+    pub fn new(
+        xyz_min: DVec3,
+        xyz_max: DVec3,
+        is_periodic: BVec3,
+    ) -> Self {
+        Self {
+            inner: ffi::new_pre_container(
+                xyz_min[0],
+                xyz_max[0],
+                xyz_min[1],
+                xyz_max[1],
+                xyz_min[2],
+                xyz_max[2],
+                is_periodic[0],
+                is_periodic[1],
+                is_periodic[2],
+            ),
+        }
+    }
+}
+
+/// A class for storing an arbitrary number of particles with radius
+/// information, prior to setting up a container geometry.
+pub struct PreContainerRad {
+    pub(crate) inner: UniquePtr<ffi::pre_container_poly>,
+}
+
+impl PreContainerRad {
+    /// The class constructor sets up the geometry of container,
+    /// initializing the minimum and maximum coordinates in each
+    /// direction.
+    ///
+    /// * `xyz_min`: the minimum coordinates.
+    /// * `xyz_max`: the maximum coordinates.
+    /// * `is_periodic`: flags setting whether the container is periodic in
+    /// each coordinate direction.
+    pub fn new(
+        xyz_min: DVec3,
+        xyz_max: DVec3,
+        is_periodic: BVec3,
+    ) -> Self {
+        Self {
+            inner: ffi::new_pre_container_poly(
+                xyz_min[0],
+                xyz_max[0],
+                xyz_min[1],
+                xyz_max[1],
+                xyz_min[2],
+                xyz_max[2],
+                is_periodic[0],
+                is_periodic[1],
+                is_periodic[2],
+            ),
+        }
+    }
 }
