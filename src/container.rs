@@ -978,33 +978,6 @@ impl<'a> Container0 for ContainerRad<'a> {
 //     ) -> Option<T>
 //     where
 //         T: VoroCell;
-//     fn compute_ghost_cell<T>(
-//         &mut self,
-//         xyz: DVec3,
-//     ) -> Option<T>;
-// }
-
-// impl<'a> Container for ContainerStd<'a> {
-//     fn sum_cell_volumes(&mut self) -> f64 {
-//         self.inner.pin_mut().sum_cell_volumes()
-//     }
-//     fn compute_cell_with_index<T>(
-//         &mut self,
-//         ijk: i32,
-//         q: i32,
-//     ) -> Option<T>
-//     where
-//         T: VoroCell,
-//     {
-//         todo!()
-//     }
-
-//     fn compute_ghost_cell<T>(
-//         &mut self,
-//         xyz: DVec3,
-//     ) -> Option<T> {
-//         todo!()
-//     }
 // }
 
 #[cfg(test)]
