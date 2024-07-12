@@ -3,7 +3,7 @@
 #[cxx::bridge(namespace = "voro")]
 pub mod ffi {
     unsafe extern "C++" {
-        include!("voro_rs/cpp/boilerplate.hh");
+        include!("voro_rs/src/boilerplate.hh");
 
         type container = crate::container::ffi::container;
         type container_poly =
