@@ -18,6 +18,8 @@ jobs:
                   rustup default stable
             - name: Check out Source Code
               uses: actions/checkout@v4
+              with:
+                  submodules: 'true'
             - name: Build
               run: cargo build
             - name: Test
@@ -33,6 +35,8 @@ jobs:
                   rustup default stable
             - name: Check out Source Code
               uses: actions/checkout@v4
+              with:
+                  submodules: 'true'
             - name: Build
               run: cargo build
             - name: Test
@@ -48,6 +52,8 @@ jobs:
                   rustup default stable
             - name: Check out Source Code
               uses: actions/checkout@v4
+              with:
+                  submodules: 'true'
             - name: Build
               run: cargo build
             - name: Test
