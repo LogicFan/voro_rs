@@ -1453,7 +1453,15 @@ impl<'a> Container2<VoroCellNbr, LoopMarked>
     }
 }
 
-pub trait Container:
+/// Trait for representing a particle system in a three-dimensional rectangular box.
+///
+/// This trait represents a system of particles in a three-dimensional
+/// rectangular box. Any combination of non-periodic and periodic coordinates
+/// can be used in the three coordinate directions.
+///
+/// The trait is derived from the `Walls` trait, which encapsulates routines
+/// for associating walls with the container.
+pub trait Container<'a>:
     Container0
     + Container1<VoroCellSgl>
     + Container1<VoroCellNbr>
@@ -1463,10 +1471,11 @@ pub trait Container:
     + Container2<VoroCellNbr, LoopMarked>
     + Container2<VoroCellSgl, LoopSubset>
     + Container2<VoroCellNbr, LoopSubset>
+    + Walls<'a>
 {
 }
-impl<'a> Container for ContainerStd<'a> {}
-impl<'a> Container for ContainerRad<'a> {}
+impl<'a> Container<'a> for ContainerStd<'a> {}
+impl<'a> Container<'a> for ContainerRad<'a> {}
 
 #[cfg(test)]
 mod tests {
