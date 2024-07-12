@@ -15,6 +15,13 @@ pub mod ffi {
         type particle_order =
             crate::particle_marker::ffi::particle_order;
 
+        type c_loop_all =
+            crate::container_loop::ffi::c_loop_all;
+        type c_loop_subset =
+            crate::container_loop::ffi::c_loop_subset;
+        type c_loop_order =
+            crate::container_loop::ffi::c_loop_order;
+
         fn container_to_wall_list(
             value: Pin<&mut container>,
         ) -> Pin<&mut wall_list>;
@@ -113,7 +120,42 @@ pub mod ffi {
             rz: &mut f64,
             pid: &mut i32,
         ) -> bool;
-        // TODO: compute_cell with c_loop
+        #[rust_name = "compute_cell_0"]
+        fn compute_cell(
+            self: Pin<&mut container>,
+            c: Pin<&mut voronoicell>,
+            vl: Pin<&mut c_loop_all>,
+        ) -> bool;
+        #[rust_name = "compute_cell_1"]
+        fn compute_cell(
+            self: Pin<&mut container>,
+            c: Pin<&mut voronoicell_neighbor>,
+            vl: Pin<&mut c_loop_all>,
+        ) -> bool;
+        #[rust_name = "compute_cell_2"]
+        fn compute_cell(
+            self: Pin<&mut container>,
+            c: Pin<&mut voronoicell>,
+            vl: Pin<&mut c_loop_subset>,
+        ) -> bool;
+        #[rust_name = "compute_cell_3"]
+        fn compute_cell(
+            self: Pin<&mut container>,
+            c: Pin<&mut voronoicell_neighbor>,
+            vl: Pin<&mut c_loop_subset>,
+        ) -> bool;
+        #[rust_name = "compute_cell_4"]
+        fn compute_cell(
+            self: Pin<&mut container>,
+            c: Pin<&mut voronoicell>,
+            vl: Pin<&mut c_loop_order>,
+        ) -> bool;
+        #[rust_name = "compute_cell_5"]
+        fn compute_cell(
+            self: Pin<&mut container>,
+            c: Pin<&mut voronoicell_neighbor>,
+            vl: Pin<&mut c_loop_order>,
+        ) -> bool;
         #[rust_name = "compute_cell_with_index_0"]
         fn compute_cell(
             self: Pin<&mut container>,
@@ -240,7 +282,42 @@ pub mod ffi {
             rz: &mut f64,
             pid: &mut i32,
         ) -> bool;
-        // TODO: compute_cell with c_loop
+        #[rust_name = "compute_cell_0"]
+        fn compute_cell(
+            self: Pin<&mut container_poly>,
+            c: Pin<&mut voronoicell>,
+            vl: Pin<&mut c_loop_all>,
+        ) -> bool;
+        #[rust_name = "compute_cell_1"]
+        fn compute_cell(
+            self: Pin<&mut container_poly>,
+            c: Pin<&mut voronoicell_neighbor>,
+            vl: Pin<&mut c_loop_all>,
+        ) -> bool;
+        #[rust_name = "compute_cell_2"]
+        fn compute_cell(
+            self: Pin<&mut container_poly>,
+            c: Pin<&mut voronoicell>,
+            vl: Pin<&mut c_loop_subset>,
+        ) -> bool;
+        #[rust_name = "compute_cell_3"]
+        fn compute_cell(
+            self: Pin<&mut container_poly>,
+            c: Pin<&mut voronoicell_neighbor>,
+            vl: Pin<&mut c_loop_subset>,
+        ) -> bool;
+        #[rust_name = "compute_cell_4"]
+        fn compute_cell(
+            self: Pin<&mut container_poly>,
+            c: Pin<&mut voronoicell>,
+            vl: Pin<&mut c_loop_order>,
+        ) -> bool;
+        #[rust_name = "compute_cell_5"]
+        fn compute_cell(
+            self: Pin<&mut container_poly>,
+            c: Pin<&mut voronoicell_neighbor>,
+            vl: Pin<&mut c_loop_order>,
+        ) -> bool;
         #[rust_name = "compute_cell_with_index_0"]
         fn compute_cell(
             self: Pin<&mut container_poly>,
@@ -277,6 +354,9 @@ pub mod ffi {
 }
 
 use crate::cell::{VoroCellNbr, VoroCellSgl};
+use crate::container_loop::{
+    ContainerLoop, LoopAll, LoopMarked, LoopSubset,
+};
 use crate::particle_marker::ParticleMarker;
 use crate::prelude::VoroCell;
 use crate::wall::ffi::{
@@ -1110,6 +1190,252 @@ impl<'a> Container1<VoroCellNbr> for ContainerRad<'a> {
                 ijk,
                 q,
             );
+        if b {
+            Some(cell)
+        } else {
+            None
+        }
+    }
+}
+
+/// A part of trait `Container` whose parameter depends on Voronoi cell type and container loop type.
+pub trait Container2<T: VoroCell, S: ContainerLoop> {
+    fn compute_cell(&mut self, r#loop: &mut S)
+        -> Option<T>;
+}
+
+impl<'a> Container2<VoroCellSgl, LoopAll>
+    for ContainerStd<'a>
+{
+    fn compute_cell(
+        &mut self,
+        r#loop: &mut LoopAll,
+    ) -> Option<VoroCellSgl> {
+        let mut cell = VoroCellSgl::new_empty();
+        let b = self.inner.pin_mut().compute_cell_0(
+            cell.inner.pin_mut(),
+            r#loop.inner.pin_mut(),
+        );
+        if b {
+            Some(cell)
+        } else {
+            None
+        }
+    }
+}
+
+impl<'a> Container2<VoroCellNbr, LoopAll>
+    for ContainerStd<'a>
+{
+    fn compute_cell(
+        &mut self,
+        r#loop: &mut LoopAll,
+    ) -> Option<VoroCellNbr> {
+        let mut cell = VoroCellNbr::new_empty();
+        let b = self.inner.pin_mut().compute_cell_1(
+            cell.inner.pin_mut(),
+            r#loop.inner.pin_mut(),
+        );
+        if b {
+            Some(cell)
+        } else {
+            None
+        }
+    }
+}
+
+impl<'a> Container2<VoroCellSgl, LoopSubset>
+    for ContainerStd<'a>
+{
+    fn compute_cell(
+        &mut self,
+        r#loop: &mut LoopSubset,
+    ) -> Option<VoroCellSgl> {
+        let mut cell = VoroCellSgl::new_empty();
+        let b = self.inner.pin_mut().compute_cell_2(
+            cell.inner.pin_mut(),
+            r#loop.inner.pin_mut(),
+        );
+        if b {
+            Some(cell)
+        } else {
+            None
+        }
+    }
+}
+
+impl<'a> Container2<VoroCellNbr, LoopSubset>
+    for ContainerStd<'a>
+{
+    fn compute_cell(
+        &mut self,
+        r#loop: &mut LoopSubset,
+    ) -> Option<VoroCellNbr> {
+        let mut cell = VoroCellNbr::new_empty();
+        let b = self.inner.pin_mut().compute_cell_3(
+            cell.inner.pin_mut(),
+            r#loop.inner.pin_mut(),
+        );
+        if b {
+            Some(cell)
+        } else {
+            None
+        }
+    }
+}
+
+impl<'a> Container2<VoroCellSgl, LoopMarked>
+    for ContainerStd<'a>
+{
+    fn compute_cell(
+        &mut self,
+        r#loop: &mut LoopMarked,
+    ) -> Option<VoroCellSgl> {
+        let mut cell = VoroCellSgl::new_empty();
+        let b = self.inner.pin_mut().compute_cell_4(
+            cell.inner.pin_mut(),
+            r#loop.inner.pin_mut(),
+        );
+        if b {
+            Some(cell)
+        } else {
+            None
+        }
+    }
+}
+
+impl<'a> Container2<VoroCellNbr, LoopMarked>
+    for ContainerStd<'a>
+{
+    fn compute_cell(
+        &mut self,
+        r#loop: &mut LoopMarked,
+    ) -> Option<VoroCellNbr> {
+        let mut cell = VoroCellNbr::new_empty();
+        let b = self.inner.pin_mut().compute_cell_5(
+            cell.inner.pin_mut(),
+            r#loop.inner.pin_mut(),
+        );
+        if b {
+            Some(cell)
+        } else {
+            None
+        }
+    }
+}
+
+impl<'a> Container2<VoroCellSgl, LoopAll>
+    for ContainerRad<'a>
+{
+    fn compute_cell(
+        &mut self,
+        r#loop: &mut LoopAll,
+    ) -> Option<VoroCellSgl> {
+        let mut cell = VoroCellSgl::new_empty();
+        let b = self.inner.pin_mut().compute_cell_0(
+            cell.inner.pin_mut(),
+            r#loop.inner.pin_mut(),
+        );
+        if b {
+            Some(cell)
+        } else {
+            None
+        }
+    }
+}
+
+impl<'a> Container2<VoroCellNbr, LoopAll>
+    for ContainerRad<'a>
+{
+    fn compute_cell(
+        &mut self,
+        r#loop: &mut LoopAll,
+    ) -> Option<VoroCellNbr> {
+        let mut cell = VoroCellNbr::new_empty();
+        let b = self.inner.pin_mut().compute_cell_1(
+            cell.inner.pin_mut(),
+            r#loop.inner.pin_mut(),
+        );
+        if b {
+            Some(cell)
+        } else {
+            None
+        }
+    }
+}
+
+impl<'a> Container2<VoroCellSgl, LoopSubset>
+    for ContainerRad<'a>
+{
+    fn compute_cell(
+        &mut self,
+        r#loop: &mut LoopSubset,
+    ) -> Option<VoroCellSgl> {
+        let mut cell = VoroCellSgl::new_empty();
+        let b = self.inner.pin_mut().compute_cell_2(
+            cell.inner.pin_mut(),
+            r#loop.inner.pin_mut(),
+        );
+        if b {
+            Some(cell)
+        } else {
+            None
+        }
+    }
+}
+
+impl<'a> Container2<VoroCellNbr, LoopSubset>
+    for ContainerRad<'a>
+{
+    fn compute_cell(
+        &mut self,
+        r#loop: &mut LoopSubset,
+    ) -> Option<VoroCellNbr> {
+        let mut cell = VoroCellNbr::new_empty();
+        let b = self.inner.pin_mut().compute_cell_3(
+            cell.inner.pin_mut(),
+            r#loop.inner.pin_mut(),
+        );
+        if b {
+            Some(cell)
+        } else {
+            None
+        }
+    }
+}
+
+impl<'a> Container2<VoroCellSgl, LoopMarked>
+    for ContainerRad<'a>
+{
+    fn compute_cell(
+        &mut self,
+        r#loop: &mut LoopMarked,
+    ) -> Option<VoroCellSgl> {
+        let mut cell = VoroCellSgl::new_empty();
+        let b = self.inner.pin_mut().compute_cell_4(
+            cell.inner.pin_mut(),
+            r#loop.inner.pin_mut(),
+        );
+        if b {
+            Some(cell)
+        } else {
+            None
+        }
+    }
+}
+
+impl<'a> Container2<VoroCellNbr, LoopMarked>
+    for ContainerRad<'a>
+{
+    fn compute_cell(
+        &mut self,
+        r#loop: &mut LoopMarked,
+    ) -> Option<VoroCellNbr> {
+        let mut cell = VoroCellNbr::new_empty();
+        let b = self.inner.pin_mut().compute_cell_5(
+            cell.inner.pin_mut(),
+            r#loop.inner.pin_mut(),
+        );
         if b {
             Some(cell)
         } else {
