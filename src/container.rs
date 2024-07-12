@@ -774,6 +774,7 @@ impl<'a> ContainerRad<'a> {
     }
 }
 
+/// Overloading functions for `ContainerStd`
 pub trait ContainerStd0<T: VoroCell> {
     /// Computes the Voronoi cell for a ghost particle at a given location.
     ///
@@ -809,6 +810,7 @@ impl<'a> ContainerStd0<VoroCellSgl> for ContainerStd<'a> {
     }
 }
 
+/// Overloading functions for `ContainerRad`
 pub trait ContainerRad0<T: VoroCell> {
     /// Computes the Voronoi cell for a ghost particle at a given location.
     ///
