@@ -3,7 +3,7 @@
 #[cxx::bridge(namespace = "voro")]
 pub mod ffi {
     unsafe extern "C++" {
-        include!("voro_rs/cpp/boilerplate.hh");
+        include!("voro_rs/src/boilerplate.hh");
 
         type voronoicell;
         #[rust_name = "new_voronoicell"]
