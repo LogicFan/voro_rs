@@ -13,9 +13,10 @@ fn main() {
         "src/cell.rs",
         "src/container.rs",
         "src/container_loop.rs",
+        "src/particle_marker.rs",
+        "src/pre_container.rs",
         "src/wall.rs",
         "src/wall_list.rs",
-        "src/particle_marker.rs",
     ]);
     bridge.cpp(true);
     bridge.warnings(false);

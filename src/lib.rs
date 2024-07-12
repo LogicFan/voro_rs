@@ -8,6 +8,7 @@ pub mod cell;
 pub mod container;
 pub mod container_loop;
 pub mod particle_marker;
+pub mod pre_container;
 pub mod wall;
 pub mod wall_list;
 
