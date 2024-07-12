@@ -1569,7 +1569,6 @@ mod tests {
         assert!(c.is_none());
     }
 
-    
     #[test]
     fn loop_test() {
         let mut con = ContainerStd::new(
@@ -1594,7 +1593,8 @@ mod tests {
         cl.start();
 
         loop {
-            let cell: Option<VoroCellSgl> = con.compute_cell(&mut cl);
+            let cell: Option<VoroCellSgl> =
+                con.compute_cell(&mut cl);
             assert!(cell.is_some());
 
             println!("{}", cl.particle_id());
