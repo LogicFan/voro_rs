@@ -1,5 +1,5 @@
 #include <memory>
-#include "../cpp/voro++.hh"
+#include "../voro/src/voro++.hh"
 
 namespace voro
 {

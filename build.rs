@@ -2,7 +2,7 @@ fn main() {
     let mut voro = cc::Build::new();
     voro.cpp(true);
     voro.warnings(false);
-    voro.file("cpp/voro++.cc");
+    voro.file("voro/src/voro++.cc");
     #[cfg(not(target_os = "windows"))]
     voro.flag("-ansi");
     #[cfg(not(target_os = "windows"))]
