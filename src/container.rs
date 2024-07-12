@@ -1034,27 +1034,89 @@ pub trait Container1<T: VoroCell> {
         T: VoroCell;
 }
 
-// impl<'a> Container1<VoroCellSgl> for ContainerStd<'a> {
-//     fn compute_cell_with_index(
-//         &mut self,
-//         ijk: i32,
-//         q: i32,
-//     ) -> Option<VoroCellSgl> {
-//         let mut cell = VoroCellSgl::new_empty();
-//         let b = self.inner.pin_mut().compute_ghost_0(
-//             cell.inner.pin_mut(),
-//             xyz[0],
-//             xyz[1],
-//             xyz[2],
-//             r,
-//         );
-//         if b {
-//             Some(cell)
-//         } else {
-//             None
-//         }
-//     }
-// }
+impl<'a> Container1<VoroCellSgl> for ContainerStd<'a> {
+    fn compute_cell_with_index(
+        &mut self,
+        ijk: i32,
+        q: i32,
+    ) -> Option<VoroCellSgl> {
+        let mut cell = VoroCellSgl::new_empty();
+        let b =
+            self.inner.pin_mut().compute_cell_with_index_0(
+                cell.inner.pin_mut(),
+                ijk,
+                q,
+            );
+        if b {
+            Some(cell)
+        } else {
+            None
+        }
+    }
+}
+
+impl<'a> Container1<VoroCellNbr> for ContainerStd<'a> {
+    fn compute_cell_with_index(
+        &mut self,
+        ijk: i32,
+        q: i32,
+    ) -> Option<VoroCellNbr> {
+        let mut cell = VoroCellNbr::new_empty();
+        let b =
+            self.inner.pin_mut().compute_cell_with_index_1(
+                cell.inner.pin_mut(),
+                ijk,
+                q,
+            );
+        if b {
+            Some(cell)
+        } else {
+            None
+        }
+    }
+}
+
+impl<'a> Container1<VoroCellSgl> for ContainerRad<'a> {
+    fn compute_cell_with_index(
+        &mut self,
+        ijk: i32,
+        q: i32,
+    ) -> Option<VoroCellSgl> {
+        let mut cell = VoroCellSgl::new_empty();
+        let b =
+            self.inner.pin_mut().compute_cell_with_index_0(
+                cell.inner.pin_mut(),
+                ijk,
+                q,
+            );
+        if b {
+            Some(cell)
+        } else {
+            None
+        }
+    }
+}
+
+impl<'a> Container1<VoroCellNbr> for ContainerRad<'a> {
+    fn compute_cell_with_index(
+        &mut self,
+        ijk: i32,
+        q: i32,
+    ) -> Option<VoroCellNbr> {
+        let mut cell = VoroCellNbr::new_empty();
+        let b =
+            self.inner.pin_mut().compute_cell_with_index_1(
+                cell.inner.pin_mut(),
+                ijk,
+                q,
+            );
+        if b {
+            Some(cell)
+        } else {
+            None
+        }
+    }
+}
 
 #[cfg(test)]
 mod tests {
