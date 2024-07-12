@@ -1200,6 +1200,15 @@ impl<'a> Container1<VoroCellNbr> for ContainerRad<'a> {
 
 /// A part of trait `Container` whose parameter depends on Voronoi cell type and container loop type.
 pub trait Container2<T: VoroCell, S: ContainerLoop> {
+    /// Computes the Voronoi cell for a particle currently being
+    /// referenced by a loop class.
+    ///
+    /// * `r#loop`: the loop class to use.
+    ///
+    /// Return some values if the cell was computed. If the cell cannot be
+    /// computed, if it is removed entirely by a wall or boundary
+    /// condition, then the routine returns `None`. If a value is returned,
+    /// it is the Voronoi cell class in which to store the computed cell.
     fn compute_cell(&mut self, r#loop: &mut S)
         -> Option<T>;
 }
