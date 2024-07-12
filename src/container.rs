@@ -810,6 +810,26 @@ impl<'a> ContainerStd0<VoroCellSgl> for ContainerStd<'a> {
     }
 }
 
+impl<'a> ContainerStd0<VoroCellNbr> for ContainerStd<'a> {
+    fn compute_ghost_cell(
+        &mut self,
+        xyz: DVec3,
+    ) -> Option<VoroCellNbr> {
+        let mut cell = VoroCellNbr::new_empty();
+        let b = self.inner.pin_mut().compute_ghost_1(
+            cell.inner.pin_mut(),
+            xyz[0],
+            xyz[1],
+            xyz[2],
+        );
+        if b {
+            Some(cell)
+        } else {
+            None
+        }
+    }
+}
+
 /// Overloading functions for `ContainerRad`
 pub trait ContainerRad0<T: VoroCell> {
     /// Computes the Voronoi cell for a ghost particle at a given location.
@@ -836,6 +856,28 @@ impl<'a> ContainerRad0<VoroCellSgl> for ContainerRad<'a> {
     ) -> Option<VoroCellSgl> {
         let mut cell = VoroCellSgl::new_empty();
         let b = self.inner.pin_mut().compute_ghost_0(
+            cell.inner.pin_mut(),
+            xyz[0],
+            xyz[1],
+            xyz[2],
+            r,
+        );
+        if b {
+            Some(cell)
+        } else {
+            None
+        }
+    }
+}
+
+impl<'a> ContainerRad0<VoroCellNbr> for ContainerRad<'a> {
+    fn compute_ghost_cell(
+        &mut self,
+        xyz: DVec3,
+        r: f64,
+    ) -> Option<VoroCellNbr> {
+        let mut cell = VoroCellNbr::new_empty();
+        let b = self.inner.pin_mut().compute_ghost_1(
             cell.inner.pin_mut(),
             xyz[0],
             xyz[1],
@@ -972,14 +1014,46 @@ impl<'a> Container0 for ContainerRad<'a> {
     }
 }
 
-// pub trait Container {
-//     fn compute_cell_with_index<T>(
+/// A part of trait `Container` whose parameter depends on Voronoi cell type.
+pub trait Container1<T: VoroCell> {
+    /// Computes the Voronoi cell for given particle.
+    ///
+    /// * `ijk`: the block that the particle is within.
+    /// * `q`: the index of the particle within the block.
+    ///
+    /// Return a value if the cell was computed. If the cell cannot be
+    /// computed, if it is removed entirely by a wall or boundary
+    /// condition, then the routine returns `None`. If a value is returned,
+    /// it is a Voronoi cell class in which to store the computed cell.
+    fn compute_cell_with_index(
+        &mut self,
+        ijk: i32,
+        q: i32,
+    ) -> Option<T>
+    where
+        T: VoroCell;
+}
+
+// impl<'a> Container1<VoroCellSgl> for ContainerStd<'a> {
+//     fn compute_cell_with_index(
 //         &mut self,
 //         ijk: i32,
 //         q: i32,
-//     ) -> Option<T>
-//     where
-//         T: VoroCell;
+//     ) -> Option<VoroCellSgl> {
+//         let mut cell = VoroCellSgl::new_empty();
+//         let b = self.inner.pin_mut().compute_ghost_0(
+//             cell.inner.pin_mut(),
+//             xyz[0],
+//             xyz[1],
+//             xyz[2],
+//             r,
+//         );
+//         if b {
+//             Some(cell)
+//         } else {
+//             None
+//         }
+//     }
 // }
 
 #[cfg(test)]
