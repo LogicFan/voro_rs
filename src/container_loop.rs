@@ -106,7 +106,7 @@ pub struct LoopAll {
 
 impl LoopAll {
     /// The constructor copies several necessary constants from the
-	/// base container class.
+    /// base container class.
     pub fn of_container_std(
         container: &mut ContainerStd,
     ) -> Self {
@@ -118,7 +118,7 @@ impl LoopAll {
     }
 
     /// The constructor copies several necessary constants from the
-	/// base container class.
+    /// base container class.
     pub fn of_container_rad(
         container: &mut ContainerRad,
     ) -> Self {
@@ -136,7 +136,7 @@ pub struct LoopSubset {
 
 impl LoopSubset {
     /// The constructor copies several necessary constants from the
-	/// base container class.
+    /// base container class.
     pub fn of_container_std(
         container: &mut ContainerStd,
     ) -> Self {
@@ -148,7 +148,7 @@ impl LoopSubset {
     }
 
     /// The constructor copies several necessary constants from the
-	/// base container class.
+    /// base container class.
     pub fn of_container_rad(
         container: &mut ContainerRad,
     ) -> Self {
@@ -228,7 +228,7 @@ pub struct LoopMarked {
 
 impl LoopMarked {
     /// The constructor copies several necessary constants from the
-	/// base container class.
+    /// base container class.
     pub fn with_container_std(
         container: &mut ContainerStd,
         marker: &mut ParticleMarker,
@@ -242,7 +242,7 @@ impl LoopMarked {
     }
 
     /// The constructor copies several necessary constants from the
-	/// base container class.
+    /// base container class.
     pub fn with_container_rad(
         container: &mut ContainerRad,
         marker: &mut ParticleMarker,
