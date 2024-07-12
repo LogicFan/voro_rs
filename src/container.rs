@@ -786,74 +786,6 @@ impl<'a> Walls3<'a, ContainerRad<'a>> for ContainerRad<'a> {
 impl<'a> Walls<'a> for ContainerStd<'a> {}
 impl<'a> Walls<'a> for ContainerRad<'a> {}
 
-impl<'a> ContainerStd<'a> {
-    /// Put a particle into the correct region of the container.
-    ///
-    /// * `n`: the numerical ID of the inserted particle.
-    /// * `xyz`: the position vector of the inserted particle.
-    pub fn put(&mut self, n: i32, xyz: DVec3) {
-        self.inner.pin_mut().put(n, xyz[0], xyz[1], xyz[2])
-    }
-
-    /// Put a particle into the correct region of the container, also recording
-    /// into which region it was stored.
-    ///
-    /// * `marker`: the marker class in which to record the region.
-    /// * `n`: the numerical ID of the inserted particle.
-    /// * `xyz`: the position vector of the inserted particle.
-    pub fn put_with_marker(
-        &mut self,
-        marker: &mut ParticleMarker,
-        n: i32,
-        xyz: DVec3,
-    ) {
-        self.inner.pin_mut().put_with_particle_order(
-            marker.inner.pin_mut(),
-            n,
-            xyz[0],
-            xyz[1],
-            xyz[2],
-        )
-    }
-}
-
-impl<'a> ContainerRad<'a> {
-    /// Put a particle into the correct region of the container.
-    ///
-    /// * `n`: the numerical ID of the inserted particle.
-    /// * `xyz`: the position vector of the inserted particle.
-    /// * `r`: the radius of the particle.
-    pub fn put(&mut self, n: i32, xyz: DVec3, r: f64) {
-        self.inner
-            .pin_mut()
-            .put(n, xyz[0], xyz[1], xyz[2], r)
-    }
-
-    /// Put a particle into the correct region of the container, also recording
-    /// into which region it was stored.
-    ///
-    /// * `marker`: the marker class in which to record the region.
-    /// * `n`: the numerical ID of the inserted particle.
-    /// * `xyz`: the position vector of the inserted particle.
-    /// * `r`: the radius of the particle.
-    pub fn put_with_marker(
-        &mut self,
-        marker: &mut ParticleMarker,
-        n: i32,
-        xyz: DVec3,
-        r: f64,
-    ) {
-        self.inner.pin_mut().put_with_particle_order(
-            marker.inner.pin_mut(),
-            n,
-            xyz[0],
-            xyz[1],
-            xyz[2],
-            r,
-        );
-    }
-}
-
 /// Overloading functions for `ContainerStd`
 pub trait ContainerStd0<T: VoroCell> {
     /// Computes the Voronoi cell for a ghost particle at a given location.
@@ -991,6 +923,28 @@ pub trait Container0 {
     /// Clears a container of particles.
     fn clear(&mut self);
 
+    /// Put a particle into the correct region of the container.
+    ///
+    /// * `n`: the numerical ID of the inserted particle.
+    /// * `xyz`: the position vector of the inserted particle.
+    /// * `r`: the radius of the particle. This is ignored for `ContainerStd`.
+    fn put(&mut self, n: i32, xyz: DVec3, r: f64);
+
+    /// Put a particle into the correct region of the container, also recording
+    /// into which region it was stored.
+    ///
+    /// * `marker`: the marker class in which to record the region.
+    /// * `n`: the numerical ID of the inserted particle.
+    /// * `xyz`: the position vector of the inserted particle.
+    /// * `r`: the radius of the particle. This is ignored for `ContainerStd`.
+    fn put_with_marker(
+        &mut self,
+        marker: &mut ParticleMarker,
+        n: i32,
+        xyz: DVec3,
+        r: f64,
+    );
+
     /// Calculates all of the Voronoi cells and sums their volumes. In most cases
     /// without walls, the sum of the Voronoi cell volumes should equal the volume
     /// of the container to numerical precision.
@@ -1031,6 +985,26 @@ impl<'a> Container0 for ContainerStd<'a> {
         self.inner.pin_mut().clear()
     }
 
+    fn put(&mut self, n: i32, xyz: DVec3, _: f64) {
+        self.inner.pin_mut().put(n, xyz[0], xyz[1], xyz[2])
+    }
+
+    fn put_with_marker(
+        &mut self,
+        marker: &mut ParticleMarker,
+        n: i32,
+        xyz: DVec3,
+        _: f64,
+    ) {
+        self.inner.pin_mut().put_with_particle_order(
+            marker.inner.pin_mut(),
+            n,
+            xyz[0],
+            xyz[1],
+            xyz[2],
+        )
+    }
+
     fn sum_cell_volumes(&mut self) -> f64 {
         self.inner.pin_mut().sum_cell_volumes()
     }
@@ -1068,6 +1042,29 @@ impl<'a> Container0 for ContainerRad<'a> {
 
     fn clear(&mut self) {
         self.inner.pin_mut().clear()
+    }
+
+    fn put(&mut self, n: i32, xyz: DVec3, r: f64) {
+        self.inner
+            .pin_mut()
+            .put(n, xyz[0], xyz[1], xyz[2], r)
+    }
+
+    fn put_with_marker(
+        &mut self,
+        marker: &mut ParticleMarker,
+        n: i32,
+        xyz: DVec3,
+        r: f64,
+    ) {
+        self.inner.pin_mut().put_with_particle_order(
+            marker.inner.pin_mut(),
+            n,
+            xyz[0],
+            xyz[1],
+            xyz[2],
+            r,
+        );
     }
 
     fn sum_cell_volumes(&mut self) -> f64 {
@@ -1538,15 +1535,15 @@ mod tests {
             [false, false, false],
         );
         con.clear();
-        con.put(0, [0.0, 0.0, 0.0]);
-        con.put(1, [1.0, 0.0, 0.0]);
-        con.put(2, [2.0, 0.0, 0.0]);
-        con.put(3, [3.0, 0.0, 0.0]);
-        con.put(4, [4.0, 0.0, 0.0]);
-        con.put(5, [4.0, 1.0, 0.0]);
-        con.put(6, [4.0, 2.0, 0.0]);
-        con.put(7, [4.0, 3.0, 0.0]);
-        con.put(8, [4.0, 4.0, 0.0]);
+        con.put(0, [0.0, 0.0, 0.0], 0.0);
+        con.put(1, [1.0, 0.0, 0.0], 0.0);
+        con.put(2, [2.0, 0.0, 0.0], 0.0);
+        con.put(3, [3.0, 0.0, 0.0], 0.0);
+        con.put(4, [4.0, 0.0, 0.0], 0.0);
+        con.put(5, [4.0, 1.0, 0.0], 0.0);
+        con.put(6, [4.0, 2.0, 0.0], 0.0);
+        con.put(7, [4.0, 3.0, 0.0], 0.0);
+        con.put(8, [4.0, 4.0, 0.0], 0.0);
         assert_eq!(con.total_particles(), 9);
         assert_eq!(con.sum_cell_volumes(), 8000.0);
 
@@ -1602,15 +1599,15 @@ mod tests {
             [false, false, false],
         );
         con.clear();
-        con.put(0, [0.0, 0.0, 0.0]);
-        con.put(1, [1.0, 0.0, 0.0]);
-        con.put(2, [2.0, 0.0, 0.0]);
-        con.put(3, [3.0, 0.0, 0.0]);
-        con.put(4, [4.0, 0.0, 0.0]);
-        con.put(5, [4.0, 1.0, 0.0]);
-        con.put(6, [4.0, 2.0, 0.0]);
-        con.put(7, [4.0, 3.0, 0.0]);
-        con.put(8, [4.0, 4.0, 0.0]);
+        con.put(0, [0.0, 0.0, 0.0], 0.0);
+        con.put(1, [1.0, 0.0, 0.0], 0.0);
+        con.put(2, [2.0, 0.0, 0.0], 0.0);
+        con.put(3, [3.0, 0.0, 0.0], 0.0);
+        con.put(4, [4.0, 0.0, 0.0], 0.0);
+        con.put(5, [4.0, 1.0, 0.0], 0.0);
+        con.put(6, [4.0, 2.0, 0.0], 0.0);
+        con.put(7, [4.0, 3.0, 0.0], 0.0);
+        con.put(8, [4.0, 4.0, 0.0], 0.0);
 
         let mut volume = 0.0;
         let mut cl = LoopAll::of_container_std(&mut con);
