@@ -151,6 +151,16 @@ impl LoopSubset {
         }
     }
 
+    /// Setup a `LoopSubset` object to scan over all particles within a
+    /// given sphere.
+    /// 
+    /// * `v`: the position vector of the center of the sphere.
+    /// * `r`: the radius of the sphere.
+    /// * `bounds_test`: whether to do detailed bounds checking. If this is 
+    /// false then the class will loop over all particles in
+    /// blocks that overlap the given sphere. If it is true, 
+    /// the particle will only loop over the particles which
+    /// actually lie within the sphere.
     pub fn setup_sphere(
         &mut self,
         v: DVec3,
@@ -166,6 +176,15 @@ impl LoopSubset {
         );
     }
 
+    /// Setup a `LoopSubset` object to loop over all particles in a rectangular box.
+    /// 
+    /// * `xyz_min`: the minimum coordinates of the box.
+    /// * `xyz_max`: the maximum coordinates of the box.
+    /// * `bounds_test`: whether to do detailed bounds checking. If this is
+    /// false then the class will loop over all particles in
+    /// blocks that overlap the given box. If it is true, the
+    /// particle will only loop over the particles which
+    /// actually lie within the box.
     pub fn setup_box(
         &mut self,
         xyz_min: DVec3,
@@ -183,6 +202,11 @@ impl LoopSubset {
         );
     }
 
+    /// Setup a `LoopSubset` object to loop over all particles in a 
+    /// rectangular subgrid of blocks.
+    /// 
+    /// * `a`: the start of sub-grid range.
+    /// * `b`: the end of sub-grid range.
     pub fn setup_grid(&mut self, a: IVec3, b: IVec3) {
         self.inner.pin_mut().setup_intbox(
             a[0], b[0], a[1], b[1], a[2], b[2],
