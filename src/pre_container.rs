@@ -291,3 +291,48 @@ impl<'a> PreContainer<ContainerRad<'a>>
         );
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::prelude::Container0;
+
+    #[test]
+    fn container_std_test() {
+        let xyz_min = [-10.0, -10.0, -10.0];
+        let xyz_max = [10.0, 10.0, 10.0];
+        let is_periodic = [false, false, false];
+
+        let mut pc = PreContainerStd::new(
+            xyz_min,
+            xyz_max,
+            is_periodic,
+        );
+        let grids = pc.optimal_grids();
+
+        pc.put(0, [0.0, 0.0, 0.0], 0.0);
+        pc.put(1, [1.0, 0.0, 0.0], 0.0);
+        pc.put(2, [2.0, 0.0, 0.0], 0.0);
+        pc.put(3, [3.0, 0.0, 0.0], 0.0);
+        pc.put(4, [4.0, 0.0, 0.0], 0.0);
+        pc.put(5, [4.0, 1.0, 0.0], 0.0);
+        pc.put(6, [4.0, 2.0, 0.0], 0.0);
+        pc.put(7, [4.0, 3.0, 0.0], 0.0);
+        pc.put(8, [4.0, 4.0, 0.0], 0.0);
+        assert_eq!(pc.total_particles(), 9);
+
+        let mut con = ContainerStd::new(
+            xyz_min,
+            xyz_max,
+            grids,
+            is_periodic,
+        );
+        pc.setup(&mut con);
+        assert_eq!(con.total_particles(), 9);
+        assert_eq!(con.sum_cell_volumes(), 8000.0);
+
+        let c = con.find_voronoi_cell([4.0, 4.0, 0.0]);
+        assert!(c.is_some());
+        assert_eq!(c.unwrap().0, 8);
+    }
+}
