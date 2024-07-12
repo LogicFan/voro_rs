@@ -11,8 +11,8 @@ Here is the list of classes/functions plan to have a high-level binding in rust.
 - [x] `voronoicell`/`voronoicell_neighbor`
 - [x] `wall_sphere`/`wall_plane`/`wall_cylinder`/`wall_cone`
 - [x] `wall_list`
-- [ ] `container`/`container_poly`
-- [ ] `c_loop_all`/`c_loop_subset`/`c_loop_order`
+- [x] `container`/`container_poly`
+- [x] `c_loop_all`/`c_loop_subset`/`c_loop_order`
 - [x] `particle_order`
 - [ ] `container_periodic`/`container_periodic_poly`
 - [ ] `c_loop_all_periodic`/`c_loop_order_periodic`
