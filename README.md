@@ -16,7 +16,7 @@ Here is the list of classes/functions plan to have a high-level binding in rust.
 - [x] `particle_order`
 - [ ] `container_periodic`/`container_periodic_poly`
 - [ ] `c_loop_all_periodic`/`c_loop_order_periodic`
-- [ ] `pre_container`/`pre_container_poly`
+- [x] `pre_container`/`pre_container_poly`
 
 ## About voro++
 
