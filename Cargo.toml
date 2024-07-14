@@ -22,6 +22,7 @@ include = [
 
 [dependencies]
 cxx = "1.0"
+glam = "0.28"
 
 [build-dependencies]
 cxx-build = "1.0"
