@@ -7,6 +7,8 @@ fn main() {
     voro.flag("-ansi");
     #[cfg(not(target_os = "windows"))]
     voro.flag("-pedantic");
+    #[cfg(target_os = "macos")]
+    voro.opt_level(0);
     voro.compile("voro++");
 
     let mut bridge = cxx_build::bridges([
