@@ -3,6 +3,7 @@
         "bindgen",
         "libc",
         "nplane",
+        "powi",
         "unitcell",
         "voro",
         "Voronoi",
