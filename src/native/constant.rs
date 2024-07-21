@@ -1,9 +1,9 @@
 #![allow(non_upper_case_globals)]
 use super::Float;
 
-pub const δ: Float = 10.0 * Float::EPSILON;
-pub const Δ: Float = 20.0 * δ;
-pub const ω: Float = Float::MAX;
+pub const small_tolerance: Float = 10.0 * Float::EPSILON;
+pub const large_tolerance: Float = 20.0 * small_tolerance;
+pub const large_number: Float = Float::MAX;
 
 // const double tolerance=10.*std::numeric_limits<double>::epsilon();
 
