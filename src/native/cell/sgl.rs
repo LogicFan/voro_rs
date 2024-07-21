@@ -223,13 +223,23 @@ impl VoronoiCell for CellSgl {
 mod tests {
     use super::*;
 
+    fn assert_float(left: f64, right: f64, epsilon: f64) {
+        assert!((left - right).abs() <= epsilon, "{} != {}", left, right);
+    }
+
+    fn assert_vec3(left: DVec3, right: DVec3, epsilon: f64) {
+        assert_float(left.x, right.x, epsilon);
+        assert_float(left.y, right.y, epsilon);
+        assert_float(left.z, right.z, epsilon);
+    }
+
     #[test]
     fn new_empty() {
         let cell = CellSgl::new_empty(1234.0);
         cell.edges.assert();
 
-        assert_eq!(cell.small_tolerance, 2.74003042477488634e-12);
-        assert_eq!(cell.large_tolerance, 5.48006084954977268e-11);
+        assert_float(cell.small_tolerance, 2.74003042477488634e-12, f64::EPSILON);
+        assert_float(cell.large_tolerance, 5.48006084954977268e-11, f64::EPSILON);
     }
 
     #[test]
@@ -239,17 +249,17 @@ mod tests {
         let cell = CellSgl::new_cuboid(min, max, 3936.0);
         cell.edges.assert();
 
-        assert_eq!(cell.small_tolerance, 8.73967564984923229e-12);
-        assert_eq!(cell.large_tolerance, 1.74793512996984646e-10);
+        assert_float(cell.small_tolerance, 8.73967564984923229e-12, f64::EPSILON);
+        assert_float(cell.large_tolerance, 1.74793512996984646e-10, f64::EPSILON);
 
-        assert_eq!(cell.vertices[0], DVec3::new(3.14, 3.30, 2.62));
-        assert_eq!(cell.vertices[1], DVec3::new(3.72, 3.30, 2.62));
-        assert_eq!(cell.vertices[2], DVec3::new(3.14, 2.66, 2.62));
-        assert_eq!(cell.vertices[3], DVec3::new(3.72, 2.66, 2.62));
-        assert_eq!(cell.vertices[4], DVec3::new(3.14, 3.30, 5.08));
-        assert_eq!(cell.vertices[5], DVec3::new(3.72, 3.30, 5.08));
-        assert_eq!(cell.vertices[6], DVec3::new(3.14, 2.66, 5.08));
-        assert_eq!(cell.vertices[7], DVec3::new(3.72, 2.66, 5.08));
+        assert_vec3(cell.vertices[0], DVec3::new(3.14, 3.30, 2.62), cell.small_tolerance);
+        assert_vec3(cell.vertices[1], DVec3::new(3.72, 3.30, 2.62), cell.small_tolerance);
+        assert_vec3(cell.vertices[2], DVec3::new(3.14, 2.66, 2.62), cell.small_tolerance);
+        assert_vec3(cell.vertices[3], DVec3::new(3.72, 2.66, 2.62), cell.small_tolerance);
+        assert_vec3(cell.vertices[4], DVec3::new(3.14, 3.30, 5.08), cell.small_tolerance);
+        assert_vec3(cell.vertices[5], DVec3::new(3.72, 3.30, 5.08), cell.small_tolerance);
+        assert_vec3(cell.vertices[6], DVec3::new(3.14, 2.66, 5.08), cell.small_tolerance);
+        assert_vec3(cell.vertices[7], DVec3::new(3.72, 2.66, 5.08), cell.small_tolerance);
 
         assert_eq!(cell.edges[0], vec![1, 4, 2, 2, 1, 0, 0]);
         assert_eq!(cell.edges[1], vec![3, 5, 0, 2, 1, 0, 1]);
@@ -284,15 +294,15 @@ mod tests {
         let cell = CellSgl::new_octahedron(l, 3134.0);
         cell.edges.assert();
 
-        assert_eq!(cell.small_tolerance, 6.95887791835048120e-12);
-        assert_eq!(cell.large_tolerance, 1.39177558367009624e-10);
+        assert_float(cell.small_tolerance, 6.95887791835048120e-12, f64::EPSILON);
+        assert_float(cell.large_tolerance, 1.39177558367009624e-10, f64::EPSILON);
 
-        assert_eq!(cell.vertices[0], DVec3::new(-6.28, 0.00, 0.00));
-        assert_eq!(cell.vertices[1], DVec3::new(6.28, 0.00, 0.00));
-        assert_eq!(cell.vertices[2], DVec3::new(0.00, -6.28, 0.00));
-        assert_eq!(cell.vertices[3], DVec3::new(0.00, 6.28, 0.00));
-        assert_eq!(cell.vertices[4], DVec3::new(0.00, 0.00, -6.28));
-        assert_eq!(cell.vertices[5], DVec3::new(0.00, 0.00, 6.28));
+        assert_vec3(cell.vertices[0], DVec3::new(-6.28, 0.00, 0.00), cell.small_tolerance);
+        assert_vec3(cell.vertices[1], DVec3::new(6.28, 0.00, 0.00), cell.small_tolerance);
+        assert_vec3(cell.vertices[2], DVec3::new(0.00, -6.28, 0.00), cell.small_tolerance);
+        assert_vec3(cell.vertices[3], DVec3::new(0.00, 6.28, 0.00), cell.small_tolerance);
+        assert_vec3(cell.vertices[4], DVec3::new(0.00, 0.00, -6.28), cell.small_tolerance);
+        assert_vec3(cell.vertices[5], DVec3::new(0.00, 0.00, 6.28), cell.small_tolerance);
 
         assert_eq!(cell.edges[0], vec![2, 5, 3, 4, 0, 0, 0, 0, 0]);
         assert_eq!(cell.edges[1], vec![2, 4, 3, 5, 2, 2, 2, 2, 1]);
@@ -326,13 +336,13 @@ mod tests {
         let cell = CellSgl::new_tetrahedron(a, b, c, d, 1818.0);
         cell.edges.assert();
 
-        assert_eq!(cell.small_tolerance, 4.03677091753706918e-12);
-        assert_eq!(cell.large_tolerance, 8.07354183507413836e-11);
+        assert_float(cell.small_tolerance, 4.03677091753706918e-12, f64::EPSILON);
+        assert_float(cell.large_tolerance, 8.07354183507413836e-11, f64::EPSILON);
 
-        assert_eq!(cell.vertices[0], DVec3::new(9.30, 9.02, 2.90));
-        assert_eq!(cell.vertices[1], DVec3::new(3.50, 4.28, 3.32));
-        assert_eq!(cell.vertices[2], DVec3::new(6.20, 6.76, 5.40));
-        assert_eq!(cell.vertices[3], DVec3::new(3.90, 5.28, 4.42));
+        assert_vec3(cell.vertices[0], DVec3::new(9.30, 9.02, 2.90), cell.small_tolerance);
+        assert_vec3(cell.vertices[1], DVec3::new(3.50, 4.28, 3.32), cell.small_tolerance);
+        assert_vec3(cell.vertices[2], DVec3::new(6.20, 6.76, 5.40), cell.small_tolerance);
+        assert_vec3(cell.vertices[3], DVec3::new(3.90, 5.28, 4.42), cell.small_tolerance);
 
         assert_eq!(cell.edges[0], vec![1, 3, 2, 0, 0, 0, 0]);
         assert_eq!(cell.edges[1], vec![0, 2, 3, 0, 2, 1, 1]);
@@ -357,14 +367,14 @@ mod tests {
         let mut cell = CellSgl::new_cuboid(min, max, 3936.0);
         cell.translate(DVec3::new(3.14, 1.23, 3.13));
 
-        assert_eq!(cell.vertices[0], DVec3::new(9.42, 5.76, 8.879999999999999));
-        assert_eq!(cell.vertices[1], DVec3::new(10.00, 5.76, 8.879999999999999));
-        assert_eq!(cell.vertices[2], DVec3::new(9.42, 5.12, 8.879999999999999));
-        assert_eq!(cell.vertices[3], DVec3::new(10.00, 5.12, 8.879999999999999));
-        assert_eq!(cell.vertices[4], DVec3::new(9.42, 5.76, 11.34));
-        assert_eq!(cell.vertices[5], DVec3::new(10.00, 5.76, 11.34));
-        assert_eq!(cell.vertices[6], DVec3::new(9.42, 5.12, 11.34));
-        assert_eq!(cell.vertices[7], DVec3::new(10.00, 5.12, 11.34));
+        assert_vec3(cell.vertices[0], DVec3::new(9.42, 5.76, 8.88), cell.small_tolerance);
+        assert_vec3(cell.vertices[1], DVec3::new(10.00, 5.76, 8.88), cell.small_tolerance);
+        assert_vec3(cell.vertices[2], DVec3::new(9.42, 5.12, 8.88), cell.small_tolerance);
+        assert_vec3(cell.vertices[3], DVec3::new(10.00, 5.12, 8.88), cell.small_tolerance);
+        assert_vec3(cell.vertices[4], DVec3::new(9.42, 5.76, 11.34), cell.small_tolerance);
+        assert_vec3(cell.vertices[5], DVec3::new(10.00, 5.76, 11.34), cell.small_tolerance);
+        assert_vec3(cell.vertices[6], DVec3::new(9.42, 5.12, 11.34), cell.small_tolerance);
+        assert_vec3(cell.vertices[7], DVec3::new(10.00, 5.12, 11.34), cell.small_tolerance);
     }
 
     #[test]
@@ -372,9 +382,9 @@ mod tests {
         let min = DVec3::new(1.57, 1.33, 1.31);
         let max = DVec3::new(1.86, 1.65, 2.54);
         let mut cell = CellSgl::new_cuboid(min, max, 3936.0);
-        assert_eq!(cell.volume(), 1.14143999999999940e-01);
+        assert_float(cell.volume(), 1.14143999999999940e-01, cell.small_tolerance);
 
         cell.translate(DVec3::new(3.14, 1.23, 3.13));
-        assert_eq!(cell.volume(), 0.114144);
+        assert_float(cell.volume(), 1.14143999999999940e-01, cell.small_tolerance);
     }
 }

@@ -91,11 +91,7 @@ impl Edges {
         // ensure consistency for redundant data.
         for i in 0..self.v2e.len() {
             for j in 0..self.len(i) {
-                assert_eq!(
-                    self[self[i][j] as usize]
-                        [self[i][self.len(i) + j] as usize],
-                    i as isize
-                );
+                assert_eq!(self[self[i][j] as usize][self[i][self.len(i) + j] as usize], i as isize);
             }
         }
 
@@ -122,14 +118,10 @@ impl Index<usize> for Edges {
 }
 
 impl IndexMut<usize> for Edges {
-    fn index_mut(
-        &mut self,
-        index: usize,
-    ) -> &mut Self::Output {
+    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
         let m = self.len(index);
         let start = (2 * m + 1) * index;
         let end = (2 * m + 1) * (index + 1);
-        &mut self.edges.get_mut(&m).unwrap().as_mut_slice()
-            [start..end]
+        &mut self.edges.get_mut(&m).unwrap().as_mut_slice()[start..end]
     }
 }
