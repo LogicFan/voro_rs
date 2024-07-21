@@ -1,4 +1,9 @@
 mod edges;
 mod sgl;
 
-pub(crate) use edges::Edges;
+use edges::Edges;
+use glam::DVec3;
+
+pub trait VoronoiCell {
+    fn translate(&mut self, translation: DVec3);
+}

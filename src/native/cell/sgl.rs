@@ -1,11 +1,9 @@
 //! Voronoi Cell
 
-use glam::{DVec3, DVec4};
-use std::collections::HashMap;
-
 use crate::native::constant::*;
+use glam::{DVec3, DVec4};
 
-use super::Edges;
+use super::{Edges, VoronoiCell};
 
 /// A class represent a Voronoi cell without neighbor information.
 ///
@@ -20,11 +18,7 @@ pub struct CellSgl {
     // big_tol = large_tolerance
     large_tolerance: f64,
 
-    // pts[i] = vertices[i]
-    // current_vertices = vertices.capacity()
-    // p = vertices.len()
     vertices: Vec<DVec3>,
-
     edges: Edges,
 
     // mask[i] = mask[i]
@@ -119,6 +113,12 @@ impl CellSgl {
         cell
     }
 
+    /// Initializes the cell to be an octahedron with vertices at
+    /// (l,0,0), (-l,0,0), (0,l,0), (0,-l,0), (0,0,l), and (0,0,-l).
+    ///
+    /// - `l`: a parameter setting the size of the octahedron.
+    /// - `max_len_sq`: the square of the maximum possible length for two cells
+    /// in the container. This is important for tolerance calculation.
     pub fn new_octahedron(
         mut l: f64,
         max_len_sq: f64,
@@ -152,10 +152,44 @@ impl CellSgl {
 
         cell
     }
+
+    pub fn new_tetrahedron(
+        mut a: DVec3,
+        mut b: DVec3,
+        mut c: DVec3,
+        mut d: DVec3,
+        max_len_sq: f64,
+    ) -> Self {
+        let mut cell = Self::new_empty(max_len_sq);
+        a *= 2.0;
+        b *= 2.0;
+        c *= 2.0;
+        d *= 2.0;
+
+        cell.vertices.push(a);
+        cell.vertices.push(b);
+        cell.vertices.push(c);
+        cell.vertices.push(d);
+
+        let edges =
+            cell.edges.edges.entry(3).or_insert(Vec::new());
+
+        edges.extend([1, 3, 2, 0, 0, 0, 0].iter());
+        edges.extend([0, 2, 3, 0, 2, 1, 1].iter());
+        edges.extend([0, 3, 1, 2, 2, 1, 2].iter());
+        edges.extend([0, 1, 2, 1, 2, 1, 3].iter());
+
+        cell.edges.v2e.push((3, 0));
+        cell.edges.v2e.push((3, 7));
+        cell.edges.v2e.push((3, 14));
+        cell.edges.v2e.push((3, 21));
+
+        cell
+    }
 }
 
-impl CellSgl {
-    pub fn translate(&mut self, mut translation: DVec3) {
+impl VoronoiCell for CellSgl {
+    fn translate(&mut self, mut translation: DVec3) {
         translation *= 2.0;
 
         for v in &mut self.vertices {
@@ -364,6 +398,73 @@ mod tests {
                 2, 2, 2, 1, 0, 4, 1, 5, 0, 3, 0, 1, 2, 0,
                 5, 1, 4, 2, 3, 2, 1, 3, 0, 3, 1, 2, 3, 3,
                 1, 1, 4, 0, 2, 1, 3, 1, 3, 3, 1, 5
+            ]
+        )
+    }
+
+    #[test]
+    fn new_tetrahedron() {
+        let a = DVec3::new(4.65, 4.51, 1.45);
+        let b = DVec3::new(1.75, 2.14, 1.66);
+        let c = DVec3::new(3.10, 3.38, 2.70);
+        let d = DVec3::new(1.95, 2.64, 2.21);
+        let cell =
+            CellSgl::new_tetrahedron(a, b, c, d, 1818.0);
+        cell.edges.assert();
+
+        assert_eq!(
+            cell.small_tolerance,
+            4.03677091753706918e-12
+        );
+        assert_eq!(
+            cell.large_tolerance,
+            8.07354183507413836e-11
+        );
+
+        assert_eq!(
+            cell.vertices[0],
+            DVec3::new(9.30, 9.02, 2.90)
+        );
+        assert_eq!(
+            cell.vertices[1],
+            DVec3::new(3.50, 4.28, 3.32)
+        );
+        assert_eq!(
+            cell.vertices[2],
+            DVec3::new(6.20, 6.76, 5.40)
+        );
+        assert_eq!(
+            cell.vertices[3],
+            DVec3::new(3.90, 5.28, 4.42)
+        );
+
+        assert_eq!(
+            cell.edges[0],
+            vec![1, 3, 2, 0, 0, 0, 0]
+        );
+        assert_eq!(
+            cell.edges[1],
+            vec![0, 2, 3, 0, 2, 1, 1]
+        );
+        assert_eq!(
+            cell.edges[2],
+            vec![0, 3, 1, 2, 2, 1, 2]
+        );
+        assert_eq!(
+            cell.edges[3],
+            vec![0, 1, 2, 1, 2, 1, 3]
+        );
+
+        assert_eq!(cell.edges.o(0), 3);
+        assert_eq!(cell.edges.o(1), 3);
+        assert_eq!(cell.edges.o(2), 3);
+        assert_eq!(cell.edges.o(3), 3);
+
+        assert_eq!(
+            cell.edges.edges[&3],
+            vec![
+                1, 3, 2, 0, 0, 0, 0, 0, 2, 3, 0, 2, 1, 1,
+                0, 3, 1, 2, 2, 1, 2, 0, 1, 2, 1, 2, 1, 3
             ]
         )
     }

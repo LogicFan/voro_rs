@@ -8,7 +8,7 @@ use std::{
 /// a structure to store the edge information
 /// for voronoi cells.
 #[derive(Clone, Debug, Default)]
-pub(crate) struct Edges {
+pub(super) struct Edges {
     /// The actual data for edges.
     ///
     /// `edges[p]` is the edge information for all the
@@ -18,14 +18,14 @@ pub(crate) struct Edges {
     /// The first `p` elements hold the neighboring edges, and
     /// remaining hold a table of relations which is redundant but
     /// helps speed up the computation.
-    pub(crate) edges: HashMap<usize, Vec<usize>>,
+    pub edges: HashMap<usize, Vec<usize>>,
 
     /// The mapping from vertices to edges.
     ///
     /// `v2e[i]` store the mapping for the i-th vertex.
     /// The first element is the order, the second element
     /// is the index of the edge.
-    pub(crate) v2e: Vec<(usize, usize)>,
+    pub v2e: Vec<(usize, usize)>,
 }
 
 impl Edges {
@@ -46,6 +46,7 @@ impl Edges {
 
     /// Ensure invariant, will panic if fails. Should only
     /// be used in unit test.
+    #[allow(dead_code)]
     pub fn assert(&self) {
         // ensure size agrees
         let mut count = 0;
