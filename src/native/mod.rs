@@ -1,4 +1,4 @@
-mod cell;
+pub mod cell;
 mod constant;
 
 #[cfg(feature = "f32")]

@@ -4,7 +4,7 @@
 //!
 //! This binding has been tested on Windows, Linux and MacOS.
 
-mod native;
+pub mod native;
 
 pub mod cell;
 pub mod container;
