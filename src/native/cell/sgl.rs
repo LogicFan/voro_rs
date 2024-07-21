@@ -101,8 +101,6 @@ impl CellSgl {
         min *= 2.0;
         max *= 2.0;
 
-        cell.up = 0;
-
         cell.vertices.push(DVec3::new(min.x, min.y, min.z));
         cell.vertices.push(DVec3::new(max.x, min.y, min.z));
         cell.vertices.push(DVec3::new(min.x, max.y, min.z));
@@ -134,6 +132,16 @@ impl CellSgl {
         cell.v2e.push((3, 49));
 
         cell
+    }
+}
+
+impl CellSgl {
+    pub fn translate(&mut self, mut translation: DVec3) {
+        translation *= 2.0;
+
+        for v in &mut self.vertices {
+            *v += translation;
+        }
     }
 }
 
