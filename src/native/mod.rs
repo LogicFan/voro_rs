@@ -1,5 +1,5 @@
-mod constant;
 mod cell;
+mod constant;
 
 #[cfg(feature = "f32")]
 type Float = f32;
