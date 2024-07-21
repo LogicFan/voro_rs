@@ -92,6 +92,12 @@ impl CellSgl {
         }
     }
 
+    /// Initializes a Voronoi cell as a rectangular box with the given dimensions.
+    /// 
+    /// - `min`: the minimum coordinates.
+    /// - `max`: the maximum coordinates.
+    /// - `max_len_sq`: the square of the maximum possible length for two cells
+    /// in the container. This is important for tolerance calculation.
     pub fn new_cuboid(
         mut min: DVec3,
         mut max: DVec3,
@@ -110,17 +116,17 @@ impl CellSgl {
         cell.vertices.push(DVec3::new(min.x, max.y, max.z));
         cell.vertices.push(DVec3::new(max.x, max.y, max.z));
 
-        let edges2 =
+        let edges =
             cell.edges.entry(3).or_insert(Vec::new());
 
-        edges2.extend([1, 4, 2, 2, 1, 0, 0].iter());
-        edges2.extend([3, 5, 0, 2, 1, 0, 1].iter());
-        edges2.extend([0, 6, 3, 2, 1, 0, 2].iter());
-        edges2.extend([2, 7, 1, 2, 1, 0, 3].iter());
-        edges2.extend([6, 0, 5, 2, 1, 0, 4].iter());
-        edges2.extend([4, 1, 7, 2, 1, 0, 5].iter());
-        edges2.extend([7, 2, 4, 2, 1, 0, 6].iter());
-        edges2.extend([5, 3, 6, 2, 1, 0, 7].iter());
+        edges.extend([1, 4, 2, 2, 1, 0, 0].iter());
+        edges.extend([3, 5, 0, 2, 1, 0, 1].iter());
+        edges.extend([0, 6, 3, 2, 1, 0, 2].iter());
+        edges.extend([2, 7, 1, 2, 1, 0, 3].iter());
+        edges.extend([6, 0, 5, 2, 1, 0, 4].iter());
+        edges.extend([4, 1, 7, 2, 1, 0, 5].iter());
+        edges.extend([7, 2, 4, 2, 1, 0, 6].iter());
+        edges.extend([5, 3, 6, 2, 1, 0, 7].iter());
 
         cell.v2e.push((3, 0));
         cell.v2e.push((3, 7));
@@ -130,6 +136,37 @@ impl CellSgl {
         cell.v2e.push((3, 35));
         cell.v2e.push((3, 42));
         cell.v2e.push((3, 49));
+
+        cell
+    }
+
+    pub fn new_octahedron(mut l: f64, max_len_sq: f64) -> Self {
+        let mut cell = Self::new_empty(max_len_sq);
+        l *= 2.0;
+
+        cell.vertices.push(DVec3::new(-l, 0.0, 0.0));
+        cell.vertices.push(DVec3::new(l, 0.0, 0.0));
+        cell.vertices.push(DVec3::new(0.0, -l, 0.0));
+        cell.vertices.push(DVec3::new(0.0, l, 0.0));
+        cell.vertices.push(DVec3::new(0.0, 0.0, -l));
+        cell.vertices.push(DVec3::new(0.0, 0.0, l));
+
+        let edges =
+        cell.edges.entry(4).or_insert(Vec::new());
+
+        edges.extend([2, 5, 3, 4, 0, 0, 0, 0, 0].iter());
+        edges.extend([2, 4, 3, 5, 2, 2, 2, 2, 1].iter());
+        edges.extend([0, 4, 1, 5, 0, 3, 0, 1, 2].iter());
+        edges.extend([0, 5, 1, 4, 2, 3, 2, 1, 3].iter());
+        edges.extend([0, 3, 1, 2, 3, 3, 1, 1, 4].iter());
+        edges.extend([0, 2, 1, 3, 1, 3, 3, 1, 5].iter());        
+
+        cell.v2e.push((4, 0));
+        cell.v2e.push((4, 9));
+        cell.v2e.push((4, 18));
+        cell.v2e.push((4, 27));
+        cell.v2e.push((4, 36));
+        cell.v2e.push((4, 45));
 
         cell
     }
@@ -149,6 +186,22 @@ impl CellSgl {
 mod tests {
     use super::*;
 
+    fn invariant(cell: &CellSgl) {
+        for i in 0..cell.vertices.len() {
+            for j in 0..cell.nu(i) {
+                assert_eq!(cell.ed(cell.ed(i, j), cell.ed(i, cell.nu(i) + j)), i);
+            }
+        }
+
+        for i in 0..cell.vertices.len() {
+            for j in 0..cell.nu(i) {
+                for k in 0..j {
+                    assert_ne!(cell.ed(i, j), cell.ed(i, k))
+                }
+            }
+        }
+    }
+
     #[test]
     fn new_empty() {
         let cell = CellSgl::new_empty(1234.0);
@@ -166,15 +219,16 @@ mod tests {
     fn new_cuboid() {
         let min = DVec3::new(1.57, 1.65, 1.31);
         let max = DVec3::new(1.86, 1.33, 2.54);
-        let cell = CellSgl::new_cuboid(min, max, 1234.0);
+        let cell = CellSgl::new_cuboid(min, max, 3936.0);
+        invariant(&cell);
 
         assert_eq!(
             cell.small_tolerance,
-            2.74003042477488634e-12
+            8.73967564984923229e-12
         );
         assert_eq!(
             cell.large_tolerance,
-            5.48006084954977268e-11
+            1.74793512996984646e-10
         );
 
         assert_eq!(
@@ -280,5 +334,13 @@ mod tests {
                 7, 2, 4, 2, 1, 0, 6, 5, 3, 6, 2, 1, 0, 7
             ]
         )
+    }
+
+    
+    #[test]
+    fn new_octahedron() {
+        let l = 3.14;
+        let cell = CellSgl::new_octahedron(l, 3134.0);
+        invariant(&cell);
     }
 }
