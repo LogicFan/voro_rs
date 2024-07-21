@@ -290,5 +290,81 @@ mod tests {
         let l = 3.14;
         let cell = CellSgl::new_octahedron(l, 3134.0);
         cell.edges.assert();
+
+        assert_eq!(
+            cell.small_tolerance,
+            6.95887791835048120e-12
+        );
+        assert_eq!(
+            cell.large_tolerance,
+            1.39177558367009624e-10
+        );
+
+        assert_eq!(
+            cell.vertices[0],
+            DVec3::new(-6.28, 0.00, 0.00)
+        );
+        assert_eq!(
+            cell.vertices[1],
+            DVec3::new(6.28, 0.00, 0.00)
+        );
+        assert_eq!(
+            cell.vertices[2],
+            DVec3::new(0.00, -6.28, 0.00)
+        );
+        assert_eq!(
+            cell.vertices[3],
+            DVec3::new(0.00, 6.28, 0.00)
+        );
+        assert_eq!(
+            cell.vertices[4],
+            DVec3::new(0.00, 0.00, -6.28)
+        );
+        assert_eq!(
+            cell.vertices[5],
+            DVec3::new(0.00, 0.00, 6.28)
+        );
+
+        assert_eq!(
+            cell.edges[0],
+            vec![2, 5, 3, 4, 0, 0, 0, 0, 0]
+        );
+        assert_eq!(
+            cell.edges[1],
+            vec![2, 4, 3, 5, 2, 2, 2, 2, 1]
+        );
+        assert_eq!(
+            cell.edges[2],
+            vec![0, 4, 1, 5, 0, 3, 0, 1, 2]
+        );
+        assert_eq!(
+            cell.edges[3],
+            vec![0, 5, 1, 4, 2, 3, 2, 1, 3]
+        );
+        assert_eq!(
+            cell.edges[4],
+            vec![0, 3, 1, 2, 3, 3, 1, 1, 4]
+        );
+        assert_eq!(
+            cell.edges[5],
+            vec![0, 2, 1, 3, 1, 3, 3, 1, 5]
+        );
+
+        assert_eq!(cell.edges.o(0), 4);
+        assert_eq!(cell.edges.o(1), 4);
+        assert_eq!(cell.edges.o(2), 4);
+        assert_eq!(cell.edges.o(3), 4);
+        assert_eq!(cell.edges.o(4), 4);
+        assert_eq!(cell.edges.o(5), 4);
+
+        assert_eq!(
+            cell.edges.edges[&4],
+            vec![
+                2, 5, 3, 4, 0, 0, 0, 0, 0, 2, 4, 3, 5, 2,
+                2, 2, 2, 1, 0, 4, 1, 5, 0, 3, 0, 1, 2, 0,
+                5, 1, 4, 2, 3, 2, 1, 3, 0, 3, 1, 2, 3, 3,
+                1, 1, 4, 0, 2, 1, 3, 1, 3, 3, 1, 5
+            ]
+        )
     }
 }
