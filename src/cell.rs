@@ -46,6 +46,20 @@ pub mod ffi {
             z: f64,
         );
         fn volume(self: Pin<&mut voronoicell>) -> f64;
+        fn volume2(
+            self: Pin<&mut voronoicell>,
+            f: fn(
+                f64,
+                f64,
+                f64,
+                f64,
+                f64,
+                f64,
+                f64,
+                f64,
+                f64,
+            ) -> f64,
+        ) -> f64;
         fn max_radius_squared(
             self: Pin<&mut voronoicell>,
         ) -> f64;
@@ -195,6 +209,20 @@ pub mod ffi {
         );
         fn volume(
             self: Pin<&mut voronoicell_neighbor>,
+        ) -> f64;
+        fn volume2(
+            self: Pin<&mut voronoicell_neighbor>,
+            f: fn(
+                f64,
+                f64,
+                f64,
+                f64,
+                f64,
+                f64,
+                f64,
+                f64,
+                f64,
+            ) -> f64,
         ) -> f64;
         fn max_radius_squared(
             self: Pin<&mut voronoicell_neighbor>,
@@ -487,6 +515,13 @@ pub trait VoroCell {
     /// Return a floating point number holding the calculated volume.
     fn volume(&mut self) -> f64;
 
+    /// Calculates the volume of the Voronoi cell, by decomposing the cell into
+    /// tetrahedra extending outward from the zeroth vertex, whose volumes are
+    /// evaluated using a scalar triple product.
+    ///
+    /// Return a floating point number holding the calculated volume.
+    fn volume2(&mut self, f: fn(f64, f64, f64, f64, f64, f64, f64, f64, f64) -> f64) -> f64;
+
     /// Computes the maximum radius squared of a vertex from the center of the
     /// cell. It can be used to determine when enough particles have been testing an
     /// all planes that could cut the cell have been considered.
@@ -641,6 +676,10 @@ impl VoroCell for VoroCellSgl {
         self.inner.pin_mut().volume()
     }
 
+    fn volume2(&mut self, f: fn(f64, f64, f64, f64, f64, f64, f64, f64, f64) -> f64) -> f64 {
+        self.inner.pin_mut().volume2(f)
+    }
+
     fn max_radius_squared(&mut self) -> f64 {
         self.inner.pin_mut().max_radius_squared()
     }
@@ -787,6 +826,10 @@ impl VoroCell for VoroCellNbr {
 
     fn volume(&mut self) -> f64 {
         self.inner.pin_mut().volume()
+    }
+
+    fn volume2(&mut self, f: fn(f64, f64, f64, f64, f64, f64, f64, f64, f64) -> f64) -> f64 {
+        self.inner.pin_mut().volume2(f)
     }
 
     fn max_radius_squared(&mut self) -> f64 {
@@ -953,6 +996,21 @@ mod tests {
         assert_eq!(c3.volume(), 3.0);
 
         assert_eq!(c0.centroid(), [1.0, 1.5, 1.5]);
+    }
+
+    #[test]
+    fn volume2() {
+        let mut c0 = VoroCellSgl::new(
+            [0.0, 0.0, 0.0],
+            [1.0, 1.0, 1.0],
+        );
+
+        fn f(ux: f64, uy: f64, uz: f64, vx: f64, vy: f64, vz: f64, wx: f64, wy: f64, wz: f64) -> f64 {
+            return 2.0*(ux*vy*wz+uy*vz*wx+uz*vx*wy-uz*vy*wx-uy*vx*wz-ux*vz*wy);
+        }
+
+        let vol = c0.volume2(f);
+        assert_eq!(vol, 2.0);
     }
 
     #[test]
