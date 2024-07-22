@@ -170,6 +170,14 @@ impl CellSgl {
 
         cell
     }
+
+    fn max_radius_sq(&self) -> f64 {
+        self.vertices
+            .iter()
+            .map(|v| v.length_squared())
+            .max_by(|x, y| x.total_cmp(y))
+            .unwrap()
+    }
 }
 
 impl VoronoiCell for CellSgl {
@@ -386,5 +394,16 @@ mod tests {
 
         cell.translate(DVec3::new(3.14, 1.23, 3.13));
         assert_float(cell.volume(), 1.14143999999999940e-01, cell.small_tolerance);
+    }
+
+    #[test]
+    fn max_radius_sq() {
+        let min = DVec3::new(1.57, 1.33, 1.31);
+        let max = DVec3::new(1.86, 1.65, 2.54);
+        let mut cell = CellSgl::new_cuboid(min, max, 3936.0);
+        assert_float(cell.max_radius_sq(), 5.05348000000000042e+01, cell.small_tolerance);
+
+        cell.translate(DVec3::new(3.14, 1.23, 3.13));
+        assert_float(cell.max_radius_sq(), 2.61773199999999974e+02, cell.small_tolerance);
     }
 }

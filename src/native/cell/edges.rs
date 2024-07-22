@@ -57,6 +57,7 @@ impl Edges {
     ///
     /// - `a`: the index of an edge of the current vertex.
     /// - `v`: the index of vertex.
+    #[allow(unused)]
     pub fn cw(&self, a: isize, v: isize) -> isize {
         if a == 0 {
             self.len(v as usize) as isize - 1
