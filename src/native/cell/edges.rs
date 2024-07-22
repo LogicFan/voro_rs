@@ -34,18 +34,13 @@ impl Edges {
         self.v2e[v].0
     }
 
-    /// shorthand for [Self::vertex_order].
-    pub fn len(&self, v: usize) -> usize {
-        self.vertex_order(v)
-    }
-
     /// Pick out the index
     /// of the next edge counterclockwise at the current vertex.
     ///
     /// - `a`: the index of an edge of the current vertex.
     /// - `v`: the index of vertex.
     pub fn ccw(&self, a: isize, v: isize) -> isize {
-        if a == self.len(v as usize) as isize - 1 {
+        if a == self.vertex_order(v as usize) as isize - 1 {
             0
         } else {
             a + 1
@@ -60,7 +55,7 @@ impl Edges {
     #[allow(unused)]
     pub fn cw(&self, a: isize, v: isize) -> isize {
         if a == 0 {
-            self.len(v as usize) as isize - 1
+            self.vertex_order(v as usize) as isize - 1
         } else {
             a - 1
         }
@@ -68,7 +63,7 @@ impl Edges {
 
     pub fn reset(&mut self) {
         for i in 0..self.v2e.len() {
-            for j in 0..self.len(i) {
+            for j in 0..self.vertex_order(i) {
                 assert!(self[i][j] < 0, "edge reset routine found a previously untested edge");
                 self[i][j] = -1 - self[i][j];
             }
@@ -91,14 +86,14 @@ impl Edges {
 
         // ensure consistency for redundant data.
         for i in 0..self.v2e.len() {
-            for j in 0..self.len(i) {
-                assert_eq!(self[self[i][j] as usize][self[i][self.len(i) + j] as usize], i as isize);
+            for j in 0..self.vertex_order(i) {
+                assert_eq!(self[self[i][j] as usize][self[i][self.vertex_order(i) + j] as usize], i as isize);
             }
         }
 
         // ensure no duplication.
         for i in 0..self.v2e.len() {
-            for j in 0..self.len(i) {
+            for j in 0..self.vertex_order(i) {
                 for k in 0..j {
                     assert_ne!(self[i][j], self[i][k]);
                 }
@@ -111,7 +106,7 @@ impl Index<usize> for Edges {
     type Output = [isize];
 
     fn index(&self, index: usize) -> &Self::Output {
-        let m = self.len(index);
+        let m = self.vertex_order(index);
         let start = (2 * m + 1) * index;
         let end = (2 * m + 1) * (index + 1);
         &self.edges[&m].as_slice()[start..end]
@@ -120,7 +115,7 @@ impl Index<usize> for Edges {
 
 impl IndexMut<usize> for Edges {
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
-        let m = self.len(index);
+        let m = self.vertex_order(index);
         let start = (2 * m + 1) * index;
         let end = (2 * m + 1) * (index + 1);
         &mut self.edges.get_mut(&m).unwrap().as_mut_slice()[start..end]
