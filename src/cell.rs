@@ -714,7 +714,6 @@ impl VoroCell for VoroCellSgl {
         }
 
         unsafe {
-            // let mut f2 = *f;
             let mut context = RhoFn { f: rho };
             self.inner.pin_mut().volume2(
                 closure,
@@ -897,7 +896,6 @@ impl VoroCell for VoroCellNbr {
         }
 
         unsafe {
-            // let mut f2 = *f;
             let mut context = RhoFn { f: rho };
             self.inner.pin_mut().volume2(
                 closure,
