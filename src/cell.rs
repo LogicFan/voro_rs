@@ -2,6 +2,10 @@
 
 #[cxx::bridge(namespace = "voro")]
 pub mod ffi {
+    extern "Rust" {
+        type RhoFn;
+    }
+
     unsafe extern "C++" {
         include!("voro_rs/src/boilerplate.hh");
 
@@ -46,9 +50,10 @@ pub mod ffi {
             z: f64,
         );
         fn volume(self: Pin<&mut voronoicell>) -> f64;
-        fn volume2(
+        unsafe fn volume2(
             self: Pin<&mut voronoicell>,
-            f: fn(
+            f: unsafe fn(
+                *mut RhoFn,
                 f64,
                 f64,
                 f64,
@@ -59,6 +64,7 @@ pub mod ffi {
                 f64,
                 f64,
             ) -> f64,
+            context: *mut RhoFn,
         ) -> f64;
         fn max_radius_squared(
             self: Pin<&mut voronoicell>,
@@ -210,9 +216,10 @@ pub mod ffi {
         fn volume(
             self: Pin<&mut voronoicell_neighbor>,
         ) -> f64;
-        fn volume2(
+        unsafe fn volume2(
             self: Pin<&mut voronoicell_neighbor>,
-            f: fn(
+            f: unsafe fn(
+                *mut RhoFn,
                 f64,
                 f64,
                 f64,
@@ -223,6 +230,7 @@ pub mod ffi {
                 f64,
                 f64,
             ) -> f64,
+            context: *mut RhoFn,
         ) -> f64;
         fn max_radius_squared(
             self: Pin<&mut voronoicell_neighbor>,
@@ -338,8 +346,13 @@ pub mod ffi {
 }
 
 use cxx::{CxxVector, UniquePtr};
+use std::sync::Arc;
 
 type DVec3 = [f64; 3];
+
+pub struct RhoFn {
+    f: Arc<dyn Fn(DVec3, DVec3, DVec3) -> f64>,
+}
 
 /// `voronoicell` class in voro++.
 ///
@@ -515,12 +528,11 @@ pub trait VoroCell {
     /// Return a floating point number holding the calculated volume.
     fn volume(&mut self) -> f64;
 
-    /// Calculates the volume of the Voronoi cell, by decomposing the cell into
-    /// tetrahedra extending outward from the zeroth vertex, whose volumes are
-    /// evaluated using a scalar triple product.
-    ///
-    /// Return a floating point number holding the calculated volume.
-    fn volume2(&mut self, f: fn(f64, f64, f64, f64, f64, f64, f64, f64, f64) -> f64) -> f64;
+    /// Calculates the volume with a special density function
+    fn volume_with(
+        &mut self,
+        rho: Arc<dyn Fn(DVec3, DVec3, DVec3) -> f64>,
+    ) -> f64;
 
     /// Computes the maximum radius squared of a vertex from the center of the
     /// cell. It can be used to determine when enough particles have been testing an
@@ -676,8 +688,39 @@ impl VoroCell for VoroCellSgl {
         self.inner.pin_mut().volume()
     }
 
-    fn volume2(&mut self, f: fn(f64, f64, f64, f64, f64, f64, f64, f64, f64) -> f64) -> f64 {
-        self.inner.pin_mut().volume2(f)
+    fn volume_with(
+        &mut self,
+        rho: Arc<dyn Fn(DVec3, DVec3, DVec3) -> f64>,
+    ) -> f64 {
+        fn closure(
+            context: *mut RhoFn,
+            ux: f64,
+            uy: f64,
+            uz: f64,
+            vx: f64,
+            vy: f64,
+            vz: f64,
+            wx: f64,
+            wy: f64,
+            wz: f64,
+        ) -> f64 {
+            unsafe {
+                ((*context).f)(
+                    [ux, uy, uz],
+                    [vx, vy, vz],
+                    [wx, wy, wz],
+                )
+            }
+        }
+
+        unsafe {
+            // let mut f2 = *f;
+            let mut context = RhoFn { f: rho };
+            self.inner.pin_mut().volume2(
+                closure,
+                &mut context as *mut RhoFn,
+            )
+        }
     }
 
     fn max_radius_squared(&mut self) -> f64 {
@@ -828,8 +871,39 @@ impl VoroCell for VoroCellNbr {
         self.inner.pin_mut().volume()
     }
 
-    fn volume2(&mut self, f: fn(f64, f64, f64, f64, f64, f64, f64, f64, f64) -> f64) -> f64 {
-        self.inner.pin_mut().volume2(f)
+    fn volume_with(
+        &mut self,
+        rho: Arc<dyn Fn(DVec3, DVec3, DVec3) -> f64>,
+    ) -> f64 {
+        fn closure(
+            context: *mut RhoFn,
+            ux: f64,
+            uy: f64,
+            uz: f64,
+            vx: f64,
+            vy: f64,
+            vz: f64,
+            wx: f64,
+            wy: f64,
+            wz: f64,
+        ) -> f64 {
+            unsafe {
+                ((*context).f)(
+                    [ux, uy, uz],
+                    [vx, vy, vz],
+                    [wx, wy, wz],
+                )
+            }
+        }
+
+        unsafe {
+            // let mut f2 = *f;
+            let mut context = RhoFn { f: rho };
+            self.inner.pin_mut().volume2(
+                closure,
+                &mut context as *mut RhoFn,
+            )
+        }
     }
 
     fn max_radius_squared(&mut self) -> f64 {
@@ -999,17 +1073,25 @@ mod tests {
     }
 
     #[test]
-    fn volume2() {
+    fn mass() {
         let mut c0 = VoroCellSgl::new(
             [0.0, 0.0, 0.0],
             [1.0, 1.0, 1.0],
         );
 
-        fn f(ux: f64, uy: f64, uz: f64, vx: f64, vy: f64, vz: f64, wx: f64, wy: f64, wz: f64) -> f64 {
-            return 2.0*(ux*vy*wz+uy*vz*wx+uz*vx*wy-uz*vy*wx-uy*vx*wz-ux*vz*wy);
-        }
+        let a: Box<f64> = Box::new(2.0);
 
-        let vol = c0.volume2(f);
+        let f = move |u: DVec3, v: DVec3, w: DVec3| {
+            return (*a)
+                * (u[0] * v[1] * w[2]
+                    + u[1] * v[2] * w[0]
+                    + u[2] * v[0] * w[1]
+                    - u[2] * v[1] * w[0]
+                    - u[1] * v[0] * w[2]
+                    - u[0] * v[2] * w[1]);
+        };
+
+        let vol = c0.volume_with(Arc::new(f));
         assert_eq!(vol, 2.0);
     }
 
